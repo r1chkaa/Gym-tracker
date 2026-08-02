@@ -6,12 +6,17 @@
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
-  "orientation": "portrait",
   "icons": [
     {
-      "src": "https://www.svgrepo.com/show/305142/gym.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml",
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/ios-icon-v2.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
