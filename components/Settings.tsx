@@ -42,24 +42,20 @@ export default function Settings() {
     localStorage.setItem('gym_gender', newGender);
   };
 
-  const handleUnitChange = async (newUnit: string) => {
+const handleUnitChange = async (newUnit: string) => {
     if (unit === newUnit) return;
-    const confirm = window.confirm(`Convert all logged weights from ${unit} to ${newUnit}?`);
-    if (confirm) {
-      const factor = newUnit === 'kg' ? (1 / 2.20462) : 2.20462;
-      try {
-        await db.transaction('rw', db.sets, db.bodyWeightLogs, async () => {
-          const allSets = await db.sets.toArray();
-          for (const s of allSets) await db.sets.update(s.id, { weight: Math.round(s.weight * factor * 10) / 10 });
-          const allBodyWeight = await db.bodyWeightLogs.toArray();
-          for (const bw of allBodyWeight) await db.bodyWeightLogs.update(bw.id, { weight: Math.round(bw.weight * factor * 10) / 10 });
-        });
-        setUnit(newUnit);
-        localStorage.setItem('gym_unit', newUnit);
-        alert(`Successfully converted database to ${newUnit}.`);
-      } catch (err) {
-        console.error("Failed to convert database:", err);
-      }
+    const factor = newUnit === 'kg' ? (1 / 2.20462) : 2.20462;
+    try {
+      await db.transaction('rw', db.sets, db.bodyWeightLogs, async () => {
+        const allSets = await db.sets.toArray();
+        for (const s of allSets) await db.sets.update(s.id, { weight: Math.round(s.weight * factor * 10) / 10 });
+        const allBodyWeight = await db.bodyWeightLogs.toArray();
+        for (const bw of allBodyWeight) await db.bodyWeightLogs.update(bw.id, { weight: Math.round(bw.weight * factor * 10) / 10 });
+      });
+      setUnit(newUnit);
+      localStorage.setItem('gym_unit', newUnit);
+    } catch (err) {
+      console.error("Failed to convert database:", err);
     }
   };
 

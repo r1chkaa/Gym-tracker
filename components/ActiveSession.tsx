@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trophy, Zap, SkipForward } from 'lucide-react';
+import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trophy, Zap, SkipForward, Trash2 } from 'lucide-react';
 import { db, defaultExercises, type Template } from '@/lib/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -13,21 +13,139 @@ const RANKS = ["Wood", "Chalk", "Iron", "Steel", "Contender", "Gladiator", "Jugg
 const TIERS = ["I", "II", "III"];
 
 function getAccountRank(points: number) {
-  if (points >= 25000000) return { name: "God", tier: "", fullName: "God Rank", image: "god.png" };
+  if (points >= 25000000) return { name: "God", tier: "", fullName: "God Rank", image: "god.png", current: 25000000, next: 25000000, progress: 100 };
   if (points >= 10000000) {
     let titanLevel = Math.floor((points - 10000000) / 150000) + 1;
     if (titanLevel > 100) titanLevel = 100;
+    const currentThresh = 10000000 + ((titanLevel - 1) * 150000);
+    const nextThresh = titanLevel === 100 ? 25000000 : 10000000 + (titanLevel * 150000);
+    const progress = ((points - currentThresh) / (nextThresh - currentThresh)) * 100;
     const titanEmblems = [100, 75, 50, 25, 10, 5, 3, 2, 1];
     const emblemNum = titanEmblems.find(e => titanLevel >= e) || 1;
-    return { name: "Titan", tier: titanLevel.toString(), fullName: `Titan ${titanLevel}`, image: `titan${emblemNum}.png` };
+    return { name: "Titan", tier: titanLevel.toString(), fullName: `Titan ${titanLevel}`, image: `titan${emblemNum}.png`, current: currentThresh, next: nextThresh, progress };
   }
   let currentTierIndex = 0;
   for (let i = 0; i < RANK_THRESHOLDS.length; i++) { if (points >= RANK_THRESHOLDS[i]) currentTierIndex = i; }
+  const currentThresh = RANK_THRESHOLDS[currentTierIndex];
+  const nextThresh = currentTierIndex === RANK_THRESHOLDS.length - 1 ? 10000000 : RANK_THRESHOLDS[currentTierIndex + 1];
   const rankName = RANKS[Math.floor(currentTierIndex / 3)];
   const tierName = TIERS[currentTierIndex % 3];
   const tierNum = (currentTierIndex % 3) + 1;
-  return { name: rankName, tier: tierName, fullName: `${rankName} ${tierName}`, image: `${rankName.toLowerCase()}${tierNum}.png` };
+  return { name: rankName, tier: tierName, fullName: `${rankName} ${tierName}`, image: `${rankName.toLowerCase()}${tierNum}.png`, current: currentThresh, next: nextThresh, progress: ((points - currentThresh) / (nextThresh - currentThresh)) * 100 };
 }
+
+// Cinematic Summary Component
+const CinematicSummary = ({ initialPoints, earnedPoints, earnedXP, onComplete }: any) => {
+  const [step, setStep] = useState<'rank' | 'xp'>('rank');
+  const [displayPoints, setDisplayPoints] = useState(0);
+  const [displayXP, setDisplayXP] = useState<Record<string, number>>({});
+  
+  const currentRank = getAccountRank(initialPoints + displayPoints);
+  const isGod = currentRank.name === 'God';
+
+  // Animate Rank Points smoothly
+  useEffect(() => {
+    if (step !== 'rank') return;
+    let startTimestamp: number | null = null;
+    const duration = 2000; // 2 second fill
+    const animate = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      // Ease out cubic
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setDisplayPoints(earnedPoints * ease);
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [step, earnedPoints]);
+
+  // Animate Muscle XP smoothly
+  useEffect(() => {
+    if (step !== 'xp') return;
+    let startTimestamp: number | null = null;
+    const duration = 2000; 
+    const animate = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      
+      const newXP: Record<string, number> = {};
+      Object.entries(earnedXP).forEach(([muscle, maxXP]: any) => {
+        newXP[muscle] = maxXP * ease;
+      });
+      setDisplayXP(newXP);
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [step, earnedXP]);
+
+  const handleNext = () => {
+    if (step === 'rank') {
+      // Small haptic for transitioning to XP
+      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(50);
+      setStep('xp');
+    } else {
+      onComplete();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[200] bg-[#0a0a0a] flex flex-col items-center justify-center p-6 animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
+      <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent pointer-events-none" />
+
+      {step === 'rank' && (
+        <div className="w-full max-w-sm flex flex-col items-center animate-in slide-in-from-bottom-8 duration-700 relative z-10">
+          <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-[0.4em] mb-8">Workout Complete</span>
+          
+          <div className="relative flex justify-center items-center mb-8 w-48 h-48">
+            <div className="absolute inset-0 bg-blue-500/20 blur-[60px] rounded-full animate-pulse" />
+            <img src={`/ranks/${currentRank.image}`} alt="Rank" className="w-40 h-40 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
+          </div>
+
+          <h2 className="text-4xl font-black uppercase tracking-widest text-white mb-1 drop-shadow-md">{currentRank.name}</h2>
+          <span className="text-xs font-bold text-white/60 tracking-[0.3em] uppercase mb-12">{currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
+
+          <div className="w-full flex justify-between items-end mb-3 px-1">
+            <span className="text-xl font-black tracking-widest text-white">+{Math.floor(displayPoints).toLocaleString()} PTS</span>
+            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{currentRank.next ? `${currentRank.next.toLocaleString()}` : 'MAX'}</span>
+          </div>
+          <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+            <div className={`h-full rounded-r-full transition-all duration-100 ${isGod ? 'bg-gradient-to-r from-yellow-500 to-white' : 'bg-blue-500'}`} style={{ width: `${currentRank.progress}%` }} />
+          </div>
+
+          <div className="mt-16 text-[10px] text-white/30 font-black uppercase tracking-widest animate-bounce">Tap to continue</div>
+        </div>
+      )}
+
+      {step === 'xp' && (
+        <div className="w-full max-w-sm flex flex-col items-center animate-in slide-in-from-right-8 duration-500 relative z-10">
+          <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8">Muscle Mastery</span>
+          
+          <div className="w-full space-y-4">
+            {Object.entries(earnedXP).map(([muscle, maxXP]: any, idx) => {
+              const currentXP = displayXP[muscle] || 0;
+              const progress = Math.min(100, (currentXP / maxXP) * 100);
+              
+              return (
+                <div key={muscle} className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-md animate-in slide-in-from-bottom-4 duration-500 fill-mode-both" style={{ animationDelay: `${idx * 150}ms` }}>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="font-black text-white text-lg">{muscle}</span>
+                    <span className="font-black text-blue-400 text-lg">+{Math.floor(currentXP).toLocaleString()}</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-black/50 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-500 rounded-r-full" style={{ width: `${progress}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-16 text-[10px] text-white/30 font-black uppercase tracking-widest animate-bounce">Tap to finish</div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function ActiveSession() {
   const templates = useLiveQuery(() => db.templates.toArray());
@@ -110,10 +228,9 @@ export default function ActiveSession() {
     triggerHaptic();
     await requestWakeLock();
     
-    // Lock in historical points so math is perfect at the end
     let points = 0;
     allSets.forEach(set => {
-      points += (set.weight * set.reps) * (1 + (set.weight / 150));
+      if(set.isCompleted) points += (set.weight * set.reps) * (1 + (set.weight / 150));
     });
     setInitialHistoricalPoints(points);
 
@@ -143,21 +260,20 @@ export default function ActiveSession() {
   const endWorkout = async (finalPoints: number, finalXP: Record<string, number>) => {
     await releaseWakeLock();
     triggerHaptic(true);
-
-    const oldRank = getAccountRank(initialHistoricalPoints);
-    const newRank = getAccountRank(initialHistoricalPoints + finalPoints);
-
-    if (oldRank.fullName !== newRank.fullName) {
-      playAudio('rankup.mp3');
-      setWorkoutSummary({ points: finalPoints, xp: finalXP, rankUp: newRank });
-    } else {
-      setWorkoutSummary({ points: finalPoints, xp: finalXP, rankUp: null });
-    }
+    setWorkoutSummary({ points: finalPoints, xp: finalXP });
   };
 
   const closeSummary = () => {
     setWorkoutSummary(null);
     setActiveTemplate(null);
+    // Trigger global event so the Rank nav button glows
+    window.dispatchEvent(new Event('rank-glow-update'));
+  };
+
+  const handleDeleteTemplate = async (id: string, name: string) => {
+    if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
+      await db.templates.delete(id);
+    }
   };
 
   const handleLogSet = async () => {
@@ -213,42 +329,12 @@ export default function ActiveSession() {
 
   if (workoutSummary) {
     return (
-      <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col items-center justify-center p-6 animate-in fade-in zoom-in duration-500 overflow-y-auto [scrollbar-width:none]">
-        
-        {workoutSummary.rankUp && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
-             <div className="absolute w-[300px] h-[300px] bg-[hsl(var(--foreground))] opacity-5 blur-[100px] rounded-full animate-pulse" />
-             <img src={`/ranks/${workoutSummary.rankUp.image}`} alt="Rank Up" className="w-40 h-40 object-contain drop-shadow-xl animate-bounce" />
-             <span className="text-[hsl(var(--muted))] text-xs font-black uppercase tracking-[0.4em] mt-8">Rank Up</span>
-             <span className="text-4xl font-black text-[hsl(var(--foreground))] uppercase tracking-widest">{workoutSummary.rankUp.fullName}</span>
-          </div>
-        )}
-
-        <div className={`relative z-10 w-full max-w-sm flex flex-col items-center transition-all ${workoutSummary.rankUp ? 'mt-[300px] bg-[hsl(var(--background))]/80 backdrop-blur-md p-6 rounded-3xl' : ''}`}>
-          {!workoutSummary.rankUp && (
-            <>
-              <h2 className="text-3xl font-black text-[hsl(var(--foreground))] uppercase tracking-[0.2em] mb-2 text-center leading-none">Workout<br/>Complete</h2>
-              <p className="text-base font-bold text-[hsl(var(--muted))] mb-8">+{Math.floor(workoutSummary.points).toLocaleString()} Points Earned</p>
-            </>
-          )}
-
-          <div className="w-full bg-[hsl(var(--surface))] rounded-3xl p-5 border border-[hsl(var(--border))] shadow-sm mb-8">
-            <h3 className="text-xs font-black uppercase tracking-widest text-[hsl(var(--muted))] mb-4 flex items-center gap-2 border-b border-[hsl(var(--border))] pb-3"><Zap size={14}/> Muscle XP Gained</h3>
-            <div className="space-y-2">
-              {Object.entries(workoutSummary.xp).map(([muscle, xp]: any) => (
-                <div key={muscle} className="flex justify-between items-center bg-[hsl(var(--background))] p-3 rounded-xl border border-[hsl(var(--border))]">
-                  <span className="font-black text-[hsl(var(--foreground))] text-sm">{muscle}</span>
-                  <span className="font-black text-blue-500 text-sm">+{Math.floor(xp).toLocaleString()} XP</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <button onClick={closeSummary} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-lg py-4 rounded-2xl flex justify-center shadow-md transition-transform active:scale-95">
-            FINISH
-          </button>
-        </div>
-      </div>
+      <CinematicSummary 
+        initialPoints={initialHistoricalPoints} 
+        earnedPoints={workoutSummary.points} 
+        earnedXP={workoutSummary.xp} 
+        onComplete={closeSummary} 
+      />
     );
   }
 
@@ -262,15 +348,20 @@ export default function ActiveSession() {
           </div>
         ) : (
           templates.map(template => (
-            <button key={template.id} onClick={() => startWorkout(template)} className="w-full bg-[hsl(var(--surface))] hover:brightness-110 transition-all duration-300 p-6 rounded-[2rem] border border-[hsl(var(--border))] flex justify-between items-center text-left shadow-sm active:scale-95 group">
-              <div>
-                <h3 className="text-2xl font-black text-[hsl(var(--foreground))]">{template.name}</h3>
+            <div key={template.id} className="w-full bg-[hsl(var(--surface))] hover:brightness-110 transition-all duration-300 p-4 rounded-[2rem] border border-[hsl(var(--border))] flex justify-between items-center shadow-sm">
+              <div className="flex-1 cursor-pointer pl-2" onClick={() => startWorkout(template)}>
+                <h3 className="text-2xl font-black text-[hsl(var(--foreground))] truncate">{template.name}</h3>
                 <p className="text-blue-500 font-black text-[10px] uppercase tracking-[0.15em] mt-1.5">{template.exercises.length} EXERCISES</p>
               </div>
-              <div className="bg-[hsl(var(--background))] p-4 rounded-full border-2 border-[hsl(var(--border))] group-hover:border-blue-500 transition-all shadow-inner">
-                <Play className="text-[hsl(var(--foreground))] ml-1" size={20} fill="currentColor" />
+              <div className="flex items-center gap-2">
+                <button onClick={() => handleDeleteTemplate(template.id, template.name)} className="p-3 text-[hsl(var(--muted))] hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors active:scale-95">
+                  <Trash2 size={20} />
+                </button>
+                <button onClick={() => startWorkout(template)} className="bg-[hsl(var(--background))] p-4 rounded-full border-2 border-[hsl(var(--border))] hover:border-blue-500 transition-all shadow-inner active:scale-95">
+                  <Play className="text-[hsl(var(--foreground))] ml-1" size={20} fill="currentColor" />
+                </button>
               </div>
-            </button>
+            </div>
           ))
         )}
       </div>

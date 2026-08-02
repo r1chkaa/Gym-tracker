@@ -124,31 +124,31 @@ export default function Progression() {
           loading="eager"
           decoding="async"
           draggable="false"
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_0_15px_rgba(255,255,255,0.05)] z-10 transform-gpu will-change-transform"
-          style={{ imageRendering: 'high-quality', transform: 'translateZ(0)' }}
+          className="absolute inset-0 w-full h-full object-contain pointer-events-none z-10"
         />
-        <svg viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet" className="absolute inset-0 w-full h-full z-20 mix-blend-screen overflow-visible">
+        {/* SVG perfectly overlays the image container using meet to guarantee scale match */}
+        <svg viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet" className="absolute inset-0 w-full h-full z-20 overflow-visible">
           {Object.entries(activeHitboxes).map(([id, path]) => {
             if (!path) return null;
             const xp = volumes[id] || 0;
             const { hex } = getMuscleDetails(xp);
             const isFocused = highlight === id;
             const isDimmed = highlight && !isFocused;
-            const activeColor = isFocused ? '#ef4444' : (isDimmed ? '#ffffff' : (xp > 0 ? hex : '#333333'));
-
+            
+            // Clean, glowing fill instead of messy strokes
             return (
-              <g key={`group-${id}`} style={{ color: activeColor }}>
-                <path
-                  d={path}
-                  onClick={() => { if (!highlight) setSelectedMuscle(id) }}
-                  className={`fill-current stroke-current transition-all duration-500 outline-none
-                    ${isFocused ? 'opacity-90 stroke-[4px] filter drop-shadow-[0_0_30px_rgba(239,68,68,1)] pointer-events-none' : ''}
-                    ${isDimmed ? 'opacity-[0.03] stroke-white/10 pointer-events-none' : ''}
-                    ${!highlight && xp > 0 ? 'opacity-20 cursor-pointer hover:!opacity-80 hover:!fill-red-500 hover:!stroke-red-500 hover:stroke-[4px] hover:filter hover:drop-shadow-[0_0_20px_red]' : ''}
-                    ${!highlight && xp === 0 ? 'opacity-0 cursor-pointer hover:!opacity-60 hover:!fill-red-500 hover:!stroke-red-500 hover:stroke-[3px] hover:filter hover:drop-shadow-[0_0_15px_red]' : ''}
-                  `}
-                />
-              </g>
+              <path
+                key={`group-${id}`}
+                d={path}
+                onClick={() => { if (!highlight) setSelectedMuscle(id) }}
+                style={{ fill: isFocused ? '#ef4444' : (xp > 0 ? hex : 'transparent') }}
+                className={`transition-all duration-500 outline-none
+                  ${isFocused ? 'opacity-60 mix-blend-screen filter drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] pointer-events-none' : ''}
+                  ${isDimmed ? 'opacity-0 pointer-events-none' : ''}
+                  ${!highlight && xp > 0 ? 'opacity-0 cursor-pointer mix-blend-screen hover:!opacity-60 hover:filter hover:drop-shadow-[0_0_15px_currentColor]' : ''}
+                  ${!highlight && xp === 0 ? 'opacity-0 cursor-pointer hover:!opacity-30 hover:!fill-white mix-blend-overlay' : ''}
+                `}
+              />
             );
           })}
         </svg>
@@ -159,6 +159,9 @@ export default function Progression() {
   return (
     <div className="bg-transparent text-[hsl(var(--foreground))] overflow-x-hidden font-sans flex flex-col items-center relative w-full h-full pb-10">
       
+      {/* Full screen fixed background so it bleeds behind the navigation tabs */}
+      <div className="fixed inset-0 pointer-events-none z-0 transition-colors duration-1000" style={{ background: `radial-gradient(circle at center, ${rankTheme.hex}20 0%, transparent 80%)` }} />
+
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes shine-sweep { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
         .shine-text { background: linear-gradient(90deg, transparent 0%, #fff 50%, transparent 100%); background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text; animation: shine-sweep 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
@@ -174,12 +177,10 @@ export default function Progression() {
 
       <div className="w-full flex-1 flex flex-col items-center pt-0 relative z-10 max-w-[600px] mx-auto px-6">
         <div className="relative w-full flex flex-col items-center justify-center min-h-[300px]">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[150%] opacity-[0.08] blur-[120px] pointer-events-none transition-colors duration-1000" style={{ backgroundColor: rankTheme.hex }} />
           
           <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-[0.4em] block mb-8 z-10 relative">Current Standing</span>
           <div className="relative group flex items-center justify-center w-full aspect-square max-w-[220px]">
             <div className={`absolute inset-0 opacity-20 blur-[60px] rounded-full transition-opacity duration-1000`} style={{ backgroundColor: rankTheme.hex }} />
-            {/* Removed the 'imageRendering' style forcing WebKit's harsh nearest-neighbor scaling */}
             <img src={`/ranks/${currentRank.image}`} alt={currentRank.fullName} loading="eager" className={`w-40 h-40 md:w-48 md:h-48 object-contain relative z-10 transform-gpu will-change-transform drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] ${rankTheme.anim}`} style={{ transform: 'translateZ(0)' }} />
           </div>
           <h2 className={`mt-8 text-5xl font-black uppercase tracking-tighter drop-shadow-md z-10 ${isGod ? 'bg-gradient-to-r from-[#fef08a] via-white to-[#fef08a] bg-[length:200%_auto] text-transparent bg-clip-text animate-[shimmer_3s_infinite]' : ''}`} style={!isGod ? { color: rankTheme.hex } : {}}>{currentRank.name}</h2>
@@ -209,13 +210,13 @@ export default function Progression() {
         const muscleXP = volumes[selectedMuscle] || 0;
         const details = getMuscleDetails(muscleXP);
         return (
-          <div className="fixed inset-0 bg-[hsl(var(--background))]/95 backdrop-blur-3xl z-[100] flex flex-col animate-in fade-in zoom-in duration-300 w-full h-[100dvh]">
-            <div className="flex-none flex items-center justify-between p-6 pt-[max(env(safe-area-inset-top),3rem)] z-10">
-              <button onClick={() => setSelectedMuscle(null)} className="text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] transition-colors p-3 bg-[hsl(var(--surface))] rounded-[1.5rem] shadow-sm"><ArrowLeft size={24} /></button>
+          <div className="fixed inset-0 bg-[#0a0a0a]/95 backdrop-blur-3xl z-[100] flex flex-col animate-in fade-in zoom-in duration-300 w-full h-[100dvh]">
+            <div className="flex-none flex items-center justify-between p-6 pt-10 z-10">
+              <button onClick={() => setSelectedMuscle(null)} className="text-[hsl(var(--muted))] hover:text-white transition-colors p-3 bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-full shadow-sm"><ArrowLeft size={24} /></button>
               <div className="w-10" />
             </div>
             <div className="flex-1 overflow-y-auto flex flex-col items-center pt-0 pb-32 px-6 w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              <h2 className="text-4xl font-black text-[hsl(var(--foreground))] uppercase tracking-[0.3em] mb-6">{selectedMuscle}</h2>
+              <h2 className="text-4xl font-black text-white uppercase tracking-[0.3em] mb-6">{selectedMuscle}</h2>
               <span className="text-[10px] font-black uppercase text-red-500 tracking-[0.4em] mb-4 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">Muscle Level</span>
               <div className="relative flex justify-center items-center mb-10">
                 <div className="absolute w-56 h-56 opacity-40 blur-[80px] rounded-full pointer-events-none" style={{ backgroundColor: details.hex }} />
