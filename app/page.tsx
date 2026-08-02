@@ -53,7 +53,8 @@ export default function Home() {
   return (
     <main className="h-[100dvh] max-w-md mx-auto flex flex-col bg-[hsl(var(--background))] text-[hsl(var(--foreground))] overflow-hidden relative transition-colors duration-300">
       
-      <header className="flex-none px-6 pt-10 pb-4 flex justify-between items-start relative z-50">
+      {/* Added safe area padding and a solid background to prevent scrolling content from showing underneath */}
+      <header className="flex-none px-6 pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start relative z-40 bg-[hsl(var(--background))]">
         <div>
           <h1 className="text-4xl font-black tracking-tight">{header.title}</h1>
           <p className="text-[hsl(var(--muted))] font-black tracking-[0.2em] text-[10px] uppercase mt-1">
@@ -68,8 +69,8 @@ export default function Home() {
         </button>
       </header>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-y-auto px-4 pt-2 pb-32 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10">
+      {/* Removed the 'relative z-10' class so modals inside the components can correctly overlap the header */}
+      <div className="flex-1 flex flex-col overflow-y-auto px-4 pt-2 pb-32 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {activeTab === 'workout' && <ActiveSession />}
         {activeTab === 'builder' && <WorkoutBuilder />}
         {activeTab === 'progression' && <Progression />}
@@ -78,8 +79,8 @@ export default function Home() {
         {activeTab === 'settings' && <Settings />}
       </div>
 
-      {/* Floating Navigation */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-50">
+      {/* Floating Navigation with safe area bottom padding */}
+      <div className="fixed bottom-[max(env(safe-area-inset-bottom),1.5rem)] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-50">
         <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/80 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
           {navItems.map((tab) => {
             const isActive = activeTab === tab.id;

@@ -74,7 +74,8 @@ export default function ExerciseLibrary() {
     const isFav = favoriteIds.has(selectedExercise.id);
     return (
       <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col animate-in slide-in-from-right-4 duration-300">
-        <div className="flex-none flex items-center justify-between p-6 pt-12 relative z-10 bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] shadow-sm">
+        {/* Added safe area padding to prevent header from hiding under the iPhone notch */}
+        <div className="flex-none flex items-center justify-between p-6 pt-[max(env(safe-area-inset-top),3rem)] relative z-10 bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] shadow-sm">
           <button onClick={() => setSelectedExercise(null)} className="p-2 bg-[hsl(var(--surface))] rounded-xl text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] transition-colors flex-shrink-0 border border-[hsl(var(--border))]">
             <ArrowLeft size={20} />
           </button>

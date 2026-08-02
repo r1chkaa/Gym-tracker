@@ -179,7 +179,8 @@ export default function Progression() {
           <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-[0.4em] block mb-8 z-10 relative">Current Standing</span>
           <div className="relative group flex items-center justify-center w-full aspect-square max-w-[220px]">
             <div className={`absolute inset-0 opacity-20 blur-[60px] rounded-full transition-opacity duration-1000`} style={{ backgroundColor: rankTheme.hex }} />
-            <img src={`/ranks/${currentRank.image}`} alt={currentRank.fullName} loading="eager" className={`w-40 h-40 md:w-48 md:h-48 object-contain relative z-10 transform-gpu will-change-transform drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] ${rankTheme.anim}`} style={{ imageRendering: 'high-quality', transform: 'translateZ(0)' }} />
+            {/* Removed the 'imageRendering' style forcing WebKit's harsh nearest-neighbor scaling */}
+            <img src={`/ranks/${currentRank.image}`} alt={currentRank.fullName} loading="eager" className={`w-40 h-40 md:w-48 md:h-48 object-contain relative z-10 transform-gpu will-change-transform drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] ${rankTheme.anim}`} style={{ transform: 'translateZ(0)' }} />
           </div>
           <h2 className={`mt-8 text-5xl font-black uppercase tracking-tighter drop-shadow-md z-10 ${isGod ? 'bg-gradient-to-r from-[#fef08a] via-white to-[#fef08a] bg-[length:200%_auto] text-transparent bg-clip-text animate-[shimmer_3s_infinite]' : ''}`} style={!isGod ? { color: rankTheme.hex } : {}}>{currentRank.name}</h2>
           <span className="text-sm font-bold text-[hsl(var(--foreground))]/90 tracking-[0.2em] mt-2 z-10 uppercase">{currentRank.name === 'God' ? 'MAXIMUM RANK' : currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
@@ -209,7 +210,7 @@ export default function Progression() {
         const details = getMuscleDetails(muscleXP);
         return (
           <div className="fixed inset-0 bg-[hsl(var(--background))]/95 backdrop-blur-3xl z-[100] flex flex-col animate-in fade-in zoom-in duration-300 w-full h-[100dvh]">
-            <div className="flex-none flex items-center justify-between p-6 z-10">
+            <div className="flex-none flex items-center justify-between p-6 pt-[max(env(safe-area-inset-top),3rem)] z-10">
               <button onClick={() => setSelectedMuscle(null)} className="text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] transition-colors p-3 bg-[hsl(var(--surface))] rounded-[1.5rem] shadow-sm"><ArrowLeft size={24} /></button>
               <div className="w-10" />
             </div>
