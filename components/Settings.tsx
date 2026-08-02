@@ -1,7 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { db } from '@/lib/db';
-import { Download, Trash2, Database, Scale, Clock, Sun, Moon, User } from 'lucide-react';
+import { Download, Trash2, Database, Scale, Clock, Sun, Moon, User, Upload } from 'lucide-react';
+import { exportDB, importInto } from "dexie-export-import";
 
 export default function Settings() {
   const [unit, setUnit] = useState('lbs');
@@ -10,6 +11,8 @@ export default function Settings() {
   const [wakeLock, setWakeLock] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [gender, setGender] = useState('male');
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setUnit(localStorage.getItem('gym_unit') || 'lbs');
@@ -84,6 +87,50 @@ export default function Settings() {
       await db.sets.clear();
       await db.bodyWeightLogs.clear();
       window.location.reload();
+    }
+  };
+
+  const handleExportDB = async () => {
+    try {
+      const blob = await exportDB(db); // Export the database
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `gym-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Failed to export database. Check console for details.");
+    }
+  };
+
+  const handleImportDBClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportDB = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (window.confirm("WARNING: This will overwrite any existing data with the imported data. Are you sure?")) {
+       try {
+           await db.templates.clear();
+           await db.sets.clear();
+           await db.bodyWeightLogs.clear();
+           await db.favorites.clear();
+           
+           await importInto(db, file, { clearTablesBeforeImport: true }); // Import the file
+           alert("Database successfully imported!");
+           window.location.reload();
+       } catch (error) {
+           console.error("Import failed:", error);
+           alert("Failed to import database. Please ensure the file is a valid Gym Tracker backup.");
+       }
+    }
+    if (fileInputRef.current) {
+        fileInputRef.current.value = "";
     }
   };
 
@@ -164,11 +211,28 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="bg-[hsl(var(--card))] rounded-3xl p-6 border border-[hsl(var(--border))] shadow-sm">
+      <div className="bg-[hsl(var(--card))] rounded-3xl p-6 border border-[hsl(var(--border))] shadow-sm mb-10">
         <h2 className="text-xl font-bold text-[hsl(var(--foreground))] mb-6 flex items-center gap-2">
           <Database size={20} className="text-blue-500" /> Database
         </h2>
         <div className="space-y-4">
+          <button onClick={handleExportDB} className="w-full bg-[hsl(var(--surface))] hover:brightness-110 text-[hsl(var(--foreground))] font-bold py-4 px-4 rounded-2xl flex justify-between items-center transition-all border border-[hsl(var(--border))]">
+            <span>Export Data (.json)</span>
+            <Download size={20} />
+          </button>
+          
+          <input 
+              type="file" 
+              accept=".json" 
+              ref={fileInputRef} 
+              onChange={handleImportDB} 
+              className="hidden" 
+          />
+          <button onClick={handleImportDBClick} className="w-full bg-[hsl(var(--surface))] hover:brightness-110 text-[hsl(var(--foreground))] font-bold py-4 px-4 rounded-2xl flex justify-between items-center transition-all border border-[hsl(var(--border))]">
+            <span>Import Data (.json)</span>
+            <Upload size={20} />
+          </button>
+
           <button onClick={handleClearData} className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold py-4 px-4 rounded-2xl flex justify-between items-center transition-colors border border-red-500/20">
             <span>Delete All Data</span>
             <Trash2 size={20} />
