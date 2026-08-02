@@ -9,7 +9,6 @@ const MUSCLE_DATA = [
   { id: 'Tricep' }, { id: 'Shoulder' }, { id: 'Forearms' }, { id: 'Legs' }
 ];
 
-// MALE HITBOXES
 const SVG_HITBOXES_MALE: Record<string, string> = {
   Chest: "M 135,148 L 148,148 L 158,150 L 168,151 L 172,156 L 173,163 L 175,171 L 176,178 L 175,189 L 173,196 L 167,199 L 158,202 L 148,204 L 135,202 L 127,199 L 120,194 L 117,189 L 114,184 L 111,179 L 109,178 L 104,181 L 109,174 L 114,165 L 120,158 L 125,153 Z M 185,152 L 191,149 L 198,147 L 203,147 L 208,147 L 218,147 L 221,147 L 228,152 L 238,159 L 243,169 L 247,175 L 251,179 L 244,177 L 241,183 L 238,190 L 233,195 L 228,200 L 221,202 L 215,203 L 206,203 L 200,203 L 193,202 L 187,198 L 182,193 L 180,185 L 180,177 L 180,169 L 183,160 Z", 
   Core: "M 231,271 L 231,276 L 224,281 L 218,286 L 211,286 L 208,281 L 210,272 L 210,264 L 211,261 L 215,261 L 211,258 L 211,253 L 211,246 L 215,244 L 221,241 L 226,235 L 229,230 L 233,225 L 231,233 L 229,241 L 229,248 L 231,258 L 233,264 Z M 233,225 L 224,223 L 216,228 L 211,236 L 211,240 L 215,243 L 221,241 L 226,236 L 231,228 Z M 233,215 L 228,221 L 221,225 L 215,230 L 210,226 L 211,220 L 213,216 L 218,215 L 223,213 L 228,215 Z M 231,207 L 224,213 L 218,215 L 213,216 L 210,215 L 211,208 L 215,205 L 219,205 L 223,207 L 226,208 L 229,208 Z M 140,259 L 144,261 L 145,266 L 147,274 L 147,282 L 145,286 L 140,286 L 134,284 L 129,279 L 124,274 L 124,268 L 124,261 L 127,254 L 127,243 L 126,235 L 122,225 L 127,233 L 134,240 L 140,244 L 144,248 L 145,253 L 145,256 L 144,259 Z M 122,225 L 131,223 L 137,228 L 142,230 L 145,235 L 145,241 L 142,243 L 139,243 L 132,240 L 127,233 Z M 126,216 L 132,213 L 137,215 L 142,216 L 145,220 L 145,225 L 142,230 L 137,228 L 132,225 L 126,218 L 122,215 L 126,216 Z M 126,208 L 132,213 L 139,215 L 144,216 L 145,211 L 144,207 L 140,205 L 137,205 L 132,207 L 129,208 Z M 178,327 L 185,325 L 190,319 L 193,309 L 198,294 L 201,281 L 205,269 L 205,261 L 198,263 L 191,263 L 185,263 L 183,263 L 178,268 L 178,281 L 178,325 L 177,268 L 172,263 L 167,263 L 159,263 L 152,261 L 152,268 L 154,279 L 157,292 L 162,307 L 167,319 L 170,325 Z M 205,243 L 206,249 L 205,258 L 198,259 L 190,259 L 185,259 L 182,258 L 180,253 L 178,246 L 180,241 L 185,240 L 193,241 Z M 149,243 L 155,241 L 162,241 L 170,241 L 173,241 L 175,243 L 177,253 L 175,258 L 170,259 L 163,259 L 155,258 L 152,258 L 150,253 L 149,248 Z M 182,238 L 190,238 L 200,240 L 205,240 L 206,235 L 206,228 L 201,225 L 193,221 L 185,220 L 182,220 L 180,223 L 180,231 L 180,235 Z M 173,220 L 168,220 L 162,221 L 155,225 L 149,228 L 149,233 L 150,238 L 155,240 L 162,238 L 168,238 L 173,238 L 177,235 L 177,228 L 175,221 Z M 175,202 L 172,200 L 165,202 L 155,205 L 150,208 L 149,215 L 149,221 L 150,223 L 154,223 L 159,220 L 165,218 L 172,216 L 175,215 L 177,208 Z M 182,202 L 191,202 L 200,205 L 205,210 L 206,216 L 206,223 L 203,223 L 196,220 L 190,218 L 183,216 L 180,215 L 180,208 L 180,203 Z",
@@ -21,7 +20,6 @@ const SVG_HITBOXES_MALE: Record<string, string> = {
   Legs: "M 231,278 L 226,285 L 218,291 L 211,298 L 204,305 L 199,312 L 192,322 L 187,329 L 182,333 L 180,336 L 180,342 L 179,363 L 180,375 L 181,384 L 182,395 L 181,405 L 181,424 L 183,436 L 187,451 L 188,457 L 186,466 L 183,479 L 182,490 L 183,501 L 187,520 L 188,539 L 189,547 L 188,553 L 184,558 L 188,556 L 193,555 L 197,555 L 202,556 L 207,558 L 208,552 L 210,542 L 213,533 L 217,521 L 222,507 L 225,495 L 227,481 L 226,470 L 225,462 L 223,454 L 222,448 L 223,439 L 225,420 L 232,406 L 237,393 L 241,379 L 243,366 L 245,356 L 245,334 L 242,320 L 238,305 L 236,291 Z M 121,280 L 125,282 L 129,286 L 134,290 L 139,295 L 147,305 L 154,313 L 160,321 L 165,327 L 170,332 L 172,334 L 172,337 L 173,344 L 173,363 L 172,376 L 170,387 L 170,399 L 171,410 L 171,428 L 169,439 L 166,454 L 166,460 L 168,471 L 171,482 L 171,493 L 169,505 L 166,520 L 165,537 L 164,547 L 165,553 L 168,559 L 165,558 L 161,556 L 156,556 L 152,556 L 148,558 L 144,560 L 145,554 L 143,545 L 139,531 L 136,521 L 131,507 L 128,497 L 126,488 L 125,479 L 126,471 L 129,458 L 130,445 L 129,433 L 126,420 L 122,411 L 115,394 L 111,378 L 106,352 L 107,338 L 108,328 L 112,315 L 115,302 L 117,289 Z M 467,296 L 470,298 L 473,296 L 478,285 L 485,278 L 494,272 L 503,269 L 513,271 L 521,276 L 526,281 L 531,293 L 533,305 L 537,318 L 540,334 L 540,348 L 538,360 L 537,373 L 534,384 L 529,399 L 523,413 L 518,425 L 517,435 L 516,449 L 517,459 L 520,474 L 521,485 L 518,502 L 513,517 L 508,531 L 504,545 L 501,556 L 502,565 L 503,569 L 501,574 L 498,579 L 494,581 L 486,580 L 481,579 L 479,574 L 478,565 L 480,560 L 482,553 L 482,545 L 481,532 L 480,520 L 477,508 L 475,499 L 476,485 L 480,470 L 482,459 L 481,451 L 478,440 L 476,429 L 476,410 L 477,396 L 474,375 L 473,360 L 474,348 L 475,341 L 476,338 L 472,334 L 470,331 L 468,334 L 465,338 L 466,344 L 467,354 L 467,369 L 465,380 L 464,391 L 463,400 L 463,410 L 464,417 L 464,434 L 461,444 L 459,452 L 458,457 L 458,465 L 461,472 L 464,484 L 465,495 L 464,503 L 461,513 L 458,539 L 458,551 L 459,558 L 462,563 L 462,571 L 461,576 L 457,578 L 452,579 L 446,579 L 441,577 L 438,574 L 437,568 L 439,562 L 439,555 L 436,547 L 433,534 L 428,521 L 423,507 L 421,498 L 419,487 L 419,475 L 422,461 L 424,451 L 423,439 L 422,424 L 419,417 L 414,409 L 411,398 L 404,377 L 401,358 L 400,344 L 401,327 L 405,311 L 408,299 L 410,289 L 415,278 L 424,272 L 433,270 L 442,271 L 450,274 L 457,279 L 463,286 Z"
 };
 
-// FEMALE HITBOXES
 const SVG_HITBOXES_FEMALE: Record<string, string> = {
   Chest: "M 221,148 L 214,147 L 205,148 L 195,149 L 187,151 L 182,154 L 182,158 L 185,161 L 184,165 L 181,171 L 179,180 L 179,188 L 182,196 L 188,203 L 193,206 L 202,210 L 214,211 L 223,209 L 230,205 L 235,198 L 237,189 L 235,183 L 239,179 L 241,176 L 247,179 L 240,171 L 236,163 L 231,156 L 226,152 Z M 116,184 L 116,193 L 118,199 L 122,204 L 127,208 L 132,210 L 141,211 L 150,210 L 158,207 L 166,202 L 171,194 L 174,186 L 173,177 L 171,170 L 168,165 L 167,161 L 170,158 L 170,155 L 167,153 L 162,150 L 151,148 L 142,147 L 134,148 L 129,150 L 123,155 L 118,161 L 113,169 L 109,174 L 105,179 L 111,177 L 112,176 L 115,180 Z", 
   Core: "M 123,206 L 122,210 L 123,213 L 126,215 L 129,216 L 133,215 L 135,214 L 133,211 L 131,210 L 127,208 L 125,207 Z M 123,213 L 122,217 L 123,221 L 126,223 L 129,224 L 132,224 L 130,221 L 129,218 L 129,216 Z M 135,214 L 139,217 L 144,220 L 143,227 L 142,229 L 138,229 L 134,227 L 131,223 L 129,216 Z M 127,224 L 127,229 L 129,234 L 133,238 L 137,242 L 140,244 L 143,243 L 144,239 L 144,235 L 144,234 L 141,231 L 138,229 L 135,227 L 132,223 Z M 138,244 L 142,249 L 144,254 L 144,258 L 141,261 L 138,258 L 142,264 L 144,272 L 145,279 L 144,284 L 141,286 L 138,285 L 133,283 L 129,280 L 126,276 L 123,274 L 124,267 L 126,261 L 128,256 L 130,250 L 129,244 L 128,237 L 127,233 L 128,232 Z M 230,204 L 230,209 L 230,212 L 229,213 L 230,217 L 229,221 L 228,223 L 226,224 L 225,228 L 223,234 L 219,239 L 214,243 L 211,244 L 209,241 L 209,238 L 209,234 L 213,230 L 215,229 L 212,229 L 210,228 L 209,225 L 209,222 L 209,219 L 214,216 L 217,214 L 220,212 L 222,209 Z M 225,231 L 226,232 L 225,235 L 224,237 L 223,240 L 223,244 L 223,246 L 223,251 L 225,257 L 227,261 L 228,265 L 229,269 L 228,273 L 225,277 L 222,280 L 219,283 L 214,285 L 210,285 L 208,284 L 207,279 L 208,274 L 210,268 L 211,263 L 215,259 L 211,260 L 209,258 L 209,255 L 210,251 L 211,247 L 214,243 L 219,240 Z M 152,209 L 157,207 L 162,204 L 167,202 L 171,202 L 173,204 L 174,207 L 174,210 L 174,213 L 172,215 L 167,217 L 165,218 L 159,220 L 158,221 L 153,222 L 151,223 L 148,222 L 147,220 L 147,216 L 149,213 Z M 182,202 L 186,203 L 190,204 L 193,207 L 197,208 L 202,209 L 203,212 L 204,215 L 205,217 L 205,220 L 204,221 L 202,222 L 201,223 L 198,222 L 197,222 L 189,219 L 183,216 L 179,214 L 178,212 L 178,208 L 179,205 Z M 148,230 L 151,227 L 156,224 L 161,222 L 168,220 L 173,220 L 174,225 L 174,230 L 174,235 L 174,239 L 172,240 L 168,240 L 162,240 L 158,240 L 154,241 L 151,241 L 149,240 L 148,237 L 148,233 Z M 181,220 L 190,222 L 198,225 L 203,229 L 205,235 L 204,239 L 201,242 L 195,241 L 189,240 L 181,240 L 178,237 L 177,230 L 178,223 Z M 150,244 L 154,245 L 159,244 L 163,243 L 169,243 L 173,245 L 174,250 L 174,254 L 174,259 L 172,262 L 168,263 L 163,263 L 157,262 L 152,260 L 149,256 L 148,246 Z M 179,244 L 184,243 L 190,244 L 196,245 L 203,244 L 204,248 L 203,254 L 202,259 L 199,260 L 189,262 L 180,262 L 178,259 L 178,251 Z M 151,263 L 158,265 L 163,265 L 168,266 L 172,267 L 174,270 L 176,305 L 178,270 L 181,267 L 185,265 L 190,265 L 195,264 L 200,263 L 202,266 L 202,275 L 199,285 L 194,298 L 190,309 L 188,314 L 183,317 L 176,319 L 170,318 L 164,314 L 158,297 L 153,283 L 151,275 L 150,268 Z",
@@ -60,8 +58,7 @@ function getAccountRank(points: number) {
     const currentThresh = 10000000 + ((titanLevel - 1) * 150000);
     const nextThresh = titanLevel === 100 ? 25000000 : 10000000 + (titanLevel * 150000);
     const progress = ((points - currentThresh) / (nextThresh - currentThresh)) * 100;
-    const titanEmblems = [100, 75, 50, 25, 10, 5, 3, 2, 1];
-    const emblemNum = titanEmblems.find(e => titanLevel >= e) || 1;
+    const emblemNum = [100, 75, 50, 25, 10, 5, 3, 2, 1].find(e => titanLevel >= e) || 1;
     return { name: "Titan", tier: titanLevel.toString(), fullName: `Titan ${titanLevel}`, image: `titan${emblemNum}.png`, current: currentThresh, next: nextThresh, progress, points };
   }
   let currentTierIndex = 0;
@@ -126,7 +123,6 @@ export default function Progression() {
           draggable="false"
           className="absolute inset-0 w-full h-full object-contain pointer-events-none z-10"
         />
-        {/* SVG perfectly overlays the image container using meet to guarantee scale match */}
         <svg viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet" className="absolute inset-0 w-full h-full z-20 overflow-visible">
           {Object.entries(activeHitboxes).map(([id, path]) => {
             if (!path) return null;
@@ -135,7 +131,6 @@ export default function Progression() {
             const isFocused = highlight === id;
             const isDimmed = highlight && !isFocused;
             
-            // Clean, glowing fill instead of messy strokes
             return (
               <path
                 key={`group-${id}`}
@@ -159,8 +154,10 @@ export default function Progression() {
   return (
     <div className="bg-transparent text-[hsl(var(--foreground))] overflow-x-hidden font-sans flex flex-col items-center relative w-full h-full pb-10">
       
-      {/* Full screen fixed background so it bleeds behind the navigation tabs */}
-      <div className="fixed inset-0 pointer-events-none z-0 transition-colors duration-1000" style={{ background: `radial-gradient(circle at center, ${rankTheme.hex}20 0%, transparent 80%)` }} />
+      {/* Full screen background glow that completely covers gray borders behind everything */}
+      <div className="fixed inset-0 pointer-events-none z-0 w-screen h-screen flex items-center justify-center">
+        <div className="absolute w-[800px] h-[800px] opacity-15 blur-[100px] rounded-full transition-colors duration-1000" style={{ backgroundColor: rankTheme.hex }} />
+      </div>
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes shine-sweep { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
@@ -171,7 +168,6 @@ export default function Progression() {
         @keyframes idle-shake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(2deg); } 75% { transform: rotate(-2deg); } }
         @keyframes idle-titan { 0%, 100% { filter: drop-shadow(0 0 15px #22d3ee); transform: scale(1); } 50% { filter: drop-shadow(0 0 40px #22d3ee); transform: scale(1.05); } }
         @keyframes idle-god { 0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 25px #fef08a); } 50% { transform: translateY(-20px) scale(1.1); filter: drop-shadow(0 0 70px #fef08a) brightness(1.2); } }
-        @keyframes god-rays { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
       `}} />
 
@@ -180,7 +176,6 @@ export default function Progression() {
           
           <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-[0.4em] block mb-8 z-10 relative">Current Standing</span>
           <div className="relative group flex items-center justify-center w-full aspect-square max-w-[220px]">
-            <div className={`absolute inset-0 opacity-20 blur-[60px] rounded-full transition-opacity duration-1000`} style={{ backgroundColor: rankTheme.hex }} />
             <img src={`/ranks/${currentRank.image}`} alt={currentRank.fullName} loading="eager" className={`w-40 h-40 md:w-48 md:h-48 object-contain relative z-10 transform-gpu will-change-transform drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] ${rankTheme.anim}`} style={{ transform: 'translateZ(0)' }} />
           </div>
           <h2 className={`mt-8 text-5xl font-black uppercase tracking-tighter drop-shadow-md z-10 ${isGod ? 'bg-gradient-to-r from-[#fef08a] via-white to-[#fef08a] bg-[length:200%_auto] text-transparent bg-clip-text animate-[shimmer_3s_infinite]' : ''}`} style={!isGod ? { color: rankTheme.hex } : {}}>{currentRank.name}</h2>
@@ -205,17 +200,16 @@ export default function Progression() {
         </div>
       </div>
 
-      {/* OVERLAY FOR OPENED MUSCLE */}
       {selectedMuscle && (() => {
         const muscleXP = volumes[selectedMuscle] || 0;
         const details = getMuscleDetails(muscleXP);
         return (
-          <div className="fixed inset-0 bg-[#0a0a0a]/95 backdrop-blur-3xl z-[100] flex flex-col animate-in fade-in zoom-in duration-300 w-full h-[100dvh]">
-            <div className="flex-none flex items-center justify-between p-6 pt-10 z-10">
+          <div className="fixed inset-0 bg-[#09090b]/95 backdrop-blur-3xl z-[100] flex flex-col animate-in fade-in zoom-in duration-300 w-screen h-screen">
+            <div className="flex-none flex items-center justify-between p-6 pt-[max(env(safe-area-inset-top),3rem)] z-10">
               <button onClick={() => setSelectedMuscle(null)} className="text-[hsl(var(--muted))] hover:text-white transition-colors p-3 bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-full shadow-sm"><ArrowLeft size={24} /></button>
               <div className="w-10" />
             </div>
-            <div className="flex-1 overflow-y-auto flex flex-col items-center pt-0 pb-32 px-6 w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex-1 overflow-y-auto flex flex-col items-center pt-0 pb-32 px-6 w-full max-w-[600px] mx-auto">
               <h2 className="text-4xl font-black text-white uppercase tracking-[0.3em] mb-6">{selectedMuscle}</h2>
               <span className="text-[10px] font-black uppercase text-red-500 tracking-[0.4em] mb-4 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">Muscle Level</span>
               <div className="relative flex justify-center items-center mb-10">

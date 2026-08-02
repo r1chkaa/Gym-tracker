@@ -73,8 +73,7 @@ export default function ExerciseLibrary() {
   if (selectedExercise) {
     const isFav = favoriteIds.has(selectedExercise.id);
     return (
-      <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col animate-in slide-in-from-right-4 duration-300">
-        {/* Added safe area padding to prevent header from hiding under the iPhone notch */}
+      <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col animate-in slide-in-from-right-4 duration-300 w-screen h-screen">
         <div className="flex-none flex items-center justify-between p-6 pt-[max(env(safe-area-inset-top),3rem)] relative z-10 bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] shadow-sm">
           <button onClick={() => setSelectedExercise(null)} className="p-2 bg-[hsl(var(--surface))] rounded-xl text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] transition-colors flex-shrink-0 border border-[hsl(var(--border))]">
             <ArrowLeft size={20} />
@@ -87,8 +86,7 @@ export default function ExerciseLibrary() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-32">
-          
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-32 max-w-[600px] mx-auto w-full">
           <div className="flex flex-wrap justify-center gap-2 mb-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))] bg-[hsl(var(--card))] border border-[hsl(var(--border))] px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
               <BarChart size={12} className={selectedExercise.level === 'Beginner' ? 'text-green-500' : selectedExercise.level === 'Intermediate' ? 'text-yellow-500' : 'text-red-500'} /> {selectedExercise.level}
@@ -165,10 +163,11 @@ export default function ExerciseLibrary() {
     );
   }
 
+  // Covers the global page headers natively
   if (activeCategory) {
     return (
-      <div className="flex flex-col w-full h-full min-w-0 animate-in slide-in-from-right-2 duration-200 ease-out">
-        <div className="flex-none flex items-center gap-3 bg-[hsl(var(--background))] p-0 pb-4 mb-2">
+      <div className="fixed inset-0 z-[60] bg-[hsl(var(--background))] flex flex-col animate-in slide-in-from-right-4 duration-300 w-screen h-screen">
+        <div className="flex-none flex items-center gap-4 p-6 pt-[max(env(safe-area-inset-top),3rem)] bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] shadow-sm z-10">
           <button onClick={() => { setActiveCategory(null); setSelectedEquipment(null); setSearchQuery(""); }} className="p-2 bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] transition-colors flex-shrink-0">
             <ArrowLeft size={20} />
           </button>
@@ -177,85 +176,86 @@ export default function ExerciseLibrary() {
           </h2>
         </div>
 
-        <div className="relative mb-3">
-          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <Search size={16} className="text-[hsl(var(--muted))]" />
-          </div>
-          <input 
-            type="text" 
-            placeholder="Search exercises..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[hsl(var(--card))] text-[hsl(var(--foreground))] text-sm font-bold py-3 pl-10 pr-3 rounded-xl border border-[hsl(var(--border))] focus:border-blue-500 focus:outline-none transition-colors shadow-inner placeholder:text-[hsl(var(--muted))]"
-          />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="absolute inset-y-0 right-3 flex items-center text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]">
-              <X size={14} />
-            </button>
-          )}
-        </div>
-
-        {equipmentTypes.length > 0 && (
-          <div className="flex-none -mx-4 mb-2">
-            <div className="flex gap-2 overflow-x-auto px-4 pb-2 snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              <button onClick={() => setSelectedEquipment(null)} className={`flex-shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full font-bold text-xs transition-all border ${!selectedEquipment ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] border-[hsl(var(--foreground))]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--muted))] border-[hsl(var(--border))] hover:border-[hsl(var(--muted))]'}`}>All</button>
-              <button onClick={() => setSelectedEquipment('Favorites')} className={`flex-shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full font-bold text-xs transition-all border flex items-center gap-1.5 ${selectedEquipment === 'Favorites' ? 'bg-red-500 text-white border-red-500' : 'bg-[hsl(var(--surface))] text-red-400 border-[hsl(var(--border))] hover:border-red-400/50'}`}>
-                <Heart size={12} className={selectedEquipment === 'Favorites' ? 'fill-white' : 'fill-red-400'} /> Favorites
-              </button>
-              {equipmentTypes.map(eq => (
-                <button key={eq} onClick={() => setSelectedEquipment(eq)} className={`flex-shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full font-bold text-xs transition-all border ${selectedEquipment === eq ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] border-[hsl(var(--foreground))]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--muted))] border-[hsl(var(--border))] hover:border-[hsl(var(--muted))]'}`}>{eq}</button>
-              ))}
-              <div className="w-1 flex-shrink-0" />
+        <div className="flex-1 overflow-y-auto flex flex-col gap-2.5 min-w-0 max-w-[600px] mx-auto w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="relative mt-4 mx-4 mb-2">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <Search size={16} className="text-[hsl(var(--muted))]" />
             </div>
+            <input 
+              type="text" 
+              placeholder="Search exercises..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[hsl(var(--card))] text-[hsl(var(--foreground))] text-sm font-bold py-3 pl-10 pr-3 rounded-xl border border-[hsl(var(--border))] focus:border-blue-500 focus:outline-none transition-colors shadow-inner placeholder:text-[hsl(var(--muted))]"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery("")} className="absolute inset-y-0 right-3 flex items-center text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]">
+                <X size={14} />
+              </button>
+            )}
           </div>
-        )}
 
-        <div className="flex-1 overflow-y-auto flex flex-col gap-2.5 min-w-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {filteredExercises.length === 0 ? (
-             <div className="flex flex-col items-center justify-center py-12 opacity-60">
-               <span className="text-[hsl(var(--foreground))] font-black text-lg tracking-tight">No exercises found.</span>
-             </div>
-          ) : (
-            filteredExercises.map((ex) => {
-              const isFav = favoriteIds.has(ex.id);
-              return (
-                <div 
-                  key={ex.id} 
-                  onClick={() => setSelectedExercise(ex)}
-                  className="bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] shadow-sm transition-all duration-200 cursor-pointer overflow-hidden flex-shrink-0 hover:border-blue-500/40 hover:brightness-110"
-                >
-                  <div className="p-4 flex flex-col gap-2.5">
-                    <div className="flex justify-between items-start gap-2">
-                      <h3 className="text-[hsl(var(--foreground))] font-black text-base leading-tight pr-2 truncate">{ex.name}</h3>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <button onClick={(e) => toggleFavorite(e, ex.id)} className="p-1.5 bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-full transition-transform active:scale-75">
-                          <Heart size={14} className={isFav ? "fill-red-500 text-red-500" : "text-[hsl(var(--muted))] hover:text-red-400"} />
-                        </button>
+          {equipmentTypes.length > 0 && (
+            <div className="flex-none mb-1">
+              <div className="flex gap-2 overflow-x-auto px-4 pb-2 snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <button onClick={() => setSelectedEquipment(null)} className={`flex-shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full font-bold text-xs transition-all border ${!selectedEquipment ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] border-[hsl(var(--foreground))]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--muted))] border-[hsl(var(--border))] hover:border-[hsl(var(--muted))]'}`}>All</button>
+                <button onClick={() => setSelectedEquipment('Favorites')} className={`flex-shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full font-bold text-xs transition-all border flex items-center gap-1.5 ${selectedEquipment === 'Favorites' ? 'bg-red-500 text-white border-red-500' : 'bg-[hsl(var(--surface))] text-red-400 border-[hsl(var(--border))] hover:border-red-400/50'}`}>
+                  <Heart size={12} className={selectedEquipment === 'Favorites' ? 'fill-white' : 'fill-red-400'} /> Favorites
+                </button>
+                {equipmentTypes.map(eq => (
+                  <button key={eq} onClick={() => setSelectedEquipment(eq)} className={`flex-shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full font-bold text-xs transition-all border ${selectedEquipment === eq ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] border-[hsl(var(--foreground))]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--muted))] border-[hsl(var(--border))] hover:border-[hsl(var(--muted))]'}`}>{eq}</button>
+                ))}
+                <div className="w-4 flex-shrink-0" />
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2.5 px-4 pb-32">
+            {filteredExercises.length === 0 ? (
+               <div className="flex flex-col items-center justify-center py-12 opacity-60">
+                 <span className="text-[hsl(var(--foreground))] font-black text-lg tracking-tight">No exercises found.</span>
+               </div>
+            ) : (
+              filteredExercises.map((ex) => {
+                const isFav = favoriteIds.has(ex.id);
+                return (
+                  <div 
+                    key={ex.id} 
+                    onClick={() => setSelectedExercise(ex)}
+                    className="bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] shadow-sm transition-all duration-200 cursor-pointer overflow-hidden flex-shrink-0 hover:border-blue-500/40 hover:brightness-110"
+                  >
+                    <div className="p-4 flex flex-col gap-2.5">
+                      <div className="flex justify-between items-start gap-2">
+                        <h3 className="text-[hsl(var(--foreground))] font-black text-base leading-tight pr-2 truncate">{ex.name}</h3>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button onClick={(e) => toggleFavorite(e, ex.id)} className="p-1.5 bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-full transition-transform active:scale-75">
+                            <Heart size={14} className={isFav ? "fill-red-500 text-red-500" : "text-[hsl(var(--muted))] hover:text-red-400"} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-nowrap overflow-x-auto gap-1.5 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                        <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-widest text-[hsl(var(--muted))] bg-[hsl(var(--card))] border border-[hsl(var(--border))] px-2 py-1 rounded flex items-center gap-1">
+                          <BarChart size={10} className={ex.level === 'Beginner' ? 'text-green-500' : ex.level === 'Intermediate' ? 'text-yellow-500' : 'text-red-500'} /> {ex.level}
+                        </span>
+                        <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-widest text-[hsl(var(--muted))] bg-[hsl(var(--card))] border border-[hsl(var(--border))] px-2 py-1 rounded flex items-center gap-1">
+                          {getMechanicIcon(ex.mechanic)} {ex.mechanic}
+                        </span>
+                        <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-widest text-[hsl(var(--muted))] bg-[hsl(var(--card))] border border-[hsl(var(--border))] px-2 py-1 rounded flex items-center gap-1">
+                          {getEquipmentIcon(ex.equipment)} {ex.equipment}
+                        </span>
                       </div>
                     </div>
-
-                    <div className="flex flex-nowrap overflow-x-auto gap-1.5 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                      <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-widest text-[hsl(var(--muted))] bg-[hsl(var(--card))] border border-[hsl(var(--border))] px-2 py-1 rounded flex items-center gap-1">
-                        <BarChart size={10} className={ex.level === 'Beginner' ? 'text-green-500' : ex.level === 'Intermediate' ? 'text-yellow-500' : 'text-red-500'} /> {ex.level}
-                      </span>
-                      <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-widest text-[hsl(var(--muted))] bg-[hsl(var(--card))] border border-[hsl(var(--border))] px-2 py-1 rounded flex items-center gap-1">
-                        {getMechanicIcon(ex.mechanic)} {ex.mechanic}
-                      </span>
-                      <span className="flex-shrink-0 text-[9px] font-black uppercase tracking-widest text-[hsl(var(--muted))] bg-[hsl(var(--card))] border border-[hsl(var(--border))] px-2 py-1 rounded flex items-center gap-1">
-                        {getEquipmentIcon(ex.equipment)} {ex.equipment}
-                      </span>
-                    </div>
                   </div>
-                </div>
-              );
-            })
-          )}
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
-  // NON-SCROLLABLE 2x4 GRID FIT TO SCREEN
   return (
     <div className="flex-1 grid grid-cols-2 grid-rows-4 gap-2.5 h-full pb-2">
       {categories.map((category) => {

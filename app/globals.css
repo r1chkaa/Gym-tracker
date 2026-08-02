@@ -22,12 +22,31 @@
   }
 }
 
+/* Global Native-App Lockdowns */
+* {
+  -webkit-touch-callout: none !important; /* Disables long-press context menu */
+  -webkit-user-select: none !important;   /* Disables text selection */
+  user-select: none !important;
+  -webkit-user-drag: none !important;     /* Disables image dragging */
+  scrollbar-width: none !important;       /* Hides scrollbars in Firefox */
+  -ms-overflow-style: none !important;    /* Hides scrollbars in IE/Edge */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Allow text selection ONLY in input fields */
+input, textarea {
+  -webkit-user-select: auto !important;
+  user-select: auto !important;
+}
+
+/* Hide scrollbars everywhere in Chrome/Safari */
+::-webkit-scrollbar {
+  display: none !important;
+}
+
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
-  -webkit-tap-highlight-color: transparent;
-  
-  /* Locks the viewport to prevent the entire app from rubber-banding */
   position: fixed;
   width: 100%;
   height: 100%;
