@@ -163,7 +163,6 @@ export default function ExerciseLibrary() {
     );
   }
 
-  // Covers the global page headers natively
   if (activeCategory) {
     return (
       <div className="fixed inset-0 z-[60] bg-[hsl(var(--background))] flex flex-col animate-in slide-in-from-right-4 duration-300 w-screen h-screen">
@@ -176,8 +175,8 @@ export default function ExerciseLibrary() {
           </h2>
         </div>
 
-        <div className="flex-1 overflow-y-auto flex flex-col gap-2.5 min-w-0 max-w-[600px] mx-auto w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <div className="relative mt-4 mx-4 mb-2">
+        <div className="flex-1 overflow-y-auto flex flex-col min-w-0 max-w-[600px] mx-auto w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="relative mt-4 mx-4 mb-3">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <Search size={16} className="text-[hsl(var(--muted))]" />
             </div>
@@ -196,8 +195,9 @@ export default function ExerciseLibrary() {
           </div>
 
           {equipmentTypes.length > 0 && (
-            <div className="flex-none mb-1">
-              <div className="flex gap-2 overflow-x-auto px-4 pb-2 snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex-none mb-3 border-b border-[hsl(var(--border))]/50 pb-3">
+              {/* Perfectly aligned padding for the 'All' pill */}
+              <div className="flex gap-2 overflow-x-auto px-4 snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 <button onClick={() => setSelectedEquipment(null)} className={`flex-shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full font-bold text-xs transition-all border ${!selectedEquipment ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] border-[hsl(var(--foreground))]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--muted))] border-[hsl(var(--border))] hover:border-[hsl(var(--muted))]'}`}>All</button>
                 <button onClick={() => setSelectedEquipment('Favorites')} className={`flex-shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full font-bold text-xs transition-all border flex items-center gap-1.5 ${selectedEquipment === 'Favorites' ? 'bg-red-500 text-white border-red-500' : 'bg-[hsl(var(--surface))] text-red-400 border-[hsl(var(--border))] hover:border-red-400/50'}`}>
                   <Heart size={12} className={selectedEquipment === 'Favorites' ? 'fill-white' : 'fill-red-400'} /> Favorites

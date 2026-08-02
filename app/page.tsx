@@ -59,31 +59,35 @@ export default function Home() {
       {/* Full-bleed background that covers gray borders on large devices and edges */}
       <div className={`fixed inset-0 w-screen h-screen z-[-2] transition-colors duration-500 ${activeTab === 'progression' ? 'bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`} />
 
-      <header className="flex-none px-6 pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start relative z-40 bg-transparent">
-        <div>
-          <h1 className="text-4xl font-black tracking-tight drop-shadow-sm">{header.title}</h1>
-          <p className="text-[hsl(var(--muted))] font-black tracking-[0.2em] text-[10px] uppercase mt-1">
-            {header.subtitle}
-          </p>
-        </div>
-        <button 
-          onClick={() => {
-            if (activeTab === 'settings') setActiveTab(previousTab);
-            else { setPreviousTab(activeTab); setActiveTab('settings'); }
-          }}
-          className={`p-3 rounded-full transition-all duration-300 shadow-sm border backdrop-blur-md ${activeTab === 'settings' ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] rotate-90 border-[hsl(var(--foreground))]' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] bg-[hsl(var(--surface))]/80 border-[hsl(var(--border))]'}`}
-        >
-          {activeTab === 'settings' ? <X size={20} /> : <SettingsIcon size={20} />}
-        </button>
-      </header>
+      {/* Header moved INSIDE the scroll container so it scrolls smoothly and prevents layout cutoffs */}
+      <div className="flex-1 flex flex-col overflow-y-auto pb-32 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        
+        <header className={`flex-none px-6 pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start transition-colors duration-500 ${activeTab === 'progression' ? 'text-white' : ''}`}>
+          <div>
+            <h1 className="text-4xl font-black tracking-tight drop-shadow-sm">{header.title}</h1>
+            <p className={`font-black tracking-[0.2em] text-[10px] uppercase mt-1 ${activeTab === 'progression' ? 'text-blue-500 drop-shadow-md' : 'text-[hsl(var(--muted))]'}`}>
+              {header.subtitle}
+            </p>
+          </div>
+          <button 
+            onClick={() => {
+              if (activeTab === 'settings') setActiveTab(previousTab);
+              else { setPreviousTab(activeTab); setActiveTab('settings'); }
+            }}
+            className={`p-3 rounded-full transition-all duration-300 shadow-sm border backdrop-blur-md ${activeTab === 'settings' ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] rotate-90 border-[hsl(var(--foreground))]' : (activeTab === 'progression' ? 'bg-white/10 text-white/70 hover:text-white border-white/20' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] bg-[hsl(var(--surface))]/80 border-[hsl(var(--border))]')}`}
+          >
+            {activeTab === 'settings' ? <X size={20} /> : <SettingsIcon size={20} />}
+          </button>
+        </header>
 
-      <div className="flex-1 flex flex-col overflow-y-auto px-4 pt-2 pb-32">
-        {activeTab === 'workout' && <ActiveSession />}
-        {activeTab === 'builder' && <WorkoutBuilder />}
-        {activeTab === 'progression' && <Progression />}
-        {activeTab === 'analytics' && <AnalyticsDashboard />}
-        {activeTab === 'library' && <ExerciseLibrary />}
-        {activeTab === 'settings' && <Settings />}
+        <div className="px-4 flex-1 flex flex-col">
+          {activeTab === 'workout' && <ActiveSession />}
+          {activeTab === 'builder' && <WorkoutBuilder />}
+          {activeTab === 'progression' && <Progression />}
+          {activeTab === 'analytics' && <AnalyticsDashboard />}
+          {activeTab === 'library' && <ExerciseLibrary />}
+          {activeTab === 'settings' && <Settings />}
+        </div>
       </div>
 
       <div className="fixed bottom-[max(env(safe-area-inset-bottom),1.5rem)] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-50">

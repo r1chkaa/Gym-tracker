@@ -18,7 +18,7 @@ export default function AnalyticsDashboard() {
   useEffect(() => { setUnit(localStorage.getItem('gym_unit') || 'lbs'); }, []);
 
   const weightLogs = useLiveQuery(() => db.bodyWeightLogs.orderBy('date').toArray());
-  const allSets = useLiveQuery(() => db.sets.toArray()); // Fixed: Removed chronological database sorting due to lack of index
+  const allSets = useLiveQuery(() => db.sets.toArray());
   
   const allExFlat = useMemo(() => defaultExercises.categories.flatMap(c => defaultExercises.exercises[c as keyof typeof defaultExercises.exercises]), []);
 
@@ -83,7 +83,6 @@ export default function AnalyticsDashboard() {
   const prevMonth = () => setCurrentMonth(new Date(year, month - 1, 1));
   const nextMonth = () => setCurrentMonth(new Date(year, month + 1, 1));
 
-  // Sort selected sets chronologically in Javascript to avoid Dexie index crash
   const selectedDaySets = [...allSets].sort((a, b) => a.timestamp - b.timestamp).filter(s => {
     const d = new Date(s.timestamp);
     return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` === selectedDateString;
@@ -154,7 +153,7 @@ export default function AnalyticsDashboard() {
       </div>
 
       {showWorkoutModal && (
-        <div className="fixed inset-0 bg-[hsl(var(--background))]/95 backdrop-blur-2xl z-[200] flex flex-col p-4 pt-12 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-[#09090b]/95 backdrop-blur-2xl z-[200] flex flex-col w-screen h-screen px-4 pt-16 animate-in fade-in duration-200">
           <div className="bg-[hsl(var(--card))] w-full max-w-md mx-auto rounded-[2rem] p-6 border border-[hsl(var(--border))] shadow-2xl flex flex-col max-h-[85vh]">
             <div className="flex justify-between items-center mb-6 border-b border-[hsl(var(--border))] pb-4">
               <div>
@@ -222,7 +221,8 @@ export default function AnalyticsDashboard() {
                 </defs>
                 <XAxis dataKey="date" stroke="hsl(var(--muted))" fontSize={10} tickMargin={10} axisLine={false} tickLine={false} />
                 <YAxis domain={['auto', 'auto']} stroke="hsl(var(--muted))" fontSize={10} width={40} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '1rem', fontWeight: '900', color: 'hsl(var(--foreground))' }} itemStyle={{ color: '#3b82f6' }} />
+                {/* Disabled Animation Active to prevent snapping/lag while sliding finger on mobile */}
+                <Tooltip isAnimationActive={false} cursor={{ stroke: 'hsl(var(--muted))', strokeWidth: 1, strokeDasharray: '4 4' }} contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '1rem', fontWeight: '900', color: 'hsl(var(--foreground))' }} itemStyle={{ color: '#3b82f6' }} />
                 <Area type="monotone" dataKey="weight" stroke="#3b82f6" strokeWidth={4} fillOpacity={1} fill="url(#colorWeight)" activeDot={{ r: 5, strokeWidth: 0 }} />
               </AreaChart>
             </ResponsiveContainer>

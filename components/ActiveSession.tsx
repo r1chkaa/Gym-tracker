@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trophy, Zap, SkipForward, Trash2 } from 'lucide-react';
+import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trash2, SkipForward, Info, PlayCircle } from 'lucide-react';
 import { db, defaultExercises, type Template } from '@/lib/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -43,44 +43,118 @@ const getMuscleDetails = (xp: number) => {
   return { level, progress, currentXP, nextXP, hex };
 };
 
-// RPG-Style Cinematic Sequence
 const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, onComplete }: any) => {
   const [step, setStep] = useState<'rank' | 'xp'>('rank');
-  const [displayPoints, setDisplayPoints] = useState(0);
-  const [animProgress, setAnimProgress] = useState(0);
-  
-  const currentRank = getAccountRank(initialPoints + displayPoints);
-  const isGod = currentRank.name === 'God';
+  const [displayPoints, setDisplayPoints] = useState(initialPoints);
+  const [displayXP, setDisplayXP] = useState<Record<string, number>>(initialXP);
+  const [isLevelingUp, setIsLevelingUp] = useState<string | false>(false); // Tracks what is currently flashing
 
-  // Points Animation
+  // Continuous Points Engine
   useEffect(() => {
     if (step !== 'rank') return;
-    let startTimestamp: number | null = null;
-    const duration = 2000; 
-    const animate = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      setDisplayPoints(earnedPoints * ease);
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
-  }, [step, earnedPoints]);
+    let current = initialPoints;
+    const target = initialPoints + earnedPoints;
+    let lastTime = performance.now();
+    let pausedUntil = 0;
+    let animationFrameId: number;
 
-  // Continuous Leveling Muscle Animation
+    const tick = (now: number) => {
+      if (now < pausedUntil) {
+        animationFrameId = requestAnimationFrame(tick);
+        return;
+      }
+      setIsLevelingUp(false); // Clear any active flash
+
+      const dt = Math.min(now - lastTime, 50); // Cap frame delta
+      lastTime = now;
+
+      const previousRank = getAccountRank(current);
+      const remaining = target - current;
+      // Dynamic speed: fast if far, slows down organically near the end
+      let speed = Math.max(15, (earnedPoints / 50)); 
+      if (remaining < speed) speed = remaining; 
+
+      current += speed;
+
+      if (current >= target) {
+        current = target;
+        setDisplayPoints(current);
+        return;
+      }
+
+      const newRank = getAccountRank(current);
+      if (newRank.name !== previousRank.name || newRank.tier !== previousRank.tier) {
+        setIsLevelingUp("RANK UP!");
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        pausedUntil = now + 1200; // Pause execution for 1.2s to show off the level up
+        current = newRank.current; // Snap exactly to the boundary during the pause
+      }
+
+      setDisplayPoints(current);
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
+    animationFrameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [step, initialPoints, earnedPoints]);
+
+  // Continuous XP Engine
   useEffect(() => {
     if (step !== 'xp') return;
-    let startTimestamp: number | null = null;
-    const duration = 3000; // 3 seconds creates the "fast for big numbers, slow for small" effect naturally
-    const animate = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      setAnimProgress(ease);
-      if (progress < 1) requestAnimationFrame(animate);
+    let currentXP = { ...initialXP };
+    const targetXP: Record<string, number> = {};
+    Object.keys(earnedXP).forEach(m => targetXP[m] = (initialXP[m] || 0) + earnedXP[m]);
+    
+    let lastTime = performance.now();
+    let pausedUntil = 0;
+    let animationFrameId: number;
+
+    const tick = (now: number) => {
+      if (now < pausedUntil) {
+        animationFrameId = requestAnimationFrame(tick);
+        return;
+      }
+      setIsLevelingUp(false);
+
+      const dt = Math.min(now - lastTime, 50);
+      lastTime = now;
+
+      let isFinished = true;
+      let triggeredLevelUp = false;
+
+      Object.keys(earnedXP).forEach(muscle => {
+        const target = targetXP[muscle];
+        if (currentXP[muscle] >= target) return;
+        
+        isFinished = false;
+        const prevDetails = getMuscleDetails(currentXP[muscle]);
+        
+        const remaining = target - currentXP[muscle];
+        let speed = Math.max(5, (earnedXP[muscle] / 40));
+        if (remaining < speed) speed = remaining;
+
+        currentXP[muscle] += speed;
+
+        const newDetails = getMuscleDetails(currentXP[muscle]);
+        if (newDetails.level > prevDetails.level && !triggeredLevelUp) {
+          triggeredLevelUp = true;
+          setIsLevelingUp(`${muscle.toUpperCase()} LVL UP!`);
+          if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([50, 50, 100]);
+          pausedUntil = now + 1000;
+          currentXP[muscle] = newDetails.currentXP; // Snap to boundary
+        }
+      });
+
+      setDisplayXP({ ...currentXP });
+
+      if (!isFinished) {
+        animationFrameId = requestAnimationFrame(tick);
+      }
     };
-    requestAnimationFrame(animate);
-  }, [step]);
+
+    animationFrameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [step, initialXP, earnedXP]);
 
   const handleNext = () => {
     if (step === 'rank') {
@@ -91,16 +165,19 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
     }
   };
 
+  const currentRank = getAccountRank(displayPoints);
+  const isGod = currentRank.name === 'God';
+
   return (
-    <div className="fixed inset-0 z-[200] bg-[#09090b] flex flex-col items-center justify-center p-6 animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
+    <div className="fixed inset-0 w-screen h-screen z-[200] bg-[#09090b] flex flex-col items-center justify-center p-6 animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
       <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent pointer-events-none" />
 
       {step === 'rank' && (
-        <div className="w-full max-w-sm flex flex-col items-center animate-in slide-in-from-bottom-8 duration-700 relative z-10">
-          <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-[0.4em] mb-8">Workout Complete</span>
+        <div className={`w-full max-w-sm flex flex-col items-center animate-in slide-in-from-bottom-8 duration-700 relative z-10 transition-transform ${isLevelingUp ? 'scale-110 drop-shadow-[0_0_50px_rgba(59,130,246,0.8)]' : ''}`}>
+          <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8">{isLevelingUp || "Workout Complete"}</span>
           
           <div className="relative flex justify-center items-center mb-8 w-48 h-48">
-            <div className="absolute inset-0 bg-blue-500/20 blur-[60px] rounded-full animate-pulse" />
+            <div className={`absolute inset-0 blur-[60px] rounded-full ${isLevelingUp ? 'bg-white opacity-80 animate-ping' : 'bg-blue-500/20 animate-pulse'}`} />
             <img src={`/ranks/${currentRank.image}`} alt="Rank" className="w-40 h-40 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
           </div>
 
@@ -108,11 +185,11 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
           <span className="text-xs font-bold text-white/60 tracking-[0.3em] uppercase mb-12">{currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
 
           <div className="w-full flex justify-between items-end mb-3 px-1">
-            <span className="text-xl font-black tracking-widest text-white">+{Math.floor(displayPoints).toLocaleString()} PTS</span>
+            <span className="text-xl font-black tracking-widest text-white">{Math.floor(displayPoints).toLocaleString()} PTS</span>
             <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{currentRank.next ? `${currentRank.next.toLocaleString()}` : 'MAX'}</span>
           </div>
           <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-            <div className={`h-full rounded-r-full transition-all duration-75 ease-linear ${isGod ? 'bg-gradient-to-r from-yellow-500 to-white' : 'bg-blue-500'}`} style={{ width: `${currentRank.progress}%` }} />
+            <div className={`h-full rounded-r-full transition-none ${isGod ? 'bg-gradient-to-r from-yellow-500 to-white' : 'bg-blue-500'}`} style={{ width: `${currentRank.progress}%` }} />
           </div>
 
           <div className="mt-16 text-[10px] text-white/30 font-black uppercase tracking-widest animate-pulse">Tap to continue</div>
@@ -120,30 +197,30 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
       )}
 
       {step === 'xp' && (
-        <div className="w-full max-w-sm flex flex-col items-center animate-in slide-in-from-right-8 duration-500 relative z-10">
-          <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8">Muscle Mastery</span>
+        <div className={`w-full max-w-sm flex flex-col items-center animate-in slide-in-from-right-8 duration-500 relative z-10 transition-transform ${isLevelingUp ? 'scale-105' : ''}`}>
+          <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8">{isLevelingUp || "Muscle Mastery"}</span>
           
           <div className="w-full space-y-4">
             {Object.entries(earnedXP).map(([muscle, totalAdded]: any, idx) => {
-              const startXP = initialXP[muscle] || 0;
-              const currentAnimatedXP = startXP + (totalAdded * animProgress);
+              const currentAnimatedXP = displayXP[muscle] || 0;
               const details = getMuscleDetails(currentAnimatedXP);
+              const isThisMuscleLeveling = isLevelingUp && isLevelingUp.includes(muscle.toUpperCase());
               
               return (
-                <div key={muscle} className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-md animate-in slide-in-from-bottom-4 duration-500 fill-mode-both" style={{ animationDelay: `${idx * 150}ms` }}>
+                <div key={muscle} className={`bg-white/5 border p-5 rounded-3xl backdrop-blur-md animate-in slide-in-from-bottom-4 duration-500 fill-mode-both transition-all ${isThisMuscleLeveling ? 'border-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] scale-105' : 'border-white/10'}`} style={{ animationDelay: `${idx * 150}ms` }}>
                   <div className="flex justify-between items-end mb-1">
                     <div className="flex items-center gap-2">
                       <span className="font-black text-white text-xl">{muscle}</span>
                       <span className="text-[10px] font-black tracking-widest" style={{ color: details.hex }}>LVL {details.level}</span>
                     </div>
-                    <span className="font-black text-blue-400 text-lg">+{Math.floor(totalAdded * animProgress).toLocaleString()}</span>
+                    <span className="font-black text-blue-400 text-lg">+{Math.floor(currentAnimatedXP - (initialXP[muscle]||0)).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-[10px] font-bold text-white/40 mb-3 px-0.5">
                     <span>{Math.floor(currentAnimatedXP).toLocaleString()}</span>
                     <span>{details.nextXP.toLocaleString()}</span>
                   </div>
                   <div className="w-full h-1.5 bg-black/50 rounded-full overflow-hidden">
-                    <div className="h-full rounded-r-full transition-all duration-75 ease-linear" style={{ width: `${details.progress}%`, backgroundColor: details.hex, boxShadow: `0 0 10px ${details.hex}` }} />
+                    <div className="h-full rounded-r-full transition-none" style={{ width: `${details.progress}%`, backgroundColor: details.hex, boxShadow: `0 0 10px ${details.hex}` }} />
                   </div>
                 </div>
               );
@@ -166,6 +243,7 @@ export default function ActiveSession() {
   const [useWakeLock, setUseWakeLock] = useState(false);
   const wakeLockRef = useRef<any>(null);
 
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [activeTemplate, setActiveTemplate] = useState<Template | null>(null);
   const [exerciseIndex, setExerciseIndex] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -230,7 +308,8 @@ export default function ActiveSession() {
     return `${m}:${s}`;
   };
 
-  const startWorkout = async (template: Template) => {
+  const startWorkout = async () => {
+    if (!previewTemplate) return;
     triggerHaptic();
     await requestWakeLock();
     
@@ -249,7 +328,8 @@ export default function ActiveSession() {
     setInitialHistoricalPoints(points);
     setInitialHistoricalXP(vols);
 
-    setActiveTemplate(template);
+    setActiveTemplate(previewTemplate);
+    setPreviewTemplate(null);
     setSessionId(crypto.randomUUID());
     setExerciseIndex(0);
     setCompletedSets(0);
@@ -275,7 +355,8 @@ export default function ActiveSession() {
     window.dispatchEvent(new Event('rank-glow-update'));
   };
 
-  const handleDeleteTemplate = async (id: string, name: string) => {
+  const handleDeleteTemplate = async (e: React.MouseEvent, id: string, name: string) => {
+    e.stopPropagation();
     if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
       await db.templates.delete(id);
     }
@@ -315,13 +396,53 @@ export default function ActiveSession() {
   };
 
   const adjustValue = (setter: any, val: string, delta: number) => { setter((prev: string) => Math.max(0, Number(prev || 0) + delta).toString()); };
-
   const tagLabels = { normal: 'Normal', warmup: 'Warm-up', drop: 'Dropset', failure: 'Failure' };
 
   if (workoutSummary) {
     return <CinematicSummary initialPoints={initialHistoricalPoints} earnedPoints={workoutSummary.points} initialXP={initialHistoricalXP} earnedXP={workoutSummary.xp} onComplete={closeSummary} />;
   }
 
+  // Pre-Workout Preview Screen
+  if (previewTemplate) {
+    return (
+      <div className="absolute inset-0 bg-[hsl(var(--background))] z-50 flex flex-col px-4 pt-4 animate-in slide-in-from-right-4 duration-300 w-screen min-h-screen pb-32">
+        <div className="flex items-center gap-4 mb-8">
+          <button onClick={() => setPreviewTemplate(null)} className="p-3 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] transition-colors shadow-sm">
+            <ArrowLeft size={20} />
+          </button>
+          <div className="flex-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))]">Preview Routine</span>
+            <h2 className="text-3xl font-black text-[hsl(var(--foreground))] leading-tight truncate">{previewTemplate.name}</h2>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto space-y-3 pb-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {previewTemplate.exercises.map((setup, i) => {
+            const ex = getExerciseDetails(setup.exerciseId);
+            return (
+              <div key={i} className="bg-[hsl(var(--surface))] border border-[hsl(var(--border))] p-4 rounded-[1.5rem] flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-8 rounded-full bg-[hsl(var(--card))] border border-[hsl(var(--border))] flex items-center justify-center font-black text-xs text-[hsl(var(--muted))]">{i + 1}</div>
+                  <div>
+                    <h4 className="font-black text-[hsl(var(--foreground))] text-sm leading-tight">{ex?.name || 'Unknown'}</h4>
+                    <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-widest">{setup.sets.length} SETS</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex-none pb-safe pt-4 border-t border-[hsl(var(--border))]">
+          <button onClick={startWorkout} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xl py-5 rounded-3xl flex items-center justify-center gap-3 transition-all shadow-md active:scale-95">
+            <PlayCircle size={28} /> START WORKOUT
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Template List Screen
   if (!activeTemplate) {
     return (
       <div className="space-y-4 pt-4 pb-10">
@@ -332,18 +453,18 @@ export default function ActiveSession() {
           </div>
         ) : (
           templates.map(template => (
-            <div key={template.id} className="w-full bg-[hsl(var(--surface))] hover:brightness-110 transition-all duration-300 p-4 rounded-[2rem] border border-[hsl(var(--border))] flex justify-between items-center shadow-sm">
-              <div className="flex-1 cursor-pointer pl-2" onClick={() => startWorkout(template)}>
+            <div key={template.id} onClick={() => setPreviewTemplate(template)} className="w-full bg-[hsl(var(--surface))] hover:brightness-110 transition-all duration-300 p-4 rounded-[2rem] border border-[hsl(var(--border))] flex justify-between items-center shadow-sm cursor-pointer group active:scale-95">
+              <div className="flex-1 pl-2">
                 <h3 className="text-2xl font-black text-[hsl(var(--foreground))] truncate">{template.name}</h3>
                 <p className="text-blue-500 font-black text-[10px] uppercase tracking-[0.15em] mt-1.5">{template.exercises.length} EXERCISES</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => handleDeleteTemplate(template.id, template.name)} className="p-3 text-[hsl(var(--muted))] hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors active:scale-95">
+                <button onClick={(e) => handleDeleteTemplate(e, template.id, template.name)} className="p-3 text-[hsl(var(--muted))] hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors active:scale-95">
                   <Trash2 size={20} />
                 </button>
-                <button onClick={() => startWorkout(template)} className="bg-[hsl(var(--background))] p-4 rounded-full border-2 border-[hsl(var(--border))] hover:border-blue-500 transition-all shadow-inner active:scale-95">
+                <div className="bg-[hsl(var(--background))] p-4 rounded-full border-2 border-[hsl(var(--border))] group-hover:border-blue-500 transition-all shadow-inner">
                   <Play className="text-[hsl(var(--foreground))] ml-1" size={20} fill="currentColor" />
-                </button>
+                </div>
               </div>
             </div>
           ))
@@ -355,24 +476,24 @@ export default function ActiveSession() {
   if (!currentExercise || !currentSetup) return null;
 
   return (
-    <div className="bg-[hsl(var(--background))] rounded-[2rem] p-0 relative flex flex-col mt-2">
+    <div className="bg-transparent rounded-[2rem] p-0 relative flex flex-col mt-2">
       {showTimerOverlay && (
-        <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))]/95 backdrop-blur-2xl flex flex-col items-center justify-center animate-in fade-in duration-300">
+        <div className="fixed inset-0 w-screen h-screen z-[100] bg-[#09090b]/95 backdrop-blur-2xl flex flex-col items-center justify-center animate-in fade-in duration-300">
           <span className="text-blue-500 font-black tracking-[0.4em] uppercase text-sm mb-12 drop-shadow-md">Take a break</span>
           <div className="relative w-64 h-64 flex items-center justify-center mb-16">
             <svg className="absolute inset-0 w-full h-full transform -rotate-90">
               <circle cx="128" cy="128" r="120" stroke="hsl(var(--surface))" strokeWidth="8" fill="none" />
               <circle cx="128" cy="128" r="120" stroke="#3b82f6" strokeWidth="8" fill="none" strokeDasharray="753" strokeDashoffset={753 - (753 * (restTimer || 0)) / defaultTimer} className="transition-all duration-1000 ease-linear" />
             </svg>
-            <span className="text-7xl font-black text-[hsl(var(--foreground))] tracking-tighter">{formatTime(restTimer || 0)}</span>
+            <span className="text-7xl font-black text-white tracking-tighter">{formatTime(restTimer || 0)}</span>
           </div>
           <div className="flex flex-col items-center mb-16">
             <span className="text-[hsl(var(--muted))] text-[10px] font-black uppercase tracking-widest mb-3">Up Next</span>
-            <span className="text-2xl font-black text-[hsl(var(--foreground))] text-center px-6">
+            <span className="text-2xl font-black text-white text-center px-6">
               {isExerciseDone && !isWorkoutDone ? getExerciseDetails(activeTemplate.exercises[exerciseIndex + 1]?.exerciseId)?.name : `${currentExercise.name} (Set ${completedSets + 1})`}
             </span>
           </div>
-          <button onClick={handleSkipTimer} className="flex items-center gap-2 text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] bg-[hsl(var(--surface))] px-8 py-4 rounded-full font-black tracking-widest uppercase text-xs border border-[hsl(var(--border))] transition-all active:scale-95 shadow-sm">
+          <button onClick={handleSkipTimer} className="flex items-center gap-2 text-white/50 hover:text-white bg-white/10 px-8 py-4 rounded-full font-black tracking-widest uppercase text-xs border border-white/20 transition-all active:scale-95 shadow-sm">
             Skip Rest <SkipForward size={16} />
           </button>
         </div>
