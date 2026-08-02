@@ -1,0 +1,18 @@
+{
+  "name": "Gym Tracker",
+  "short_name": "Gym",
+  "description": "Local-first gym tracker built for performance.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://www.svgrepo.com/show/305142/gym.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
