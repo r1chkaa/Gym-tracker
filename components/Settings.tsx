@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { db } from '@/lib/db';
 import { Download, Trash2, Database, Scale, Clock, Sun, Moon, User, Upload } from 'lucide-react';
-import { exportDB, importInto } from "dexie-export-import";
 
 export default function Settings() {
   const [unit, setUnit] = useState('lbs');
@@ -11,7 +10,7 @@ export default function Settings() {
   const [wakeLock, setWakeLock] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [gender, setGender] = useState('male');
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -92,8 +91,10 @@ export default function Settings() {
 
   const handleExportDB = async () => {
     try {
-      const blob = await exportDB(db); // Export the database
+      // Dynamically import to avoid server-side prerendering errors
+      const { exportDB } = await import("dexie-export-import");
       
+      const blob = await exportDB(db);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -116,12 +117,15 @@ export default function Settings() {
 
     if (window.confirm("WARNING: This will overwrite any existing data with the imported data. Are you sure?")) {
        try {
+           // Dynamically import to avoid server-side prerendering errors
+           const { importInto } = await import("dexie-export-import");
+           
            await db.templates.clear();
            await db.sets.clear();
            await db.bodyWeightLogs.clear();
            await db.favorites.clear();
            
-           await importInto(db, file, { clearTablesBeforeImport: true }); // Import the file
+           await importInto(db, file, { clearTablesBeforeImport: true });
            alert("Database successfully imported!");
            window.location.reload();
        } catch (error) {
