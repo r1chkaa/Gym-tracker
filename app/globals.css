@@ -24,13 +24,14 @@
 
 /* Global Native-App Lockdowns */
 * {
-  -webkit-touch-callout: none !important; /* Disables long-press context menu */
-  -webkit-user-select: none !important;   /* Disables text selection */
+  -webkit-touch-callout: none !important; 
+  -webkit-user-select: none !important;   
   user-select: none !important;
-  -webkit-user-drag: none !important;     /* Disables image dragging */
-  scrollbar-width: none !important;       /* Hides scrollbars in Firefox */
-  -ms-overflow-style: none !important;    /* Hides scrollbars in IE/Edge */
-  -webkit-tap-highlight-color: transparent;
+  -webkit-user-drag: none !important;     
+  scrollbar-width: none !important;       
+  -ms-overflow-style: none !important;    
+  -webkit-tap-highlight-color: transparent !important; 
+  outline: none !important;
 }
 
 /* Allow text selection ONLY in input fields */

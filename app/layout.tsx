@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import "./globals.css";
+import "@/app/globals.css";
 
 export const metadata: Metadata = {
   title: "Gym Tracker",
   description: "Local-first gym tracker built for performance.",
-  manifest: "/manifest.json?v=999",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -28,10 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* FORCE iOS CACHE BUST */}
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=999" />
-        <link rel="icon" href="/icon.png?v=999" />
-        
+        {/* Notice: No manual <link> tags here anymore! */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
