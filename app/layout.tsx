@@ -5,11 +5,6 @@ export const metadata: Metadata = {
   title: "Gym Tracker",
   description: "Local-first gym tracker built for performance.",
   manifest: "/manifest.json",
-  // This explicitly forces the new local icons and overrides the old SVG
-  icons: {
-    icon: "/icon.png",
-    apple: "/ios-icon-v2.png", 
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -33,6 +28,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* FORCE iOS TO SEE THE ICON */}
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" href="/icon.png" />
+        
         {/* This script runs before React loads, preventing the Light/Dark mode flash */}
         <script
           dangerouslySetInnerHTML={{
