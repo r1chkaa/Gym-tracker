@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Gym Tracker",
   description: "Local-first gym tracker built for performance.",
-  manifest: "/manifest.json",
+  manifest: "/manifest.json?v=999",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -28,11 +28,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* FORCE iOS TO SEE THE ICON */}
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="icon" href="/icon.png" />
+        {/* FORCE iOS CACHE BUST */}
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=999" />
+        <link rel="icon" href="/icon.png?v=999" />
         
-        {/* This script runs before React loads, preventing the Light/Dark mode flash */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
