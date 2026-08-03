@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trash2, SkipForward, PlayCircle, Settings as SettingsIcon, X, Info, Moon, Sun, Scale, Clock } from 'lucide-react';
+import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trash2, SkipForward, PlayCircle, Settings as SettingsIcon, X, Info, Moon, Sun, Scale, Clock, Loader2 } from 'lucide-react';
 import { db, defaultExercises, type Template } from '@/lib/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -170,8 +170,8 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
       )}
 
       {step === 'xp' && (
-        <div className="w-full max-w-sm flex flex-col items-center animate-in slide-in-from-right-8 duration-500 relative z-10">
-          <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8">Muscle Mastery</span>
+        <div className="w-full max-w-sm flex flex-col items-center animate-in slide-in-from-right-8 duration-500 relative z-10 pb-32 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8 mt-12">Muscle Mastery</span>
           <div className="w-full space-y-4">
             {Object.entries(earnedXP).map(([muscle]: any, idx) => {
               const details = getMuscleDetails(displayXP[muscle] || 0);
@@ -214,6 +214,7 @@ export default function ActiveSession() {
   const [defaultTimer, setDefaultTimer] = useState(90);
   const [useWakeLock, setUseWakeLock] = useState(false);
   const wakeLockRef = useRef<any>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [activeTemplate, setActiveTemplate] = useState<Template | null>(null);
@@ -235,7 +236,7 @@ export default function ActiveSession() {
   
   // Background Timestamp Timer Logic
   const [restEndTime, setRestEndTime] = useState<number | null>(null);
-  const [restTimer, setRestTimer] = useState<number | null>(null);
+  const [restTimerLeft, setRestTimerLeft] = useState<number>(0);
   const [totalRestTime, setTotalRestTime] = useState<number>(90);
   const [showTimerOverlay, setShowTimerOverlay] = useState(false);
   
@@ -259,6 +260,7 @@ export default function ActiveSession() {
 
     const handleVisibility = () => { if (document.visibilityState === 'visible') requestWakeLock(); };
     document.addEventListener('visibilitychange', handleVisibility);
+    setIsMounted(true);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
@@ -285,15 +287,25 @@ export default function ActiveSession() {
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(heavy ? [50, 100, 50] : 50); 
   };
 
-  const requestWakeLock = async () => { if ('wakeLock' in navigator && useWakeLock) { try { wakeLockRef.current = await (navigator as any).wakeLock.request('screen'); } catch (err) {} } };
-  const releaseWakeLock = async () => { if (wakeLockRef.current) { try { await wakeLockRef.current.release(); wakeLockRef.current = null; } catch (err) {} } };
+  const requestWakeLock = async () => { 
+    const shouldWake = localStorage.getItem('gym_wakelock') === 'true';
+    if ('wakeLock' in navigator && shouldWake) { 
+      try { wakeLockRef.current = await (navigator as any).wakeLock.request('screen'); } catch (err) {} 
+    } 
+  };
+  
+  const releaseWakeLock = async () => { 
+    if (wakeLockRef.current) { try { await wakeLockRef.current.release(); wakeLockRef.current = null; } catch (err) {} } 
+  };
 
-  // Timestamp Background Timer Execution
+  // Timestamp Background Timer Execution via requestAnimationFrame
   useEffect(() => {
     if (!showTimerOverlay || !restEndTime) return;
-    const interval = setInterval(() => {
-      const remaining = Math.max(0, Math.ceil((restEndTime - Date.now()) / 1000));
-      setRestTimer(remaining);
+    let animationFrameId: number;
+    
+    const tick = () => {
+      const remaining = Math.max(0, restEndTime - Date.now());
+      setRestTimerLeft(remaining);
 
       if (remaining === 0) { 
         triggerHaptic(true); 
@@ -305,15 +317,19 @@ export default function ActiveSession() {
           setCompletedSets(0);
           setExerciseIndex(i => i + 1);
         }
-        clearInterval(interval);
+      } else {
+        animationFrameId = requestAnimationFrame(tick);
       }
-    }, 100);
-    return () => clearInterval(interval);
+    };
+    
+    animationFrameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animationFrameId);
   }, [restEndTime, showTimerOverlay, isExerciseDone, isWorkoutDone]);
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const s = (seconds % 60).toString().padStart(2, '0');
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const s = (totalSeconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
 
@@ -352,6 +368,19 @@ export default function ActiveSession() {
     if (restEndTime) {
       setRestEndTime(restEndTime + 30000);
       setTotalRestTime(prev => prev + 30);
+    }
+  };
+
+  const closeSummary = () => {
+    setWorkoutSummary(null);
+    setActiveTemplate(null);
+    window.dispatchEvent(new Event('rank-glow-update'));
+  };
+
+  const handleDeleteTemplate = async (e: React.MouseEvent, id: string, name: string) => {
+    e.stopPropagation();
+    if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
+      await db.templates.delete(id);
     }
   };
 
@@ -446,13 +475,17 @@ export default function ActiveSession() {
   const adjustValue = (setter: any, val: string, delta: number) => { setter((prev: string) => Math.max(0, Number(prev || 0) + delta).toString()); };
   const tagLabels = { normal: 'Normal', warmup: 'Warm-up', drop: 'Dropset', failure: 'Failure' };
 
+  if (!isMounted) {
+    return <div className="h-[100dvh] bg-[hsl(var(--background))] flex items-center justify-center"><Loader2 className="animate-spin text-[hsl(var(--muted))]" size={32}/></div>;
+  }
+
   if (workoutSummary) {
     return <CinematicSummary initialPoints={initialHistoricalPoints} earnedPoints={workoutSummary.points} initialXP={initialHistoricalXP} earnedXP={workoutSummary.xp} onComplete={closeSummary} />;
   }
 
   if (showSettingsModal) {
     return (
-      <div className="absolute inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col px-4 pt-12 animate-in slide-in-from-bottom-4 w-screen min-h-screen">
+      <div className="absolute inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in slide-in-from-bottom-4 w-screen min-h-screen pb-32">
         <div className="flex justify-between items-center mb-8 px-2">
           <h2 className="text-3xl font-black text-[hsl(var(--foreground))]">Settings</h2>
           <button onClick={() => setShowSettingsModal(false)} className="text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] p-2 bg-[hsl(var(--surface))] rounded-full border border-[hsl(var(--border))]"><X size={24} /></button>
@@ -483,7 +516,7 @@ export default function ActiveSession() {
           <h2 className="text-2xl font-black text-white">{showInfoModal.name}</h2>
           <button onClick={() => setShowInfoModal(null)} className="text-white/50 hover:text-white p-2 bg-white/10 rounded-full border border-white/20"><X size={24} /></button>
         </div>
-        <div className="flex-1 overflow-y-auto space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex-1 overflow-y-auto space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-32">
           {showInfoModal.images?.length > 0 && (
             <div className="grid grid-cols-2 gap-3">
               {showInfoModal.images.map((img: string, idx: number) => (
@@ -533,7 +566,7 @@ export default function ActiveSession() {
 
   if (previewTemplate) {
     return (
-      <div className="absolute inset-0 bg-[hsl(var(--background))] z-50 flex flex-col px-4 pt-4 animate-in slide-in-from-right-4 w-screen min-h-screen pb-32">
+      <div className="absolute inset-0 bg-[hsl(var(--background))] z-50 flex flex-col px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in slide-in-from-right-4 w-screen min-h-screen pb-32">
         <div className="flex items-center gap-4 mb-8">
           <button onClick={() => setPreviewTemplate(null)} className="p-3 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] text-[hsl(var(--muted))]"><ArrowLeft size={20} /></button>
           <div className="flex-1"><span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))]">Preview</span><h2 className="text-3xl font-black text-[hsl(var(--foreground))] truncate">{previewTemplate.name}</h2></div>
@@ -558,16 +591,16 @@ export default function ActiveSession() {
   if (!currentExercise || !currentSetup) return null;
 
   return (
-    <div className="bg-transparent rounded-[2rem] p-0 relative flex flex-col mt-2">
+    <div className="bg-transparent rounded-[2rem] p-0 relative flex flex-col pb-32">
       {showTimerOverlay && (
         <div className="fixed inset-0 w-screen h-screen z-[100] bg-[#09090b]/95 backdrop-blur-2xl flex flex-col items-center justify-center animate-in fade-in duration-300">
           <span className="text-blue-500 font-black tracking-[0.4em] uppercase text-sm mb-12 drop-shadow-md">Take a break</span>
           <div className="relative w-64 h-64 flex items-center justify-center mb-10">
             <svg className="absolute inset-0 w-full h-full transform -rotate-90">
               <circle cx="128" cy="128" r="120" stroke="hsl(var(--surface))" strokeWidth="8" fill="none" />
-              <circle cx="128" cy="128" r="120" stroke="#3b82f6" strokeWidth="8" fill="none" strokeDasharray="753" strokeDashoffset={753 - (753 * (restTimer || 0)) / totalRestTime} className="transition-all duration-100 ease-linear" />
+              <circle cx="128" cy="128" r="120" stroke="#3b82f6" strokeWidth="8" fill="none" strokeDasharray="753" strokeDashoffset={753 - (753 * (restTimerLeft / (totalRestTime * 1000)))} className="transition-none" />
             </svg>
-            <span className="text-7xl font-black text-white tracking-tighter">{formatTime(restTimer || 0)}</span>
+            <span className="text-7xl font-black text-white tracking-tighter">{formatTime(restTimerLeft)}</span>
           </div>
 
           <button onClick={handleAdd30s} className="mb-12 px-6 py-2 border-2 border-white/20 text-white font-black tracking-widest text-xs uppercase rounded-full hover:bg-white/10 active:scale-95 transition-all shadow-sm">
@@ -586,25 +619,25 @@ export default function ActiveSession() {
         </div>
       )}
 
-      <div className="flex justify-between items-start mb-6 relative z-10">
-        <div className="flex-1 pr-4">
-          <div className="flex justify-between items-center mb-4">
-            <button onClick={() => { setActiveTemplate(null); }} className="text-[hsl(var(--muted))] flex items-center gap-1 text-[10px] font-black uppercase tracking-widest hover:text-[hsl(var(--foreground))] transition-colors bg-[hsl(var(--surface))] px-3 py-1.5 rounded-lg border border-[hsl(var(--border))] w-fit shadow-sm">
-              <ArrowLeft size={14} /> End Session
-            </button>
-            <button onClick={() => setShowSettingsModal(true)} className="text-[hsl(var(--muted))] p-2 bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-full active:scale-95"><SettingsIcon size={16}/></button>
-          </div>
-          
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <h2 className="text-3xl font-black text-[hsl(var(--foreground))] leading-tight">{currentExercise.name}</h2>
-            <button onClick={() => setShowInfoModal(currentExercise)} className="text-blue-500 bg-blue-500/10 border border-blue-500/20 p-2 rounded-full active:scale-95 shrink-0"><Info size={20}/></button>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 mt-2">
-            <span className="bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] px-3 py-1.5 rounded-lg text-xs font-bold border border-[hsl(var(--border))] shadow-inner">{completedSets}/{plannedSets.length} Sets</span>
-            {!isExerciseDone && <span className="text-blue-500 text-xs font-black uppercase tracking-widest bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-lg shadow-inner">{tagLabels[currentTag as keyof typeof tagLabels]}</span>}
-          </div>
+      {/* NEW HEADER THAT MATCHES NORMAL SCREEN */}
+      <div className="flex justify-between items-start mb-6 pt-4 px-2 relative z-10">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight drop-shadow-sm pr-4 leading-tight">{currentExercise.name}</h1>
+          <p className="font-black tracking-[0.2em] text-[10px] uppercase mt-1 text-[hsl(var(--muted))] flex items-center gap-2">
+            Set {completedSets + 1} of {plannedSets.length}
+            {!isExerciseDone && <span className="text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded">{tagLabels[currentTag as keyof typeof tagLabels]}</span>}
+          </p>
         </div>
+        <div className="flex gap-2">
+          <button onClick={() => setShowInfoModal(currentExercise)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] hover:text-blue-500 transition-colors"><Info size={20} /></button>
+          <button onClick={() => setShowSettingsModal(true)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] transition-colors"><SettingsIcon size={20} /></button>
+        </div>
+      </div>
+
+      <div className="flex px-2 justify-start mb-6 relative z-10">
+        <button onClick={() => { setActiveTemplate(null); }} className="text-[hsl(var(--muted))] flex items-center gap-1 text-[10px] font-black uppercase tracking-widest hover:text-red-500 transition-colors bg-[hsl(var(--surface))] px-3 py-1.5 rounded-lg border border-[hsl(var(--border))] shadow-sm">
+          <ArrowLeft size={14} /> End Session
+        </button>
       </div>
 
       {currentTag === 'drop' && !isExerciseDone ? (
@@ -756,11 +789,11 @@ export default function ActiveSession() {
       ) : null}
 
       {!isExerciseDone ? (
-        <button onClick={handleLogSet} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-lg py-5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md">
+        <button onClick={handleLogSet} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-lg py-5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md mb-8">
           <Check size={24} strokeWidth={3} /> LOG {tagLabels[currentTag as keyof typeof tagLabels].toUpperCase()}
         </button>
       ) : (
-        <button onClick={() => { setExerciseIndex(i => i + 1); setCompletedSets(0); }} className="w-full bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] border border-[hsl(var(--border))] font-black text-lg py-5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm">
+        <button onClick={() => { setExerciseIndex(i => i + 1); setCompletedSets(0); }} className="w-full bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] border border-[hsl(var(--border))] font-black text-lg py-5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm mb-8">
           Next Exercise <ChevronRight size={20} strokeWidth={3} />
         </button>
       )}

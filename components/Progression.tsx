@@ -76,17 +76,21 @@ export default function Progression() {
   
   const [showCalibration, setShowCalibration] = useState(false);
   const [liftMonths, setLiftMonths] = useState(8);
+  const [calibrationPts, setCalibrationPts] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
 
   const allSets = useLiveQuery(() => db.sets.toArray());
 
   useEffect(() => { 
     setGender(localStorage.getItem('gym_gender') || 'male'); 
+    setCalibrationPts(Number(localStorage.getItem('gym_calibration_pts') || 0));
     if (!localStorage.getItem('gym_calibrated')) {
       setShowCalibration(true);
     }
+    setIsMounted(true);
   }, []);
 
-  if (allSets === undefined) {
+  if (!isMounted || allSets === undefined) {
     return <div className="h-full flex items-center justify-center bg-transparent"><Loader2 className="animate-spin text-[hsl(var(--muted))]" size={32}/></div>;
   }
 
@@ -95,7 +99,7 @@ export default function Progression() {
   const exToCategory: Record<string, string> = {};
   Object.entries(defaultExercises.exercises).forEach(([cat, exes]) => exes.forEach(ex => exToCategory[ex.id] = cat));
 
-  let totalPoints = Number(localStorage.getItem('gym_calibration_pts') || 0);
+  let totalPoints = calibrationPts;
 
   allSets.forEach(set => {
     if (set.isCompleted && exToCategory[set.exerciseId]) {
@@ -111,10 +115,10 @@ export default function Progression() {
 
   const handleCalibrate = () => {
     localStorage.setItem('gym_calibrated', 'true');
-    // Approx 30,000 pts per month of consistent lifting
-    localStorage.setItem('gym_calibration_pts', (liftMonths * 30000).toString());
+    const newCalibrationPts = liftMonths * 30000;
+    localStorage.setItem('gym_calibration_pts', newCalibrationPts.toString());
+    setCalibrationPts(newCalibrationPts);
     setShowCalibration(false);
-    window.location.reload();
   };
 
   if (showCalibration) {
@@ -210,7 +214,7 @@ export default function Progression() {
   };
 
   return (
-    <div className="bg-transparent text-[hsl(var(--foreground))] overflow-x-hidden font-sans flex flex-col items-center relative w-full h-full pb-10">
+    <div className="bg-transparent text-[hsl(var(--foreground))] overflow-x-hidden font-sans flex flex-col items-center relative w-full h-full pb-32">
       
       <div className="fixed inset-0 pointer-events-none z-0 w-screen h-screen flex items-center justify-center">
         <div className="absolute w-[800px] h-[800px] opacity-15 blur-[100px] rounded-full transition-colors duration-1000" style={{ backgroundColor: rankTheme.hex }} />
