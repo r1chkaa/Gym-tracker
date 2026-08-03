@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trash2, SkipForward, Info, PlayCircle, Plus } from 'lucide-react';
+import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trash2, SkipForward, Info, PlayCircle } from 'lucide-react';
 import { db, defaultExercises, type Template } from '@/lib/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -47,118 +47,95 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
   const [step, setStep] = useState<'rank' | 'xp'>('rank');
   const [displayPoints, setDisplayPoints] = useState(initialPoints);
   const [displayXP, setDisplayXP] = useState<Record<string, number>>(initialXP);
+  
+  const [skipRank, setSkipRank] = useState(false);
+  const [skipXP, setSkipXP] = useState(false);
   const [isLevelingUp, setIsLevelingUp] = useState<string | false>(false);
 
+  // Points Animation Engine (Easing-based)
   useEffect(() => {
     if (step !== 'rank') return;
-    let current = initialPoints;
     const target = initialPoints + earnedPoints;
-    let lastTime = performance.now();
-    let pausedUntil = 0;
+    let startTime = performance.now();
     let animationFrameId: number;
 
     const tick = (now: number) => {
-      if (now < pausedUntil) {
-        animationFrameId = requestAnimationFrame(tick);
-        return;
-      }
-      setIsLevelingUp(false);
-
-      const dt = Math.min(now - lastTime, 50);
-      lastTime = now;
-
-      const previousRank = getAccountRank(current);
-      const remaining = target - current;
-      let speed = Math.max(15, (earnedPoints / 50)); 
-      if (remaining < speed) speed = remaining; 
-
-      current += speed;
-
-      if (current >= target) {
-        current = target;
-        setDisplayPoints(current);
+      if (skipRank) {
+        setDisplayPoints(target);
         return;
       }
 
-      const newRank = getAccountRank(current);
-      if (newRank.name !== previousRank.name || newRank.tier !== previousRank.tier) {
-        setIsLevelingUp("RANK UP!");
-        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([100, 50, 100]);
-        pausedUntil = now + 1200;
-        current = newRank.current; 
-      }
+      let elapsed = now - startTime;
+      let progress = Math.min(elapsed / 2500, 1);
+      // easeOutQuart
+      let eased = 1 - Math.pow(1 - progress, 4);
 
+      let current = initialPoints + (target - initialPoints) * eased;
       setDisplayPoints(current);
-      animationFrameId = requestAnimationFrame(tick);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(tick);
+      } else {
+        setDisplayPoints(target);
+      }
     };
 
     animationFrameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [step, initialPoints, earnedPoints]);
+  }, [step, skipRank, initialPoints, earnedPoints]);
 
+  // XP Animation Engine (Easing-based)
   useEffect(() => {
     if (step !== 'xp') return;
-    let currentXP = { ...initialXP };
     const targetXP: Record<string, number> = {};
     Object.keys(earnedXP).forEach(m => targetXP[m] = (initialXP[m] || 0) + earnedXP[m]);
     
-    let lastTime = performance.now();
-    let pausedUntil = 0;
+    let startTime = performance.now();
     let animationFrameId: number;
 
     const tick = (now: number) => {
-      if (now < pausedUntil) {
-        animationFrameId = requestAnimationFrame(tick);
+      if (skipXP) {
+        setDisplayXP(targetXP);
         return;
       }
-      setIsLevelingUp(false);
 
-      const dt = Math.min(now - lastTime, 50);
-      lastTime = now;
+      let elapsed = now - startTime;
+      let progress = Math.min(elapsed / 2500, 1);
+      // easeOutQuart
+      let eased = 1 - Math.pow(1 - progress, 4);
 
-      let isFinished = true;
-      let triggeredLevelUp = false;
-
-      Object.keys(earnedXP).forEach(muscle => {
-        const target = targetXP[muscle];
-        if (currentXP[muscle] >= target) return;
-        
-        isFinished = false;
-        const prevDetails = getMuscleDetails(currentXP[muscle]);
-        
-        const remaining = target - currentXP[muscle];
-        let speed = Math.max(5, (earnedXP[muscle] / 40));
-        if (remaining < speed) speed = remaining;
-
-        currentXP[muscle] += speed;
-
-        const newDetails = getMuscleDetails(currentXP[muscle]);
-        if (newDetails.level > prevDetails.level && !triggeredLevelUp) {
-          triggeredLevelUp = true;
-          setIsLevelingUp(`${muscle.toUpperCase()} LVL UP!`);
-          if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([50, 50, 100]);
-          pausedUntil = now + 1000;
-          currentXP[muscle] = newDetails.currentXP;
-        }
+      let currentXP: Record<string, number> = {};
+      Object.keys(targetXP).forEach(m => {
+        currentXP[m] = (initialXP[m] || 0) + (targetXP[m] - (initialXP[m] || 0)) * eased;
       });
 
-      setDisplayXP({ ...currentXP });
+      setDisplayXP(currentXP);
 
-      if (!isFinished) {
+      if (progress < 1) {
         animationFrameId = requestAnimationFrame(tick);
+      } else {
+        setDisplayXP(targetXP);
       }
     };
 
     animationFrameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [step, initialXP, earnedXP]);
+  }, [step, skipXP, initialXP, earnedXP]);
 
   const handleNext = () => {
     if (step === 'rank') {
-      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(50);
-      setStep('xp');
+      if (!skipRank) {
+        setSkipRank(true);
+      } else {
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(50);
+        setStep('xp');
+      }
     } else {
-      onComplete();
+      if (!skipXP) {
+        setSkipXP(true);
+      } else {
+        onComplete();
+      }
     }
   };
 
@@ -201,10 +178,9 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
             {Object.entries(earnedXP).map(([muscle, totalAdded]: any, idx) => {
               const currentAnimatedXP = displayXP[muscle] || 0;
               const details = getMuscleDetails(currentAnimatedXP);
-              const isThisMuscleLeveling = isLevelingUp && isLevelingUp.includes(muscle.toUpperCase());
               
               return (
-                <div key={muscle} className={`bg-white/5 border p-5 rounded-3xl backdrop-blur-md animate-in slide-in-from-bottom-4 duration-500 fill-mode-both transition-all ${isThisMuscleLeveling ? 'border-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] scale-105' : 'border-white/10'}`} style={{ animationDelay: `${idx * 150}ms` }}>
+                <div key={muscle} className={`bg-white/5 border p-5 rounded-3xl backdrop-blur-md animate-in slide-in-from-bottom-4 duration-500 fill-mode-both transition-all border-white/10`} style={{ animationDelay: `${idx * 150}ms` }}>
                   <div className="flex justify-between items-end mb-1">
                     <div className="flex items-center gap-2">
                       <span className="font-black text-white text-xl">{muscle}</span>
@@ -253,7 +229,7 @@ export default function ActiveSession() {
   const [completedSets, setCompletedSets] = useState<number>(0);
 
   // Dropset State
-  const [dropsets, setDropsets] = useState([{ weight: "", reps: "" }]);
+  const [dropsets, setDropsets] = useState([{ weight: "", reps: "", leftWeight: "", leftReps: "", rightWeight: "", rightReps: "" }]);
 
   // Unilateral State
   const [leftWeight, setLeftWeight] = useState("");
@@ -266,6 +242,7 @@ export default function ActiveSession() {
   const [bwExtra, setBwExtra] = useState("");
   
   const [restTimer, setRestTimer] = useState<number | null>(null);
+  const [totalRestTime, setTotalRestTime] = useState<number>(90);
   const [showTimerOverlay, setShowTimerOverlay] = useState(false);
   
   const [workoutSummary, setWorkoutSummary] = useState<any | null>(null);
@@ -300,7 +277,7 @@ export default function ActiveSession() {
   useEffect(() => {
     setWeight("");
     setReps("");
-    setDropsets([{ weight: "", reps: "" }]);
+    setDropsets([{ weight: "", reps: "", leftWeight: "", leftReps: "", rightWeight: "", rightReps: "" }]);
     setLeftWeight(""); setLeftReps(""); setRightWeight(""); setRightReps("");
     setBwExtra(""); setBwMode('strict');
   }, [exerciseIndex, completedSets]);
@@ -409,13 +386,25 @@ export default function ActiveSession() {
     const setsToLog: { weight: number, reps: number }[] = [];
 
     if (currentTag === 'drop') {
-      if (dropsets.some(d => !d.weight || !d.reps)) return;
-      dropsets.forEach(d => {
-        const w = Number(d.weight); const r = Number(d.reps);
-        pointsGained += (w * r) * (1 + (w / 150));
-        xpGained += w * r;
-        setsToLog.push({ weight: w, reps: r });
-      });
+      if (isUnilateral) {
+        if (dropsets.some(d => !d.leftWeight || !d.leftReps || !d.rightWeight || !d.rightReps)) return;
+        dropsets.forEach(d => {
+          const lw = Number(d.leftWeight); const lr = Number(d.leftReps);
+          const rw = Number(d.rightWeight); const rr = Number(d.rightReps);
+          pointsGained += ((lw * lr) * (1 + (lw / 150))) + ((rw * rr) * (1 + (rw / 150)));
+          xpGained += (lw * lr) + (rw * rr);
+          setsToLog.push({ weight: lw, reps: lr });
+          setsToLog.push({ weight: rw, reps: rr });
+        });
+      } else {
+        if (dropsets.some(d => !d.weight || !d.reps)) return;
+        dropsets.forEach(d => {
+          const w = Number(d.weight); const r = Number(d.reps);
+          pointsGained += (w * r) * (1 + (w / 150));
+          xpGained += w * r;
+          setsToLog.push({ weight: w, reps: r });
+        });
+      }
     } else if (isUnilateral) {
       if (!leftWeight || !leftReps || !rightWeight || !rightReps) return;
       const lw = Number(leftWeight); const lr = Number(leftReps);
@@ -463,7 +452,7 @@ export default function ActiveSession() {
       if (newCompleted >= plannedSets.length && exerciseIndex >= activeTemplate!.exercises.length - 1) {
         endWorkout(newSessionPoints, newSessionXP);
       } else {
-        setRestTimer(defaultTimer); setShowTimerOverlay(true);
+        setRestTimer(defaultTimer); setTotalRestTime(defaultTimer); setShowTimerOverlay(true);
       }
     } catch (error) {}
   };
@@ -556,12 +545,12 @@ export default function ActiveSession() {
           <div className="relative w-64 h-64 flex items-center justify-center mb-10">
             <svg className="absolute inset-0 w-full h-full transform -rotate-90">
               <circle cx="128" cy="128" r="120" stroke="hsl(var(--surface))" strokeWidth="8" fill="none" />
-              <circle cx="128" cy="128" r="120" stroke="#3b82f6" strokeWidth="8" fill="none" strokeDasharray="753" strokeDashoffset={753 - (753 * (restTimer || 0)) / defaultTimer} className="transition-all duration-1000 ease-linear" />
+              <circle cx="128" cy="128" r="120" stroke="#3b82f6" strokeWidth="8" fill="none" strokeDasharray="753" strokeDashoffset={753 - (753 * (restTimer || 0)) / totalRestTime} className="transition-all duration-1000 ease-linear" />
             </svg>
             <span className="text-7xl font-black text-white tracking-tighter">{formatTime(restTimer || 0)}</span>
           </div>
 
-          <button onClick={() => setRestTimer(prev => (prev || 0) + 30)} className="mb-12 px-6 py-2 border-2 border-white/20 text-white font-black tracking-widest text-xs uppercase rounded-full hover:bg-white/10 active:scale-95 transition-all shadow-sm">
+          <button onClick={() => { setRestTimer(prev => (prev || 0) + 30); setTotalRestTime(prev => prev + 30); }} className="mb-12 px-6 py-2 border-2 border-white/20 text-white font-black tracking-widest text-xs uppercase rounded-full hover:bg-white/10 active:scale-95 transition-all shadow-sm">
             + 30 SEC
           </button>
 
@@ -591,32 +580,70 @@ export default function ActiveSession() {
       </div>
 
       {currentTag === 'drop' && !isExerciseDone ? (
-        <div className="flex flex-col gap-3 mb-6 animate-in slide-in-from-bottom-2">
+        <div className="flex flex-col gap-4 mb-6 animate-in slide-in-from-bottom-2">
           {dropsets.map((ds, i) => (
-            <div key={i} className="flex gap-3 items-center bg-[hsl(var(--surface))] p-3 rounded-2xl border border-[hsl(var(--border))] shadow-sm">
-              <span className="font-black text-[hsl(var(--muted))] text-xs pl-2">#{i + 1}</span>
-              
-              <div className="flex-1 relative flex items-center">
-                <input type="number" placeholder="Weight" value={ds.weight} onChange={(e) => {
-                  const newDs = [...dropsets]; newDs[i].weight = e.target.value; setDropsets(newDs);
-                }} className="w-full bg-[hsl(var(--card))] text-[hsl(var(--foreground))] text-xl font-black text-center p-3 rounded-xl border border-[hsl(var(--border))] focus:outline-none focus:border-blue-500 appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
-                <span className="absolute right-3 text-[10px] font-bold text-[hsl(var(--muted))]">{unit}</span>
+            <div key={i} className="flex flex-col gap-3 bg-[hsl(var(--surface))] p-4 rounded-3xl border border-[hsl(var(--border))] shadow-sm relative">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-black text-[hsl(var(--muted))] text-[10px] uppercase tracking-widest bg-[hsl(var(--background))] px-2 py-1 rounded-md border border-[hsl(var(--border))]">Drop #{i + 1}</span>
+                {i > 0 && (
+                  <button onClick={() => setDropsets(d => d.filter((_, idx) => idx !== i))} className="text-[hsl(var(--muted))] hover:text-red-500 active:scale-75 transition-all">
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
 
-              <div className="flex-1 relative flex items-center">
-                <input type="number" placeholder="Reps" value={ds.reps} onChange={(e) => {
-                  const newDs = [...dropsets]; newDs[i].reps = e.target.value; setDropsets(newDs);
-                }} className="w-full bg-[hsl(var(--card))] text-[hsl(var(--foreground))] text-xl font-black text-center p-3 rounded-xl border border-[hsl(var(--border))] focus:outline-none focus:border-blue-500 appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
-              </div>
-
-              {i > 0 && (
-                <button onClick={() => setDropsets(d => d.filter((_, idx) => idx !== i))} className="p-3 text-[hsl(var(--muted))] hover:text-red-500 active:scale-75 transition-all">
-                  <Trash2 size={18} />
-                </button>
+              {isUnilateral ? (
+                <>
+                  {/* Left Arm Drop */}
+                  <div className="flex gap-4">
+                    <div className="flex-1 relative flex items-center bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl">
+                      <span className="absolute -top-2 left-2 bg-[hsl(var(--surface))] px-1.5 text-[8px] font-black uppercase text-[hsl(var(--muted))] tracking-widest rounded-sm">L Arm Wgt</span>
+                      <input type="number" placeholder="0" value={ds.leftWeight} onChange={(e) => {
+                        const newDs = [...dropsets]; newDs[i].leftWeight = e.target.value.replace(/^0+(?=\d)/, ''); setDropsets(newDs);
+                      }} className="w-full bg-transparent text-[hsl(var(--foreground))] text-3xl font-black text-center py-3 focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-[hsl(var(--muted))]" />
+                    </div>
+                    <div className="flex-1 relative flex items-center bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl">
+                      <span className="absolute -top-2 left-2 bg-[hsl(var(--surface))] px-1.5 text-[8px] font-black uppercase text-[hsl(var(--muted))] tracking-widest rounded-sm">L Arm Reps</span>
+                      <input type="number" placeholder="0" value={ds.leftReps} onChange={(e) => {
+                        const newDs = [...dropsets]; newDs[i].leftReps = e.target.value.replace(/^0+(?=\d)/, ''); setDropsets(newDs);
+                      }} className="w-full bg-transparent text-[hsl(var(--foreground))] text-3xl font-black text-center py-3 focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-[hsl(var(--muted))]" />
+                    </div>
+                  </div>
+                  {/* Right Arm Drop */}
+                  <div className="flex gap-4">
+                    <div className="flex-1 relative flex items-center bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl">
+                      <span className="absolute -top-2 left-2 bg-[hsl(var(--surface))] px-1.5 text-[8px] font-black uppercase text-[hsl(var(--muted))] tracking-widest rounded-sm">R Arm Wgt</span>
+                      <input type="number" placeholder="0" value={ds.rightWeight} onChange={(e) => {
+                        const newDs = [...dropsets]; newDs[i].rightWeight = e.target.value.replace(/^0+(?=\d)/, ''); setDropsets(newDs);
+                      }} className="w-full bg-transparent text-[hsl(var(--foreground))] text-3xl font-black text-center py-3 focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-[hsl(var(--muted))]" />
+                    </div>
+                    <div className="flex-1 relative flex items-center bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl">
+                      <span className="absolute -top-2 left-2 bg-[hsl(var(--surface))] px-1.5 text-[8px] font-black uppercase text-[hsl(var(--muted))] tracking-widest rounded-sm">R Arm Reps</span>
+                      <input type="number" placeholder="0" value={ds.rightReps} onChange={(e) => {
+                        const newDs = [...dropsets]; newDs[i].rightReps = e.target.value.replace(/^0+(?=\d)/, ''); setDropsets(newDs);
+                      }} className="w-full bg-transparent text-[hsl(var(--foreground))] text-3xl font-black text-center py-3 focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-[hsl(var(--muted))]" />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex gap-4">
+                  <div className="flex-1 relative flex items-center bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl">
+                    <span className="absolute -top-2 left-2 bg-[hsl(var(--surface))] px-1.5 text-[8px] font-black uppercase text-[hsl(var(--muted))] tracking-widest rounded-sm">Weight</span>
+                    <input type="number" placeholder="0" value={ds.weight} onChange={(e) => {
+                      const newDs = [...dropsets]; newDs[i].weight = e.target.value.replace(/^0+(?=\d)/, ''); setDropsets(newDs);
+                    }} className="w-full bg-transparent text-[hsl(var(--foreground))] text-3xl font-black text-center py-3 focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-[hsl(var(--muted))]" />
+                  </div>
+                  <div className="flex-1 relative flex items-center bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl">
+                    <span className="absolute -top-2 left-2 bg-[hsl(var(--surface))] px-1.5 text-[8px] font-black uppercase text-[hsl(var(--muted))] tracking-widest rounded-sm">Reps</span>
+                    <input type="number" placeholder="0" value={ds.reps} onChange={(e) => {
+                      const newDs = [...dropsets]; newDs[i].reps = e.target.value.replace(/^0+(?=\d)/, ''); setDropsets(newDs);
+                    }} className="w-full bg-transparent text-[hsl(var(--foreground))] text-3xl font-black text-center py-3 focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-[hsl(var(--muted))]" />
+                  </div>
+                </div>
               )}
             </div>
           ))}
-          <button onClick={() => setDropsets([...dropsets, { weight: "", reps: "" }])} className="w-full bg-blue-500/10 text-blue-500 border border-blue-500/20 p-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-500/20 active:scale-95 transition-all mt-1">
+          <button onClick={() => setDropsets([...dropsets, { weight: "", reps: "", leftWeight: "", leftReps: "", rightWeight: "", rightReps: "" }])} className="w-full bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] border border-[hsl(var(--border))] p-4 rounded-xl font-black text-xs uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-sm">
             + Add Drop
           </button>
         </div>
@@ -627,12 +654,12 @@ export default function ActiveSession() {
             <span className="absolute -top-3 left-4 bg-[hsl(var(--background))] px-2 text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-widest border border-[hsl(var(--border))] rounded-md">Left Arm</span>
             <div className="flex gap-4 mt-2">
               <div className="flex-1 relative flex items-center">
-                <input type="number" placeholder="Weight" value={leftWeight} onChange={(e) => setLeftWeight(e.target.value)} className="w-full bg-transparent text-[hsl(var(--foreground))] text-4xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                <input type="number" placeholder="0" value={leftWeight} onChange={(e) => setLeftWeight(e.target.value.replace(/^0+(?=\d)/, ''))} className="w-full bg-transparent text-[hsl(var(--foreground))] text-4xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-[hsl(var(--border))]" />
                 <span className="absolute right-0 text-[10px] font-bold text-[hsl(var(--muted))] uppercase">{unit}</span>
               </div>
               <div className="w-[1px] bg-[hsl(var(--border))]" />
               <div className="flex-1 relative flex items-center">
-                <input type="number" placeholder="Reps" value={leftReps} onChange={(e) => setLeftReps(e.target.value)} className="w-full bg-transparent text-[hsl(var(--foreground))] text-4xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                <input type="number" placeholder="0" value={leftReps} onChange={(e) => setLeftReps(e.target.value.replace(/^0+(?=\d)/, ''))} className="w-full bg-transparent text-[hsl(var(--foreground))] text-4xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-[hsl(var(--border))]" />
                 <span className="absolute right-0 text-[10px] font-bold text-[hsl(var(--muted))] uppercase">Reps</span>
               </div>
             </div>
@@ -643,12 +670,12 @@ export default function ActiveSession() {
             <span className="absolute -top-3 left-4 bg-[hsl(var(--background))] px-2 text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-widest border border-[hsl(var(--border))] rounded-md">Right Arm</span>
             <div className="flex gap-4 mt-2">
               <div className="flex-1 relative flex items-center">
-                <input type="number" placeholder="Weight" value={rightWeight} onChange={(e) => setRightWeight(e.target.value)} className="w-full bg-transparent text-[hsl(var(--foreground))] text-4xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                <input type="number" placeholder="0" value={rightWeight} onChange={(e) => setRightWeight(e.target.value.replace(/^0+(?=\d)/, ''))} className="w-full bg-transparent text-[hsl(var(--foreground))] text-4xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-[hsl(var(--border))]" />
                 <span className="absolute right-0 text-[10px] font-bold text-[hsl(var(--muted))] uppercase">{unit}</span>
               </div>
               <div className="w-[1px] bg-[hsl(var(--border))]" />
               <div className="flex-1 relative flex items-center">
-                <input type="number" placeholder="Reps" value={rightReps} onChange={(e) => setRightReps(e.target.value)} className="w-full bg-transparent text-[hsl(var(--foreground))] text-4xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                <input type="number" placeholder="0" value={rightReps} onChange={(e) => setRightReps(e.target.value.replace(/^0+(?=\d)/, ''))} className="w-full bg-transparent text-[hsl(var(--foreground))] text-4xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-[hsl(var(--border))]" />
                 <span className="absolute right-0 text-[10px] font-bold text-[hsl(var(--muted))] uppercase">Reps</span>
               </div>
             </div>
@@ -669,7 +696,7 @@ export default function ActiveSession() {
                 {bwMode === 'strict' ? (
                   <div className="w-full text-[hsl(var(--foreground))] text-5xl font-black text-center">{userBw}<span className="text-xl ml-1">{unit}</span></div>
                 ) : (
-                  <input type="number" placeholder="0" value={bwExtra} onChange={(e) => setBwExtra(e.target.value)} className="w-full bg-transparent text-[hsl(var(--foreground))] text-5xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+                  <input type="number" placeholder="0" value={bwExtra} onChange={(e) => setBwExtra(e.target.value.replace(/^0+(?=\d)/, ''))} className="w-full bg-transparent text-[hsl(var(--foreground))] text-5xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-[hsl(var(--border))]" />
                 )}
                 {bwMode !== 'strict' && (
                   <div className="absolute right-0 flex flex-col gap-1.5">
@@ -683,7 +710,7 @@ export default function ActiveSession() {
             <div className="flex-1 bg-[hsl(var(--surface))] rounded-3xl p-4 border border-[hsl(var(--border))] shadow-sm relative">
               <div className="flex justify-between items-center mb-3"><label className="text-[10px] font-black text-[hsl(var(--muted))] uppercase tracking-widest px-2">Reps</label></div>
               <div className="relative flex items-center">
-                <input type="number" placeholder="0" value={reps} onChange={(e) => setReps(e.target.value)} className="w-full bg-transparent text-[hsl(var(--foreground))] text-5xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+                <input type="number" placeholder="0" value={reps} onChange={(e) => setReps(e.target.value.replace(/^0+(?=\d)/, ''))} className="w-full bg-transparent text-[hsl(var(--foreground))] text-5xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-[hsl(var(--border))]" />
                 <div className="absolute right-0 flex flex-col gap-1.5">
                   <button onClick={() => adjustValue(setReps, reps, 1)} className="bg-[hsl(var(--card))] text-[hsl(var(--muted))] p-2 rounded-xl border border-[hsl(var(--border))] hover:text-[hsl(var(--foreground))] transition-colors active:scale-95"><ChevronUp size={16}/></button>
                   <button onClick={() => adjustValue(setReps, reps, -1)} className="bg-[hsl(var(--card))] text-[hsl(var(--muted))] p-2 rounded-xl border border-[hsl(var(--border))] hover:text-[hsl(var(--foreground))] transition-colors active:scale-95"><ChevronDown size={16}/></button>
@@ -697,7 +724,7 @@ export default function ActiveSession() {
           <div className="flex-1 bg-[hsl(var(--surface))] rounded-3xl p-4 border border-[hsl(var(--border))] shadow-sm relative">
             <div className="flex justify-between items-center mb-3"><label className="text-[10px] font-black text-[hsl(var(--muted))] uppercase tracking-widest px-2">Weight ({unit})</label></div>
             <div className="relative flex items-center">
-              <input type="number" placeholder="0" value={weight} onChange={(e) => setWeight(e.target.value.replace(/^0+(?=\d)/, ''))} className="w-full bg-transparent text-[hsl(var(--foreground))] text-5xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+              <input type="number" placeholder="0" value={weight} onChange={(e) => setWeight(e.target.value.replace(/^0+(?=\d)/, ''))} className="w-full bg-transparent text-[hsl(var(--foreground))] text-5xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-[hsl(var(--border))]" />
               <div className="absolute right-0 flex flex-col gap-1.5">
                 <button onClick={() => adjustValue(setWeight, weight, 5)} className="bg-[hsl(var(--card))] text-[hsl(var(--muted))] p-2 rounded-xl border border-[hsl(var(--border))] hover:text-[hsl(var(--foreground))] transition-colors active:scale-95"><ChevronUp size={16}/></button>
                 <button onClick={() => adjustValue(setWeight, weight, -5)} className="bg-[hsl(var(--card))] text-[hsl(var(--muted))] p-2 rounded-xl border border-[hsl(var(--border))] hover:text-[hsl(var(--foreground))] transition-colors active:scale-95"><ChevronDown size={16}/></button>
@@ -708,7 +735,7 @@ export default function ActiveSession() {
           <div className="flex-1 bg-[hsl(var(--surface))] rounded-3xl p-4 border border-[hsl(var(--border))] shadow-sm relative">
             <div className="flex justify-between items-center mb-3"><label className="text-[10px] font-black text-[hsl(var(--muted))] uppercase tracking-widest px-2">Reps</label></div>
             <div className="relative flex items-center">
-              <input type="number" placeholder="0" value={reps} onChange={(e) => setReps(e.target.value)} className="w-full bg-transparent text-[hsl(var(--foreground))] text-5xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+              <input type="number" placeholder="0" value={reps} onChange={(e) => setReps(e.target.value.replace(/^0+(?=\d)/, ''))} className="w-full bg-transparent text-[hsl(var(--foreground))] text-5xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-[hsl(var(--border))]" />
               <div className="absolute right-0 flex flex-col gap-1.5">
                 <button onClick={() => adjustValue(setReps, reps, 1)} className="bg-[hsl(var(--card))] text-[hsl(var(--muted))] p-2 rounded-xl border border-[hsl(var(--border))] hover:text-[hsl(var(--foreground))] transition-colors active:scale-95"><ChevronUp size={16}/></button>
                 <button onClick={() => adjustValue(setReps, reps, -1)} className="bg-[hsl(var(--card))] text-[hsl(var(--muted))] p-2 rounded-xl border border-[hsl(var(--border))] hover:text-[hsl(var(--foreground))] transition-colors active:scale-95"><ChevronDown size={16}/></button>
