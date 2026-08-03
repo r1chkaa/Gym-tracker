@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, defaultExercises, type LoggedSet } from '@/lib/db';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, YAxis } from 'recharts';
-import { Weight, Check, Activity, CalendarDays, ChevronLeft, ChevronRight, X, Loader2 } from 'lucide-react';
+import { Weight, Check, Activity, CalendarDays, ChevronLeft, ChevronRight, X, Loader2, Plus } from 'lucide-react';
 
 export default function AnalyticsDashboard() {
   const [weightInput, setWeightInput] = useState("");
@@ -96,9 +96,14 @@ export default function AnalyticsDashboard() {
 
   const handleDayClick = (dateStr: string) => {
     setSelectedDateString(dateStr);
-    if (workoutDates.has(dateStr)) {
-        setShowWorkoutModal(true);
-    }
+    setShowWorkoutModal(true);
+  };
+
+  const handleLogPastWorkout = () => {
+    if (!selectedDateString) return;
+    const [y, m, d] = selectedDateString.split('-').map(Number);
+    const timestamp = new Date(y, m, d).getTime();
+    window.dispatchEvent(new CustomEvent('start-past-workout', { detail: { timestamp } }));
   };
 
   return (
@@ -153,36 +158,47 @@ export default function AnalyticsDashboard() {
       </div>
 
       {showWorkoutModal && (
-        <div className="fixed inset-0 bg-[#09090b]/95 backdrop-blur-2xl z-[200] flex flex-col w-screen h-screen px-4 pt-16 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-[#09090b]/95 backdrop-blur-2xl z-[200] flex flex-col w-screen h-screen px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in fade-in duration-200">
           <div className="bg-[hsl(var(--card))] w-full max-w-md mx-auto rounded-[2rem] p-6 border border-[hsl(var(--border))] shadow-2xl flex flex-col max-h-[85vh]">
             <div className="flex justify-between items-center mb-6 border-b border-[hsl(var(--border))] pb-4">
               <div>
-                <h3 className="text-2xl font-black text-[hsl(var(--foreground))]">Workout Summary</h3>
-                <p className="text-blue-500 text-xs font-black mt-1 uppercase tracking-widest">{new Date(selectedDateString!).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <h3 className="text-2xl font-black text-[hsl(var(--foreground))]">Day Summary</h3>
+                <p className="text-blue-500 text-xs font-black mt-1 uppercase tracking-widest">
+                  {selectedDateString ? new Date(Number(selectedDateString.split('-')[0]), Number(selectedDateString.split('-')[1]), Number(selectedDateString.split('-')[2])).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                </p>
               </div>
               <button onClick={() => setShowWorkoutModal(false)} className="text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] bg-[hsl(var(--surface))] border border-[hsl(var(--border))] p-3 rounded-full transition-colors shadow-sm active:scale-95"><X size={20} /></button>
             </div>
             
             <div className="flex-1 overflow-y-auto space-y-4 pr-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-10">
-              {Object.entries(setsByExercise).map(([exId, sets]) => {
-                const exName = allExFlat.find(e => e.id === exId)?.name || 'Unknown Exercise';
-                return (
-                  <div key={exId} className="bg-[hsl(var(--surface))] p-5 rounded-[1.5rem] border border-[hsl(var(--border))] shadow-sm">
-                    <h4 className="font-black text-base text-[hsl(var(--foreground))] mb-4">{exName}</h4>
-                    <div className="space-y-2.5">
-                      {sets.map((s, i) => (
-                        <div key={s.id} className="flex justify-between items-center text-sm bg-[hsl(var(--background))] p-3 rounded-xl border border-[hsl(var(--border))] shadow-inner">
-                          <span className="text-[hsl(var(--muted))] font-bold flex items-center gap-3">
-                            Set {i + 1} 
-                            {s.tag && s.tag !== 'normal' && <span className="text-[9px] uppercase bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] px-2 py-1 rounded border border-[hsl(var(--border))] tracking-widest font-black">{s.tag}</span>}
-                          </span>
-                          <span className="font-black text-[hsl(var(--foreground))]">{s.weight} <span className="text-[10px] text-[hsl(var(--muted))] font-bold">{unit}</span> × {s.reps}</span>
-                        </div>
-                      ))}
+              {Object.keys(setsByExercise).length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 opacity-60 text-center">
+                  <span className="text-[hsl(var(--foreground))] font-black text-lg tracking-tight mb-4">No workout logged</span>
+                  <button onClick={handleLogPastWorkout} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-black rounded-xl text-sm transition-all active:scale-95 shadow-md">
+                    <Plus size={16} /> Log Past Workout
+                  </button>
+                </div>
+              ) : (
+                Object.entries(setsByExercise).map(([exId, sets]) => {
+                  const exName = allExFlat.find(e => e.id === exId)?.name || 'Unknown Exercise';
+                  return (
+                    <div key={exId} className="bg-[hsl(var(--surface))] p-5 rounded-[1.5rem] border border-[hsl(var(--border))] shadow-sm">
+                      <h4 className="font-black text-base text-[hsl(var(--foreground))] mb-4">{exName}</h4>
+                      <div className="space-y-2.5">
+                        {sets.map((s, i) => (
+                          <div key={s.id} className="flex justify-between items-center text-sm bg-[hsl(var(--background))] p-3 rounded-xl border border-[hsl(var(--border))] shadow-inner">
+                            <span className="text-[hsl(var(--muted))] font-bold flex items-center gap-3">
+                              Set {i + 1} 
+                              {s.tag && s.tag !== 'normal' && <span className="text-[9px] uppercase bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] px-2 py-1 rounded border border-[hsl(var(--border))] tracking-widest font-black">{s.tag}</span>}
+                            </span>
+                            <span className="font-black text-[hsl(var(--foreground))]">{s.weight} <span className="text-[10px] text-[hsl(var(--muted))] font-bold">{unit}</span> × {s.reps}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
+                  )
+                })
+              )}
             </div>
           </div>
         </div>
@@ -221,7 +237,6 @@ export default function AnalyticsDashboard() {
                 </defs>
                 <XAxis dataKey="date" stroke="hsl(var(--muted))" fontSize={10} tickMargin={10} axisLine={false} tickLine={false} />
                 <YAxis domain={['auto', 'auto']} stroke="hsl(var(--muted))" fontSize={10} width={40} axisLine={false} tickLine={false} />
-                {/* Disabled Animation Active to prevent snapping/lag while sliding finger on mobile */}
                 <Tooltip isAnimationActive={false} cursor={{ stroke: 'hsl(var(--muted))', strokeWidth: 1, strokeDasharray: '4 4' }} contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '1rem', fontWeight: '900', color: 'hsl(var(--foreground))' }} itemStyle={{ color: '#3b82f6' }} />
                 <Area type="monotone" dataKey="weight" stroke="#3b82f6" strokeWidth={4} fillOpacity={1} fill="url(#colorWeight)" activeDot={{ r: 5, strokeWidth: 0 }} />
               </AreaChart>
