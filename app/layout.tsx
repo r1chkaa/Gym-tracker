@@ -18,6 +18,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -28,7 +29,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Notice: No manual <link> tags here anymore! */}
+        <style dangerouslySetInnerHTML={{__html: `
+          @media screen and (orientation: landscape) {
+            body { transform: rotate(-90deg); transform-origin: left top; width: 100vh; height: 100vw; overflow-x: hidden; position: absolute; top: 100%; left: 0; }
+          }
+        `}} />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -37,6 +42,9 @@ export default function RootLayout({
                   document.documentElement.classList.add('dark')
                 } else {
                   document.documentElement.classList.remove('dark')
+                }
+                if (screen.orientation && screen.orientation.lock) {
+                  screen.orientation.lock('portrait').catch(function(error) {});
                 }
               } catch (_) {}
             `,

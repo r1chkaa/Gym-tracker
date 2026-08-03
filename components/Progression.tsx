@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, defaultExercises } from '@/lib/db';
-import { Trophy, Star, Shield, Swords, ArrowLeft, Crown, Target, X, Zap, Loader2 } from 'lucide-react';
+import { Trophy, Star, Shield, Swords, ArrowLeft, Crown, Target, X, Zap, Loader2, Calendar } from 'lucide-react';
 
 const MUSCLE_DATA = [
   { id: 'Chest' }, { id: 'Bicep' }, { id: 'Core' }, { id: 'Back' },
@@ -74,9 +74,17 @@ export default function Progression() {
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null);
   const [gender, setGender] = useState('male');
   
+  const [showCalibration, setShowCalibration] = useState(false);
+  const [liftMonths, setLiftMonths] = useState(8);
+
   const allSets = useLiveQuery(() => db.sets.toArray());
 
-  useEffect(() => { setGender(localStorage.getItem('gym_gender') || 'male'); }, []);
+  useEffect(() => { 
+    setGender(localStorage.getItem('gym_gender') || 'male'); 
+    if (!localStorage.getItem('gym_calibrated')) {
+      setShowCalibration(true);
+    }
+  }, []);
 
   if (allSets === undefined) {
     return <div className="h-full flex items-center justify-center bg-transparent"><Loader2 className="animate-spin text-[hsl(var(--muted))]" size={32}/></div>;
@@ -87,7 +95,8 @@ export default function Progression() {
   const exToCategory: Record<string, string> = {};
   Object.entries(defaultExercises.exercises).forEach(([cat, exes]) => exes.forEach(ex => exToCategory[ex.id] = cat));
 
-  let totalPoints = 0;
+  let totalPoints = Number(localStorage.getItem('gym_calibration_pts') || 0);
+
   allSets.forEach(set => {
     if (set.isCompleted && exToCategory[set.exerciseId]) {
       volumes[exToCategory[set.exerciseId]] += (set.weight * set.reps);
@@ -99,6 +108,39 @@ export default function Progression() {
   const currentRank = getAccountRank(activePoints);
   const rankTheme = RANK_THEMES[currentRank.name] || RANK_THEMES['Wood'];
   const isGod = currentRank.name === 'God';
+
+  const handleCalibrate = () => {
+    localStorage.setItem('gym_calibrated', 'true');
+    // Approx 30,000 pts per month of consistent lifting
+    localStorage.setItem('gym_calibration_pts', (liftMonths * 30000).toString());
+    setShowCalibration(false);
+    window.location.reload();
+  };
+
+  if (showCalibration) {
+    return (
+      <div className="fixed inset-0 z-[200] bg-[#09090b] flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
+        <div className="bg-white/10 border border-white/20 p-8 rounded-3xl backdrop-blur-xl w-full max-w-sm flex flex-col items-center shadow-2xl">
+          <Calendar className="text-blue-500 mb-6" size={48} />
+          <h2 className="text-2xl font-black text-white text-center mb-2">Initial Calibration</h2>
+          <p className="text-white/60 text-center text-sm mb-8">How many months have you been consistently lifting before using this app?</p>
+          
+          <div className="flex items-center gap-6 mb-8 w-full justify-center">
+            <button onClick={() => setLiftMonths(Math.max(0, liftMonths - 1))} className="p-4 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white font-black"><ChevronDown size={24} /></button>
+            <div className="flex flex-col items-center w-24">
+              <span className="text-5xl font-black text-white">{liftMonths}</span>
+              <span className="text-[10px] font-black tracking-widest text-white/40 uppercase mt-1">Months</span>
+            </div>
+            <button onClick={() => setLiftMonths(Math.min(120, liftMonths + 1))} className="p-4 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white font-black"><ChevronUp size={24} /></button>
+          </div>
+
+          <button onClick={handleCalibrate} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl tracking-widest uppercase transition-all shadow-md active:scale-95">
+            Set Starting Rank
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const getMuscleDetails = (xp: number) => {
     const level = Math.floor(Math.sqrt(xp / 500)) + 1;
@@ -170,7 +212,6 @@ export default function Progression() {
   return (
     <div className="bg-transparent text-[hsl(var(--foreground))] overflow-x-hidden font-sans flex flex-col items-center relative w-full h-full pb-10">
       
-      {/* Full screen background glow that completely covers gray borders behind everything */}
       <div className="fixed inset-0 pointer-events-none z-0 w-screen h-screen flex items-center justify-center">
         <div className="absolute w-[800px] h-[800px] opacity-15 blur-[100px] rounded-full transition-colors duration-1000" style={{ backgroundColor: rankTheme.hex }} />
       </div>

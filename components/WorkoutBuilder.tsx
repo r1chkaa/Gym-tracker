@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { defaultExercises, db } from '@/lib/db';
-import { Save, Plus, Trash2, X, ChevronRight, ArrowLeft, ChevronDown, ChevronUp, PenLine, Search } from 'lucide-react';
+import { Save, Plus, Trash2, X, ChevronRight, ArrowLeft, ChevronDown, ChevronUp, PenLine, Search, Info } from 'lucide-react';
 
 type SetType = 'normal' | 'warmup' | 'drop' | 'failure';
 
@@ -12,7 +12,7 @@ interface PlannedExercise {
 }
 
 export default function WorkoutBuilder() {
-  const [templateName, setTemplateName] = useState("New Routine");
+  const [templateName, setTemplateName] = useState("");
   const [selectedExercises, setSelectedExercises] = useState<PlannedExercise[]>([]);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,6 +20,7 @@ export default function WorkoutBuilder() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [openDropdown, setOpenDropdown] = useState<{ex: number, set: number} | null>(null);
+  const [showInfoModal, setShowInfoModal] = useState<any | null>(null);
 
   const tagLabels = { normal: 'Normal', warmup: 'Warm-up', drop: 'Dropset', failure: 'Failure' };
 
@@ -74,22 +75,51 @@ export default function WorkoutBuilder() {
     try {
       await db.templates.add({
         id: crypto.randomUUID(),
-        name: templateName,
+        name: templateName || "Unnamed Routine",
         order: 0,
         exercises: selectedExercises.map(ex => ({ exerciseId: ex.id, sets: ex.sets }))
       });
       alert("Routine saved successfully!");
-      setTemplateName("New Routine");
+      setTemplateName("");
       setSelectedExercises([]);
       setExpandedIndex(null);
     } catch (error) { console.error("Failed to save template:", error); }
   };
 
+  if (showInfoModal) {
+    return (
+      <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[150] flex flex-col p-6 animate-in fade-in zoom-in-95">
+        <div className="flex justify-between items-center mb-6 pt-[max(env(safe-area-inset-top),1rem)]">
+          <h2 className="text-2xl font-black text-white">{showInfoModal.name}</h2>
+          <button onClick={() => setShowInfoModal(null)} className="text-white/50 hover:text-white p-2 bg-white/10 rounded-full border border-white/20"><X size={24} /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {showInfoModal.images?.length > 0 && (
+            <div className="grid grid-cols-2 gap-3">
+              {showInfoModal.images.map((img: string, idx: number) => (
+                <div key={idx} className="aspect-square bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
+                  <img src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${img}`} alt="Step" className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+          )}
+          {showInfoModal.instructions?.length > 0 && (
+            <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
+              <ol className="list-decimal list-outside pl-4 space-y-3 text-sm text-white/90 marker:text-blue-500 marker:font-black">
+                {showInfoModal.instructions.map((step: string, idx: number) => <li key={idx} className="pl-2 leading-relaxed">{step}</li>)}
+              </ol>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[hsl(var(--background))] rounded-[2rem] p-0 shadow-sm transition-colors relative flex flex-col min-h-[500px]">
       
       {openDropdown && (
-        <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(null)} />
+        <div className="fixed inset-0 z-[50]" onClick={() => setOpenDropdown(null)} />
       )}
 
       <div className="flex-none flex items-center gap-3 mb-6 border-b border-[hsl(var(--border))] pb-3 focus-within:border-blue-500 transition-colors mx-2">
@@ -103,7 +133,7 @@ export default function WorkoutBuilder() {
         <PenLine className="text-[hsl(var(--muted))]" size={20} />
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-4 mb-6 pr-2 min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 overflow-y-auto space-y-4 mb-6 pr-2 min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-32">
         {selectedExercises.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 opacity-60 animate-in fade-in duration-500 text-center">
             <span className="text-[hsl(var(--foreground))] font-black text-xl tracking-tight mb-2 leading-tight">Tap below to add<br/>your first exercise.</span>
@@ -111,7 +141,7 @@ export default function WorkoutBuilder() {
         )}
         
         {selectedExercises.map((ex, exIdx) => (
-          <div key={exIdx} className="bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] overflow-visible transition-all">
+          <div key={exIdx} className={`bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] transition-all ${expandedIndex === exIdx ? 'relative z-[60]' : 'relative z-10'}`}>
             <div 
               className="flex justify-between items-center p-4 bg-[hsl(var(--card))] border-b border-[hsl(var(--border))] cursor-pointer active:brightness-110 rounded-t-2xl"
               onClick={() => setExpandedIndex(expandedIndex === exIdx ? null : exIdx)}
@@ -142,14 +172,14 @@ export default function WorkoutBuilder() {
                     <div className="flex-1 relative">
                       <button 
                         onClick={() => setOpenDropdown(openDropdown?.ex === exIdx && openDropdown?.set === setIdx ? null : {ex: exIdx, set: setIdx})}
-                        className="w-full bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] p-3 rounded-lg border border-[hsl(var(--border))] focus:border-blue-500 outline-none text-sm font-bold flex justify-between items-center transition-colors relative z-20"
+                        className="w-full bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] p-3 rounded-lg border border-[hsl(var(--border))] focus:border-blue-500 outline-none text-sm font-bold flex justify-between items-center transition-colors relative z-[60]"
                       >
                         {tagLabels[set.tag]}
                         <ChevronDown size={16} className="text-[hsl(var(--muted))]" />
                       </button>
 
                       {openDropdown?.ex === exIdx && openDropdown?.set === setIdx && (
-                        <div className="absolute top-10 left-0 right-0 mt-2 bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-xl shadow-2xl z-50 overflow-hidden">
+                        <div className="absolute top-10 left-0 right-0 mt-2 bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-xl shadow-2xl z-[70]">
                           {Object.entries(tagLabels).map(([val, label]) => (
                             <div 
                               key={val}
@@ -185,7 +215,7 @@ export default function WorkoutBuilder() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[hsl(var(--background))]/95 backdrop-blur-xl z-[100] flex flex-col p-4 pt-12 animate-in slide-in-from-bottom-10">
+        <div className="fixed inset-0 bg-[hsl(var(--background))]/95 backdrop-blur-xl z-[100] flex flex-col p-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in slide-in-from-bottom-10">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl font-black text-[hsl(var(--foreground))]">{activeCategory || "Muscle Group"}</h2>
             <button onClick={() => {setIsModalOpen(false); setActiveCategory(null); setSearchQuery("");}} className="text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] bg-[hsl(var(--surface))] border border-[hsl(var(--border))] p-2 rounded-full transition-colors shadow-sm">
@@ -228,10 +258,15 @@ export default function WorkoutBuilder() {
                 {defaultExercises.exercises[activeCategory as keyof typeof defaultExercises.exercises]
                   ?.filter(ex => ex.name.toLowerCase().includes(searchQuery.toLowerCase()))
                   .map(ex => (
-                  <button key={ex.id} onClick={() => {handleAddExercise(ex); setSearchQuery("");}} className="w-full bg-[hsl(var(--surface))] border border-[hsl(var(--border))] p-4 rounded-xl text-left hover:brightness-110 transition-all shadow-sm active:scale-95 flex flex-col gap-1.5">
-                    <span className="block text-[hsl(var(--foreground))] font-black text-base truncate w-full">{ex.name}</span>
-                    <span className="text-[hsl(var(--muted))] text-[9px] font-black uppercase tracking-widest bg-[hsl(var(--background))] px-2 py-1 rounded border border-[hsl(var(--border))] w-fit">{ex.equipment}</span>
-                  </button>
+                  <div key={ex.id} className="w-full bg-[hsl(var(--surface))] border border-[hsl(var(--border))] p-2 pl-4 rounded-xl flex items-center justify-between shadow-sm active:scale-95 transition-all">
+                    <button onClick={() => {handleAddExercise(ex); setSearchQuery("");}} className="flex-1 text-left flex flex-col gap-1.5 min-w-0 pr-2">
+                      <span className="block text-[hsl(var(--foreground))] font-black text-base truncate w-full">{ex.name}</span>
+                      <span className="text-[hsl(var(--muted))] text-[9px] font-black uppercase tracking-widest bg-[hsl(var(--background))] px-2 py-1 rounded border border-[hsl(var(--border))] w-fit">{ex.equipment}</span>
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); setShowInfoModal(ex); }} className="text-blue-500 p-3 bg-blue-500/10 rounded-xl hover:bg-blue-500/20 active:scale-95 transition-all shrink-0">
+                      <Info size={20} />
+                    </button>
+                  </div>
                 ))}
               </>
             )}
