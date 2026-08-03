@@ -56,10 +56,8 @@ export default function Home() {
   return (
     <main className="h-[100dvh] max-w-md mx-auto flex flex-col bg-transparent text-[hsl(var(--foreground))] overflow-hidden relative transition-colors duration-300">
       
-      {/* Full-bleed background that covers gray borders on large devices and edges */}
       <div className={`fixed inset-0 w-screen h-screen z-[-2] transition-colors duration-500 ${activeTab === 'progression' ? 'bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`} />
 
-      {/* Header moved INSIDE the scroll container so it scrolls smoothly and prevents layout cutoffs */}
       <div className="flex-1 flex flex-col overflow-y-auto pb-32 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         
         <header className={`flex-none px-6 pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start transition-colors duration-500 ${activeTab === 'progression' ? 'text-white' : ''}`}>
@@ -80,7 +78,7 @@ export default function Home() {
           </button>
         </header>
 
-        <div className="px-4 flex-1 flex flex-col">
+        <div className="px-4 flex-1 flex flex-col min-h-0">
           {activeTab === 'workout' && <ActiveSession />}
           {activeTab === 'builder' && <WorkoutBuilder />}
           {activeTab === 'progression' && <Progression />}
@@ -90,7 +88,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="fixed bottom-[max(env(safe-area-inset-bottom),1.5rem)] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-50">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]">
         <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
           {navItems.map((tab) => {
             const isActive = activeTab === tab.id;

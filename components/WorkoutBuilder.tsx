@@ -116,7 +116,7 @@ export default function WorkoutBuilder() {
   }
 
   return (
-    <div className="bg-[hsl(var(--background))] rounded-[2rem] p-0 shadow-sm transition-colors relative flex flex-col min-h-[500px]">
+    <div className="bg-transparent rounded-[2rem] p-0 relative flex flex-col h-full">
       
       {openDropdown && (
         <div className="fixed inset-0 z-[50]" onClick={() => setOpenDropdown(null)} />
@@ -133,7 +133,7 @@ export default function WorkoutBuilder() {
         <PenLine className="text-[hsl(var(--muted))]" size={20} />
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-4 mb-6 pr-2 min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-32">
+      <div className="flex-1 overflow-y-auto space-y-4 pr-2 min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-10">
         {selectedExercises.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 opacity-60 animate-in fade-in duration-500 text-center">
             <span className="text-[hsl(var(--foreground))] font-black text-xl tracking-tight mb-2 leading-tight">Tap below to add<br/>your first exercise.</span>
@@ -204,7 +204,7 @@ export default function WorkoutBuilder() {
         ))}
       </div>
 
-      <div className="flex-none space-y-4 pt-2 border-t border-[hsl(var(--border))]">
+      <div className="flex-none space-y-4 pt-4 pb-8 border-t border-[hsl(var(--border))] z-10 relative bg-transparent">
         <button onClick={() => setIsModalOpen(true)} className="w-full bg-[hsl(var(--surface))] text-blue-500 p-4 rounded-2xl border border-blue-500/30 font-black flex justify-center items-center gap-2 transition-all shadow-sm active:scale-95">
           <Plus size={20} /> ADD EXERCISE
         </button>

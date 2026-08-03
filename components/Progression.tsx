@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, defaultExercises } from '@/lib/db';
-import { Trophy, Star, Shield, Swords, ArrowLeft, Crown, Target, X, Zap, Loader2, Calendar } from 'lucide-react';
+import { Trophy, Star, Shield, Swords, ArrowLeft, Crown, Target, X, Zap, Loader2, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 
 const MUSCLE_DATA = [
   { id: 'Chest' }, { id: 'Bicep' }, { id: 'Core' }, { id: 'Back' },
