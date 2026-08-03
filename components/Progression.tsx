@@ -113,40 +113,56 @@ export default function Progression() {
 
   const AnatomyModel = ({ highlight }: { highlight?: string | null }) => {
     const activeHitboxes = gender === 'female' ? SVG_HITBOXES_FEMALE : SVG_HITBOXES_MALE;
+    const baseImage = `/anatomy/${gender === 'female' ? 'base2' : 'base'}.png`;
+
     return (
       <div className="relative w-full aspect-[4/5] max-w-[400px] mx-auto flex items-center justify-center">
         <img 
-          src={`/anatomy/${gender === 'female' ? 'base2' : 'base'}.png`} 
+          src={baseImage} 
           alt="Anatomy Base"
           loading="eager"
           decoding="async"
           draggable="false"
           className="absolute inset-0 w-full h-full object-contain pointer-events-none z-10"
         />
-        <svg viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet" className="absolute inset-0 w-full h-full z-20 overflow-visible">
-          {Object.entries(activeHitboxes).map(([id, path]) => {
-            if (!path) return null;
-            const xp = volumes[id] || 0;
-            const { hex } = getMuscleDetails(xp);
-            const isFocused = highlight === id;
-            const isDimmed = highlight && !isFocused;
-            
-            return (
-              <path
-                key={`group-${id}`}
-                d={path}
-                onClick={() => { if (!highlight) setSelectedMuscle(id) }}
-                style={{ fill: isFocused ? '#ef4444' : (xp > 0 ? hex : 'transparent') }}
-                className={`transition-all duration-500 outline-none
-                  ${isFocused ? 'opacity-60 mix-blend-screen filter drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] pointer-events-none' : ''}
-                  ${isDimmed ? 'opacity-0 pointer-events-none' : ''}
-                  ${!highlight && xp > 0 ? 'opacity-0 cursor-pointer mix-blend-screen hover:!opacity-60 hover:filter hover:drop-shadow-[0_0_15px_currentColor]' : ''}
-                  ${!highlight && xp === 0 ? 'opacity-0 cursor-pointer hover:!opacity-30 hover:!fill-white mix-blend-overlay' : ''}
-                `}
-              />
-            );
-          })}
-        </svg>
+        <div 
+          className="absolute inset-0 w-full h-full z-20"
+          style={{
+            WebkitMaskImage: `url(${baseImage})`,
+            WebkitMaskSize: 'contain',
+            WebkitMaskRepeat: 'no-repeat',
+            WebkitMaskPosition: 'center',
+            maskImage: `url(${baseImage})`,
+            maskSize: 'contain',
+            maskRepeat: 'no-repeat',
+            maskPosition: 'center'
+          }}
+        >
+          <svg viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet" className="w-full h-full overflow-visible">
+            {Object.entries(activeHitboxes).map(([id, path]) => {
+              if (!path) return null;
+              const xp = volumes[id] || 0;
+              const { hex } = getMuscleDetails(xp);
+              const isFocused = highlight === id;
+              const isDimmed = highlight && !isFocused;
+              
+              return (
+                <path
+                  key={`group-${id}`}
+                  d={path}
+                  onClick={() => { if (!highlight) setSelectedMuscle(id) }}
+                  style={{ fill: isFocused ? '#ef4444' : (xp > 0 ? hex : 'transparent') }}
+                  className={`transition-all duration-500 outline-none
+                    ${isFocused ? 'opacity-70 mix-blend-screen pointer-events-none' : ''}
+                    ${isDimmed ? 'opacity-0 pointer-events-none' : ''}
+                    ${!highlight && xp > 0 ? 'opacity-0 cursor-pointer mix-blend-screen hover:!opacity-60 hover:filter hover:drop-shadow-[0_0_15px_currentColor]' : ''}
+                    ${!highlight && xp === 0 ? 'opacity-0 cursor-pointer hover:!opacity-30 hover:!fill-white mix-blend-overlay' : ''}
+                  `}
+                />
+              );
+            })}
+          </svg>
+        </div>
       </div>
     );
   };
@@ -205,31 +221,38 @@ export default function Progression() {
         const details = getMuscleDetails(muscleXP);
         return (
           <div className="fixed inset-0 bg-[#09090b]/95 backdrop-blur-3xl z-[100] flex flex-col animate-in fade-in zoom-in duration-300 w-screen h-screen">
-            <div className="flex-none flex items-center justify-between p-6 pt-[max(env(safe-area-inset-top),3rem)] z-10">
-              <button onClick={() => setSelectedMuscle(null)} className="text-[hsl(var(--muted))] hover:text-white transition-colors p-3 bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-full shadow-sm"><ArrowLeft size={24} /></button>
-              <div className="w-10" />
+            <div className="flex-none flex items-center justify-between p-6 pt-[max(env(safe-area-inset-top),3rem)] z-10 absolute top-0 left-0">
+              <button onClick={() => setSelectedMuscle(null)} className="text-[hsl(var(--muted))] hover:text-white transition-colors p-3 bg-white/5 border border-white/10 rounded-full shadow-sm backdrop-blur-md active:scale-95"><ArrowLeft size={24} /></button>
             </div>
-            <div className="flex-1 overflow-y-auto flex flex-col items-center pt-0 pb-32 px-6 w-full max-w-[600px] mx-auto">
-              <h2 className="text-4xl font-black text-white uppercase tracking-[0.3em] mb-6">{selectedMuscle}</h2>
-              <span className="text-[10px] font-black uppercase text-red-500 tracking-[0.4em] mb-4 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">Muscle Level</span>
-              <div className="relative flex justify-center items-center mb-10">
-                <div className="absolute w-56 h-56 opacity-40 blur-[80px] rounded-full pointer-events-none" style={{ backgroundColor: details.hex }} />
-                <span className="text-[140px] font-black leading-none tracking-tighter relative z-10 drop-shadow-[0_0_50px_currentColor]" style={{ color: details.hex }}>{details.level}</span>
+            
+            <div className="flex-1 overflow-y-auto flex flex-col justify-between pt-12 pb-16 px-6 w-full max-w-[500px] mx-auto">
+              
+              <div className="flex flex-col items-center mt-auto mb-10">
+                <h2 className="text-4xl sm:text-5xl font-black text-white uppercase tracking-[0.3em] mb-2">{selectedMuscle}</h2>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] mb-8" style={{ color: details.hex, textShadow: `0 0 15px ${details.hex}` }}>Muscle Level</span>
+                
+                <div className="relative flex justify-center items-center">
+                  <div className="absolute w-40 h-40 opacity-30 blur-[60px] rounded-full pointer-events-none" style={{ backgroundColor: details.hex }} />
+                  <span className="text-[140px] font-black leading-none tracking-tighter relative z-10" style={{ color: details.hex, textShadow: `0 0 40px ${details.hex}` }}>{details.level}</span>
+                </div>
               </div>
-              <div className="w-full max-w-[400px] flex flex-col relative z-10 mb-12">
+
+              <div className="w-full bg-white/5 rounded-3xl p-6 border border-white/10 shadow-2xl backdrop-blur-md mb-12 relative z-10">
                 <div className="flex justify-between items-end mb-4 px-1 text-sm font-black uppercase tracking-widest">
                   <span style={{ color: details.hex }} className="drop-shadow-md">{Math.floor(muscleXP).toLocaleString()} XP</span>
-                  <span className="text-[hsl(var(--muted))]">{details.nextXP.toLocaleString()} XP</span>
+                  <span className="text-white/40">{details.nextXP.toLocaleString()} XP</span>
                 </div>
-                <div className="w-full h-4 bg-[hsl(var(--surface))] rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] border border-[hsl(var(--border))]">
-                  <div className="h-full rounded-r-full transition-all duration-1000 ease-out relative" style={{ width: `${Math.min(100, Math.max(0, details.progress))}%`, backgroundColor: details.hex, boxShadow: `0 0 25px ${details.hex}` }}>
+                <div className="w-full h-3 bg-black/50 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
+                  <div className="h-full rounded-r-full transition-all duration-1000 ease-out relative" style={{ width: `${Math.min(100, Math.max(0, details.progress))}%`, backgroundColor: details.hex, boxShadow: `0 0 20px ${details.hex}` }}>
                     <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]" />
                   </div>
                 </div>
               </div>
-              <div className="w-full max-w-[400px] relative pointer-events-none">
+
+              <div className="w-full max-w-[300px] mx-auto relative pointer-events-none opacity-80 mt-auto">
                 <AnatomyModel highlight={selectedMuscle} />
               </div>
+
             </div>
           </div>
         );

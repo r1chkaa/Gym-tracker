@@ -50,9 +50,12 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
   
   const [skipRank, setSkipRank] = useState(false);
   const [skipXP, setSkipXP] = useState(false);
+  const [isRankAnimDone, setIsRankAnimDone] = useState(false);
+  const [isXPAnimDone, setIsXPAnimDone] = useState(false);
+  
   const [isLevelingUp, setIsLevelingUp] = useState<string | false>(false);
 
-  // Points Animation Engine (Easing-based)
+  // Points Animation Engine
   useEffect(() => {
     if (step !== 'rank') return;
     const target = initialPoints + earnedPoints;
@@ -62,6 +65,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
     const tick = (now: number) => {
       if (skipRank) {
         setDisplayPoints(target);
+        setIsRankAnimDone(true);
         return;
       }
 
@@ -77,6 +81,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
         animationFrameId = requestAnimationFrame(tick);
       } else {
         setDisplayPoints(target);
+        setIsRankAnimDone(true);
       }
     };
 
@@ -84,7 +89,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
     return () => cancelAnimationFrame(animationFrameId);
   }, [step, skipRank, initialPoints, earnedPoints]);
 
-  // XP Animation Engine (Easing-based)
+  // XP Animation Engine
   useEffect(() => {
     if (step !== 'xp') return;
     const targetXP: Record<string, number> = {};
@@ -96,6 +101,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
     const tick = (now: number) => {
       if (skipXP) {
         setDisplayXP(targetXP);
+        setIsXPAnimDone(true);
         return;
       }
 
@@ -115,6 +121,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
         animationFrameId = requestAnimationFrame(tick);
       } else {
         setDisplayXP(targetXP);
+        setIsXPAnimDone(true);
       }
     };
 
@@ -124,14 +131,14 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
 
   const handleNext = () => {
     if (step === 'rank') {
-      if (!skipRank) {
+      if (!isRankAnimDone) {
         setSkipRank(true);
       } else {
         if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(50);
         setStep('xp');
       }
     } else {
-      if (!skipXP) {
+      if (!isXPAnimDone) {
         setSkipXP(true);
       } else {
         onComplete();
@@ -166,7 +173,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
             <div className={`h-full rounded-r-full transition-none ${isGod ? 'bg-gradient-to-r from-yellow-500 to-white' : 'bg-blue-500'}`} style={{ width: `${currentRank.progress}%` }} />
           </div>
 
-          <div className="mt-16 text-[10px] text-white/30 font-black uppercase tracking-widest animate-pulse">Tap to continue</div>
+          <div className={`mt-16 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 ${isRankAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to continue</div>
         </div>
       )}
 
@@ -200,7 +207,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
             })}
           </div>
 
-          <div className="mt-16 text-[10px] text-white/30 font-black uppercase tracking-widest animate-pulse">Tap to finish</div>
+          <div className={`mt-16 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 ${isXPAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to finish</div>
         </div>
       )}
     </div>
