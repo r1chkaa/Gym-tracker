@@ -25,17 +25,22 @@ useEffect(() => {
     window.addEventListener('rank-glow-update', handleGlow);
     window.addEventListener('gym-calibrated', handleCalibrated);
 
-    const handlePastWorkout = (e: any) => {
+const handlePastWorkout = (e: any) => {
       setPastWorkoutDate(e.detail.timestamp);
       setActiveTab('workout');
       setPreviousTab('analytics');
     };
+    const handleGoToProgression = () => {
+      setActiveTab('progression');
+    };
     window.addEventListener('start-past-workout', handlePastWorkout);
+    window.addEventListener('go-to-progression', handleGoToProgression);
 
 return () => {
-      window.removeEventListener('rank-glow-update', handleGlow);
+window.removeEventListener('rank-glow-update', handleGlow);
       window.removeEventListener('start-past-workout', handlePastWorkout);
       window.removeEventListener('gym-calibrated', handleCalibrated);
+      window.removeEventListener('go-to-progression', handleGoToProgression);
     };
   }, []);
 
@@ -116,12 +121,14 @@ return (
           </button>
         </header>
 
-        {activeTab === 'workout' && <ActiveSession pastWorkoutDate={pastWorkoutDate} onClearPastDate={() => setPastWorkoutDate(null)} />}
-        {activeTab === 'builder' && <WorkoutBuilder />}
-        {activeTab === 'progression' && <Progression />}
-        {activeTab === 'analytics' && <AnalyticsDashboard />}
-        {activeTab === 'library' && <ExerciseLibrary />}
-        {activeTab === 'settings' && <Settings />}
+<div key={activeTab} className="w-full flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-8 duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] fill-mode-both">
+          {activeTab === 'workout' && <ActiveSession pastWorkoutDate={pastWorkoutDate} onClearPastDate={() => setPastWorkoutDate(null)} />}
+          {activeTab === 'builder' && <WorkoutBuilder />}
+          {activeTab === 'progression' && <Progression />}
+          {activeTab === 'analytics' && <AnalyticsDashboard />}
+          {activeTab === 'library' && <ExerciseLibrary />}
+          {activeTab === 'settings' && <Settings />}
+        </div>
       </div>
 {/* 
         Fixed Floating Nav:

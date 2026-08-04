@@ -150,37 +150,39 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
   return (
     <div className="fixed inset-0 w-screen h-screen z-[999999] bg-[#09090b] flex flex-col items-center justify-center p-0 m-0 overflow-hidden animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
 {step === 'rank' && (
-        <div className={`w-full max-w-sm flex flex-col items-center relative z-10 p-6 ${isRankLeveling ? 'animate-[rank-slam_1.2s_ease-out_forwards]' : 'animate-in slide-in-from-bottom-8 duration-700'}`}>
-          <style dangerouslySetInnerHTML={{__html: `
-            @keyframes rank-slam { 0% { transform: scale(3) translateY(-50px); opacity: 0; filter: blur(20px); } 30% { transform: scale(0.9) translateY(10px); opacity: 1; filter: blur(0px); } 50% { transform: scale(1.05) translateY(-5px); } 100% { transform: scale(1) translateY(0); } }
-            @keyframes shockwave-pulse { 0% { transform: scale(0.5); opacity: 1; border-width: 15px; } 100% { transform: scale(3.5); opacity: 0; border-width: 0px; } }
-          `}} />
-          <span className={`text-[10px] font-black uppercase tracking-[0.4em] mb-8 ${isRankLeveling ? 'text-blue-400 animate-pulse drop-shadow-[0_0_10px_rgba(96,165,250,0.8)]' : 'text-blue-500'}`}>{isRankLeveling ? "RANK UP ACHIEVED" : "Workout Complete"}</span>
-          <div className="relative flex justify-center items-center mb-8 w-48 h-48">
-            {isRankLeveling && (
-              <>
-                <div className="absolute inset-0 rounded-full border-blue-400 animate-[shockwave-pulse_1s_ease-out_forwards]" />
-                <div className="absolute inset-0 rounded-full border-blue-300 animate-[shockwave-pulse_1.5s_ease-out_0.2s_forwards]" />
-                <div className="absolute inset-0 blur-[60px] rounded-full bg-white opacity-80 animate-ping" />
-              </>
-            )}
-            {!isRankLeveling && <div className="absolute inset-0 blur-[60px] rounded-full bg-blue-500/20 animate-pulse" />}
-            <img src={`/ranks/${currentRank.image}`} alt="Rank" className={`w-40 h-40 object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] ${isRankLeveling ? 'animate-[idle-titan_2s_ease-in-out_infinite]' : ''}`} />
-          </div>
-          <h2 className="text-4xl font-black uppercase tracking-widest text-white mb-1 drop-shadow-md">{currentRank.name}</h2>
-          <span className="text-xs font-bold text-white/60 tracking-[0.3em] uppercase mb-12">{currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
-          <div className="w-full flex justify-between items-end mb-3 px-1">
-            <span className="text-xl font-black tracking-widest text-white">{Math.floor(displayPoints).toLocaleString()} PTS</span>
-            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{currentRank.next ? `${currentRank.next.toLocaleString()}` : 'MAX'}</span>
-          </div>
-          <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)]">
-            <div className={`h-full rounded-r-full transition-none relative ${isGod ? 'bg-gradient-to-r from-yellow-500 to-white' : 'bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)]'}`} style={{ width: `${currentRank.progress}%` }}>
-               <div className="absolute inset-0 bg-white/20 w-full h-full animate-pulse" />
+            <div className={`w-full max-w-sm flex flex-col items-center relative z-10 p-6 ${isRankLeveling ? 'animate-[rank-epic-enter_1.5s_cubic-bezier(0.22,1,0.36,1)_forwards]' : 'animate-in slide-in-from-bottom-8 duration-700'}`}>
+              <style dangerouslySetInnerHTML={{__html: `
+                @keyframes rank-epic-enter { 0% { transform: scale(0.2) rotate(-20deg) translateY(100px); opacity: 0; filter: blur(20px); } 40% { transform: scale(1.15) rotate(5deg) translateY(-10px); opacity: 1; filter: blur(0px); } 70% { transform: scale(0.95) rotate(-2deg) translateY(5px); } 100% { transform: scale(1) rotate(0deg) translateY(0); } }
+                @keyframes rank-burst { 0% { transform: scale(0.5); opacity: 1; border-width: 25px; } 100% { transform: scale(4); opacity: 0; border-width: 0px; } }
+                @keyframes aura-spin { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.1); } 100% { transform: rotate(360deg) scale(1); } }
+              `}} />
+              <span className={`text-[10px] font-black uppercase tracking-[0.4em] mb-12 ${isRankLeveling ? 'text-blue-400 animate-pulse drop-shadow-[0_0_15px_rgba(96,165,250,1)]' : 'text-blue-500'}`}>{isRankLeveling ? "RANK UP ACHIEVED" : "Workout Complete"}</span>
+              <div className="relative flex justify-center items-center mb-12 w-48 h-48">
+                {isRankLeveling && (
+                  <>
+                    <div className="absolute inset-0 rounded-full border-white animate-[rank-burst_1.2s_cubic-bezier(0.22,1,0.36,1)_forwards]" />
+                    <div className="absolute inset-0 rounded-full border-blue-400 animate-[rank-burst_1.8s_cubic-bezier(0.22,1,0.36,1)_0.2s_forwards]" />
+                    <div className="absolute w-[300px] h-[300px] bg-[conic-gradient(from_0deg,transparent_0deg,rgba(96,165,250,0.4)_90deg,transparent_180deg,rgba(96,165,250,0.4)_270deg,transparent_360deg)] rounded-full animate-[aura-spin_4s_linear_infinite]" />
+                    <div className="absolute inset-0 blur-[60px] rounded-full bg-white opacity-80 animate-ping" />
+                  </>
+                )}
+                {!isRankLeveling && <div className="absolute inset-0 blur-[60px] rounded-full bg-blue-500/20 animate-pulse" />}
+                <img src={`/ranks/${currentRank.image}`} alt="Rank" className={`w-48 h-48 object-contain relative z-20 drop-shadow-[0_0_30px_rgba(255,255,255,0.4)] ${isRankLeveling ? 'animate-[idle-titan_2.5s_ease-in-out_infinite]' : ''}`} />
+              </div>
+              <h2 className="text-5xl font-black uppercase tracking-widest text-white mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{currentRank.name}</h2>
+              <span className="text-sm font-bold text-white/60 tracking-[0.4em] uppercase mb-16">{currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
+              <div className="w-full flex justify-between items-end mb-3 px-1">
+                <span className="text-2xl font-black tracking-widest text-white">{Math.floor(displayPoints).toLocaleString()} PTS</span>
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{currentRank.next ? `${currentRank.next.toLocaleString()}` : 'MAX'}</span>
+              </div>
+              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)]">
+                <div className={`h-full rounded-r-full transition-none relative ${isGod ? 'bg-gradient-to-r from-yellow-500 to-white' : 'bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.9)]'}`} style={{ width: `${currentRank.progress}%` }}>
+                   <div className="absolute inset-0 bg-white/20 w-full h-full animate-pulse" />
+                </div>
+              </div>
+              <div className={`mt-20 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 ${isRankAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to continue</div>
             </div>
-          </div>
-          <div className={`mt-16 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 ${isRankAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to continue</div>
-        </div>
-      )}
+          )}
 
       {step === 'xp' && (
         <div className="w-full max-w-sm flex flex-col items-center animate-in slide-in-from-right-8 duration-500 relative z-10 pb-32 overflow-y-auto px-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -391,11 +393,12 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
     }
   };
 
-  const closeSummary = () => {
+const closeSummary = () => {
     setWorkoutSummary(null);
     setActiveTemplate(null);
     if (onClearPastDate) onClearPastDate();
     window.dispatchEvent(new Event('rank-glow-update'));
+    window.dispatchEvent(new Event('go-to-progression'));
   };
 
   const handleDeleteTemplate = async (e: React.MouseEvent, id: string, name: string) => {

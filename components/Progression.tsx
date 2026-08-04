@@ -137,15 +137,10 @@ const goToStep = (step: number) => {
 
 if (showCalibration) {
     return (
-      <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center px-6 transition-colors duration-1000">
+      <div className="absolute inset-0 min-h-[100dvh] w-full z-[999] bg-[#09090b] flex flex-col items-center justify-center px-6 transition-colors duration-1000 overflow-y-auto overscroll-none">
         
-        {/* Smart Scroll Lock to prevent dark rectangle artifacts */}
-        <style dangerouslySetInnerHTML={{__html: `
-          html, body { overflow: visible !important; height: auto !important; overscroll-behavior-y: none !important; }
-        `}} />
-
         {/* Premium Atmospheric Background */}
-        <div className="absolute inset-0 z-[-1] bg-[#09090b] overflow-hidden pointer-events-none">
+        <div className="fixed inset-0 z-[0] overflow-hidden pointer-events-none">
           <div className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] bg-blue-900/20 rounded-full mix-blend-screen filter blur-[80px] animate-[pulse_6s_ease-in-out_infinite]" />
           <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-indigo-900/20 rounded-full mix-blend-screen filter blur-[80px] animate-[pulse_8s_ease-in-out_infinite_reverse]" />
         </div>
@@ -157,9 +152,8 @@ if (showCalibration) {
           </div>
         )}
 
-        {onboardingStep < 5 ? (
-          <div className={`w-full max-w-sm flex flex-col items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isTransitioning ? 'opacity-0 scale-95 blur-[8px] -translate-y-4 pointer-events-none' : 'opacity-100 scale-100 blur-0 translate-y-0'}`}>
-            
+{onboardingStep < 5 ? (
+          <div className={`relative z-10 w-full max-w-sm flex flex-col items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isTransitioning ? 'opacity-0 scale-95 blur-[8px] -translate-y-4 pointer-events-none' : 'opacity-100 scale-100 blur-0 translate-y-0'}`}>            
             {onboardingStep === 1 && (
               <>
                 <Crown className="text-blue-500 mb-8 w-20 h-20 animate-[idle-float_4s_ease-in-out_infinite] drop-shadow-[0_0_20px_rgba(59,130,246,0.4)]" />
@@ -203,34 +197,38 @@ if (showCalibration) {
               </>
             )}
           </div>
-        ) : (() => {
+) : (() => {
            // Step 5: Epic Cinematic Rank Slam
            const calcRank = getAccountRank(liftMonths * 30000);
            const tTheme = RANK_THEMES[calcRank.name] || RANK_THEMES['Wood'];
            return (
              <div 
-               className="absolute inset-0 w-full h-full flex flex-col items-center justify-center z-50 cursor-pointer overflow-hidden touch-none" 
+               className="absolute inset-0 min-h-[100dvh] w-full flex flex-col items-center justify-center z-50 cursor-pointer overflow-hidden touch-none" 
                onClick={completeCalibration}
              >
                 <style dangerouslySetInnerHTML={{__html: `
-                  @keyframes rank-slam { 0% { transform: scale(3) translateY(-50px); opacity: 0; filter: blur(20px); } 30% { transform: scale(0.9) translateY(10px); opacity: 1; filter: blur(0px); } 50% { transform: scale(1.05) translateY(-5px); } 100% { transform: scale(1) translateY(0); } }
-                  @keyframes shockwave-pulse { 0% { transform: scale(0.5); opacity: 1; border-width: 15px; } 100% { transform: scale(3.5); opacity: 0; border-width: 0px; } }
+                  @keyframes rank-epic-enter { 0% { transform: scale(0.2) rotate(-20deg) translateY(100px); opacity: 0; filter: blur(20px); } 40% { transform: scale(1.15) rotate(5deg) translateY(-10px); opacity: 1; filter: blur(0px); } 70% { transform: scale(0.95) rotate(-2deg) translateY(5px); } 100% { transform: scale(1) rotate(0deg) translateY(0); } }
+                  @keyframes rank-burst { 0% { transform: scale(0.5); opacity: 1; border-width: 25px; } 100% { transform: scale(4); opacity: 0; border-width: 0px; } }
+                  @keyframes aura-spin { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.1); } 100% { transform: rotate(360deg) scale(1); } }
                 `}} />
-                <div className="absolute w-[800px] h-[800px] opacity-20 blur-[100px] rounded-full animate-pulse transition-colors duration-1000 z-0" style={{ backgroundColor: tTheme.hex }} />
                 
-                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/50 mb-12 z-10 animate-in slide-in-from-top-10 fade-in duration-1000 delay-500 fill-mode-both">Starting Rank Established</span>
+                <div className="absolute inset-0 bg-[#09090b] z-[-1]" />
+                <div className="absolute w-[800px] h-[800px] opacity-20 blur-[100px] rounded-full animate-pulse transition-colors duration-1000 z-0 pointer-events-none" style={{ backgroundColor: tTheme.hex }} />
                 
-                <div className="relative flex justify-center items-center w-64 h-64 z-10 animate-[rank-slam_1.2s_ease-out_forwards]">
-                  <div className="absolute inset-0 rounded-full animate-[shockwave-pulse_1s_ease-out_0.2s_forwards]" style={{ borderColor: tTheme.hex }} />
-                  <div className="absolute inset-0 rounded-full animate-[shockwave-pulse_1.5s_ease-out_0.4s_forwards]" style={{ borderColor: tTheme.hex }} />
-                  <div className="absolute inset-0 blur-[80px] rounded-full opacity-60 animate-ping" style={{ backgroundColor: tTheme.hex }} />
-                  <img src={`/ranks/${calcRank.image}`} alt={calcRank.name} className={`w-56 h-56 object-contain relative z-20 drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] ${tTheme.anim}`} />
+                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/50 mb-16 z-10 animate-in slide-in-from-top-10 fade-in duration-1000 delay-500 fill-mode-both">Starting Rank Established</span>
+                
+                <div className="relative flex justify-center items-center w-64 h-64 z-10 animate-[rank-epic-enter_1.5s_cubic-bezier(0.22,1,0.36,1)_forwards]">
+                  <div className="absolute inset-0 rounded-full border-white animate-[rank-burst_1.2s_cubic-bezier(0.22,1,0.36,1)_forwards]" />
+                  <div className="absolute inset-0 rounded-full animate-[rank-burst_1.8s_cubic-bezier(0.22,1,0.36,1)_0.2s_forwards]" style={{ borderColor: tTheme.hex }} />
+                  <div className="absolute w-[400px] h-[400px] rounded-full animate-[aura-spin_4s_linear_infinite] opacity-50 mix-blend-screen" style={{ background: `conic-gradient(from 0deg, transparent 0deg, ${tTheme.hex} 90deg, transparent 180deg, ${tTheme.hex} 270deg, transparent 360deg)` }} />
+                  <div className="absolute inset-0 blur-[60px] rounded-full bg-white opacity-80 animate-ping" />
+                  <img src={`/ranks/${calcRank.image}`} alt={calcRank.name} className={`w-64 h-64 object-contain relative z-20 drop-shadow-[0_0_40px_rgba(255,255,255,0.4)] ${tTheme.anim}`} />
                 </div>
 
-                <h1 className="text-6xl font-black uppercase tracking-tighter mt-10 z-10 text-center animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-700 fill-mode-both" style={{ color: tTheme.hex, textShadow: `0 0 30px ${tTheme.hex}80` }}>{calcRank.name}</h1>
-                <span className="text-sm font-bold text-white/80 tracking-[0.3em] uppercase mt-4 z-10 animate-in fade-in duration-1000 delay-1000 fill-mode-both">{calcRank.tier || `LEVEL ${calcRank.tier}`}</span>
+                <h1 className="text-7xl font-black uppercase tracking-tighter mt-12 z-10 text-center animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-700 fill-mode-both" style={{ color: tTheme.hex, textShadow: `0 0 40px ${tTheme.hex}80` }}>{calcRank.name}</h1>
+                <span className="text-sm font-bold text-white/80 tracking-[0.4em] uppercase mt-4 z-10 animate-in fade-in duration-1000 delay-1000 fill-mode-both">{calcRank.tier || `LEVEL ${calcRank.tier}`}</span>
                 
-                <div className="absolute bottom-16 text-[10px] font-black uppercase tracking-widest text-white/40 animate-in fade-in duration-1000 delay-[2000ms] fill-mode-both bg-black/20 px-6 py-3 rounded-full backdrop-blur-sm border border-white/10">
+                <div className="absolute bottom-20 text-[10px] font-black uppercase tracking-widest text-white/40 animate-in fade-in duration-1000 delay-[2000ms] fill-mode-both bg-black/30 px-8 py-4 rounded-full backdrop-blur-md border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
                   <span className="animate-pulse">Tap anywhere to continue</span>
                 </div>
              </div>

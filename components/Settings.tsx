@@ -143,16 +143,16 @@ const handleClearData = async () => {
 return (
     <>
 {isDeleting && (
-        <div className="fixed inset-0 z-[999999] flex flex-col items-center justify-center animate-[core-meltdown_2.5s_ease-in_forwards] pointer-events-none origin-center mix-blend-screen">
+        <div className="fixed inset-0 z-[999999] bg-white flex flex-col items-center justify-center animate-[world-collapse_2.5s_ease-in_forwards] pointer-events-none origin-center">
           <style dangerouslySetInnerHTML={{__html: `
-            @keyframes core-meltdown {
-              0% { opacity: 0; transform: scale(1); filter: brightness(1) contrast(1); background-color: transparent; }
-              10% { opacity: 1; transform: scale(1.02) translate(1px, -1px); filter: brightness(1.2) contrast(1.5); background-color: rgba(255, 0, 0, 0.05); box-shadow: inset 0 0 50px rgba(255,0,0,0.2); }
-              30% { opacity: 1; transform: scale(1.05) translate(-3px, 3px) skew(1deg); filter: brightness(1.5) contrast(2) hue-rotate(-10deg); background-color: rgba(255, 0, 0, 0.2); box-shadow: inset 0 0 100px rgba(255,0,0,0.5); }
-              50% { opacity: 1; transform: scale(1.1) translate(5px, -5px) skew(-2deg); filter: brightness(3) blur(2px); background-color: rgba(255, 100, 100, 0.5); box-shadow: inset 0 0 200px rgba(255,100,100,0.8); }
-              70% { opacity: 1; transform: scale(1.15) translate(-8px, 8px); filter: brightness(8) blur(5px); background-color: rgba(255, 200, 200, 0.8); }
-              85% { opacity: 1; transform: scale(1.2) translate(10px, -10px); filter: brightness(15) blur(10px); background-color: #fff; }
-              100% { opacity: 1; transform: scale(1.5) translate(0, 0); filter: brightness(20) blur(20px); background-color: #fff; }
+            @keyframes world-collapse {
+              0% { opacity: 0; filter: brightness(1); transform: scale(1) translate(0, 0); }
+              10% { opacity: 1; filter: brightness(2); transform: scale(1.02) translate(2px, -2px); }
+              20% { opacity: 1; filter: brightness(3); transform: scale(1.05) translate(-4px, 4px) rotate(1deg); }
+              40% { opacity: 1; filter: brightness(5); transform: scale(1.1) translate(6px, -4px) rotate(-1deg); }
+              60% { opacity: 1; filter: brightness(8); transform: scale(1.15) translate(-8px, 6px) rotate(2deg); }
+              80% { opacity: 1; filter: brightness(10); transform: scale(1.2) translate(10px, -8px) rotate(-2deg); background-color: white;}
+              100% { opacity: 1; filter: brightness(20); transform: scale(1.5) translate(0, 0); background-color: white; }
             }
           `}} />
         </div>
