@@ -83,7 +83,6 @@ export default function Settings() {
       await db.bodyWeightLogs.clear();
       await db.favorites.clear();
       
-      // Fully clear rank and calibration
       localStorage.removeItem('gym_calibrated');
       localStorage.removeItem('gym_calibration_pts');
       
@@ -160,8 +159,9 @@ export default function Settings() {
               <span className="text-[hsl(var(--foreground))] font-bold">Anatomy Model</span>
             </div>
             <div className="flex bg-[hsl(var(--surface))] rounded-lg border border-[hsl(var(--border))] p-1">
-              <button onClick={() => handleGenderChange('male')} className={`px-4 py-1.5 rounded-md text-lg font-bold transition-colors ${gender === 'male' ? 'bg-blue-600 text-white' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]'}`}>♂</button>
-              <button onClick={() => handleGenderChange('female')} className={`px-4 py-1.5 rounded-md text-lg font-bold transition-colors ${gender === 'female' ? 'bg-blue-600 text-white' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]'}`}>♀</button>
+              {/* Flex items-center + leading-none strictly centers symbols */}
+              <button onClick={() => handleGenderChange('male')} className={`px-4 py-2 rounded-md text-xl font-bold flex items-center justify-center leading-none transition-colors ${gender === 'male' ? 'bg-blue-600 text-white' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]'}`}>♂</button>
+              <button onClick={() => handleGenderChange('female')} className={`px-4 py-2 rounded-md text-xl font-bold flex items-center justify-center leading-none transition-colors ${gender === 'female' ? 'bg-blue-600 text-white' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]'}`}>♀</button>
             </div>
           </div>
 

@@ -100,7 +100,7 @@ export default function AnalyticsDashboard() {
     const today = new Date();
     today.setHours(0,0,0,0);
     
-    // Lock out future dates
+    // Hard block any future dates
     if (cellDate > today) return; 
 
     setSelectedDateString(dateStr);
@@ -140,6 +140,7 @@ export default function AnalyticsDashboard() {
             const cellDate = new Date(cell.y, cell.m, cell.d);
             const today = new Date();
             today.setHours(0,0,0,0);
+            
             const isToday = cellDate.getTime() === today.getTime();
             const isFuture = cellDate > today;
             
@@ -147,16 +148,19 @@ export default function AnalyticsDashboard() {
 
             if (isFuture) {
               baseClasses += "opacity-20 cursor-not-allowed text-[hsl(var(--muted))] bg-[hsl(var(--surface))]";
+            } else if (!isWorkout) {
+              baseClasses += "opacity-40 cursor-pointer text-[hsl(var(--muted))] bg-[hsl(var(--surface))] hover:opacity-80 active:scale-95 border border-transparent border-dashed hover:border-[hsl(var(--border))]";
             } else {
               baseClasses += "cursor-pointer ";
               if (cell.isCurrentMonth) {
-                if (isWorkout) baseClasses += "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)] hover:brightness-110 active:scale-95 ";
-                else if (isToday) baseClasses += "border-2 border-blue-500 text-blue-500 bg-blue-500/10 ";
-                else baseClasses += "bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--border))] active:scale-95 ";
+                baseClasses += "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)] hover:brightness-110 active:scale-95 ";
               } else {
-                if (isWorkout) baseClasses += "bg-blue-500/20 text-blue-500/80 active:scale-95 ";
-                else baseClasses += "bg-[hsl(var(--surface))] text-[hsl(var(--muted))] opacity-30 hover:opacity-60 ";
+                baseClasses += "bg-blue-500/30 text-blue-400 active:scale-95 ";
               }
+            }
+            
+            if (isToday && !isWorkout) {
+               baseClasses = baseClasses.replace('opacity-40', 'opacity-100 border-blue-500 text-blue-500 bg-blue-500/10 border-solid');
             }
             
             return (

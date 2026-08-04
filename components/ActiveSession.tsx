@@ -148,9 +148,9 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
   const isGod = currentRank.name === 'God';
 
   return (
-    <div className="fixed inset-0 w-screen h-screen z-[200] bg-[#09090b] flex flex-col items-center justify-center p-6 animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
+    <div className="fixed inset-0 w-screen h-screen z-[999999] bg-[#09090b] flex flex-col items-center justify-center p-0 m-0 overflow-hidden animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
       {step === 'rank' && (
-        <div className={`w-full max-w-sm flex flex-col items-center animate-in slide-in-from-bottom-8 duration-700 relative z-10 transition-transform ${isRankLeveling ? 'scale-110 drop-shadow-[0_0_50px_rgba(59,130,246,0.8)]' : ''}`}>
+        <div className={`w-full max-w-sm flex flex-col items-center animate-in slide-in-from-bottom-8 duration-700 relative z-10 transition-transform p-6 ${isRankLeveling ? 'scale-110 drop-shadow-[0_0_50px_rgba(59,130,246,0.8)]' : ''}`}>
           <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8">{isRankLeveling ? "RANK UP!" : "Workout Complete"}</span>
           <div className="relative flex justify-center items-center mb-8 w-48 h-48">
             <div className={`absolute inset-0 blur-[60px] rounded-full ${isRankLeveling ? 'bg-white opacity-80 animate-ping' : 'bg-blue-500/20 animate-pulse'}`} />
@@ -170,7 +170,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
       )}
 
       {step === 'xp' && (
-        <div className="w-full max-w-sm flex flex-col items-center animate-in slide-in-from-right-8 duration-500 relative z-10 pb-32 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="w-full max-w-sm flex flex-col items-center animate-in slide-in-from-right-8 duration-500 relative z-10 pb-32 overflow-y-auto px-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8 mt-12">Muscle Mastery</span>
           <div className="w-full space-y-4">
             {Object.entries(earnedXP).map(([muscle]: any, idx) => {
@@ -298,7 +298,6 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
     if (wakeLockRef.current) { try { await wakeLockRef.current.release(); wakeLockRef.current = null; } catch (err) {} } 
   };
 
-  // Timestamp Background Timer Execution via setInterval for solid background lock screen support
   useEffect(() => {
     if (!showTimerOverlay || !restEndTime) return;
     
@@ -310,7 +309,6 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
         triggerHaptic(true); 
         setShowTimerOverlay(false);
         
-// Push notification utilizing Service Worker for maximum background reach
         if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
           navigator.serviceWorker.ready.then(reg => {
             reg.showNotification('Rest Complete', { 
@@ -485,6 +483,7 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
       if (newCompleted >= plannedSets.length && exerciseIndex >= activeTemplate!.exercises.length - 1) {
         endWorkout(sessionPoints + pointsGained, { ...sessionXP, [exCategory]: (sessionXP[exCategory] || 0) + xpGained });
       } else {
+        setRestTimerLeft(defaultTimer * 1000);
         setRestEndTime(Date.now() + (defaultTimer * 1000));
         setTotalRestTime(defaultTimer); 
         setShowTimerOverlay(true);
@@ -494,6 +493,10 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
 
   const adjustValue = (setter: any, val: string, delta: number) => { setter((prev: string) => Math.max(0, Number(prev || 0) + delta).toString()); };
   const tagLabels = { normal: 'Normal', warmup: 'Warm-up', drop: 'Dropset', failure: 'Failure' };
+
+  // Helper check if the logged past workout date is actually strictly in the past
+  const isToday = (timestamp: number) => new Date(timestamp).setHours(0,0,0,0) === new Date().setHours(0,0,0,0);
+  const isActuallyPastWorkout = pastWorkoutDate && !isToday(pastWorkoutDate);
 
   if (!isMounted) {
     return <div className="h-full w-full flex items-center justify-center bg-transparent"><Loader2 className="animate-spin text-[hsl(var(--muted))]" size={32}/></div>;
@@ -587,12 +590,12 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
   if (previewTemplate) {
     return (
       <div className="fixed inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in slide-in-from-right-4 w-screen h-screen pb-safe">
-        {pastWorkoutDate && (
-          <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest text-center py-1.5 z-10 shadow-md">
-            Logging Past Workout: {new Date(pastWorkoutDate).toLocaleDateString()}
+        {isActuallyPastWorkout && (
+          <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest text-center py-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] z-10 shadow-md">
+            Logging Past Workout: {new Date(pastWorkoutDate as number).toLocaleDateString()}
           </div>
         )}
-        <div className="flex items-center gap-4 mb-8 mt-6">
+        <div className={`flex items-center gap-4 mb-8 mt-6 ${isActuallyPastWorkout ? 'pt-6' : ''}`}>
           <button onClick={() => { setPreviewTemplate(null); if(onClearPastDate) onClearPastDate(); }} className="p-3 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] text-[hsl(var(--muted))]"><ArrowLeft size={20} /></button>
           <div className="flex-1 min-w-0"><span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))]">Preview</span><h2 className="text-3xl font-black text-[hsl(var(--foreground))] truncate">{previewTemplate.name}</h2></div>
         </div>
@@ -606,7 +609,8 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
             </div>
           ))}
         </div>
-        <div className="flex-none pt-4 mb-6 border-t border-[hsl(var(--border))]">
+        {/* Ensures the button clears the bottom nav bar */}
+        <div className="flex-none pt-4 pb-[110px] border-t border-[hsl(var(--border))] bg-[hsl(var(--background))]">
           <button onClick={startWorkout} className="w-full bg-blue-600 text-white font-black text-xl py-5 rounded-3xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-md"><PlayCircle size={28} /> START WORKOUT</button>
         </div>
       </div>
@@ -617,14 +621,14 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
 
   return (
     <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col w-screen h-screen animate-in slide-in-from-bottom-4">
-      {pastWorkoutDate && (
-        <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest text-center py-1.5 z-50 shadow-md">
-          Logging Past Workout: {new Date(pastWorkoutDate).toLocaleDateString()}
+      {isActuallyPastWorkout && (
+        <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest text-center py-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] z-50 shadow-md">
+          Logging Past Workout: {new Date(pastWorkoutDate as number).toLocaleDateString()}
         </div>
       )}
 
       {showTimerOverlay && (
-        <div className="absolute inset-0 z-[110] bg-[#09090b]/95 backdrop-blur-2xl flex flex-col items-center justify-center animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[999999] bg-[#09090b]/95 backdrop-blur-2xl flex flex-col items-center justify-center animate-in fade-in duration-300">
           <span className="text-blue-500 font-black tracking-[0.4em] uppercase text-sm mb-12 drop-shadow-md">Take a break</span>
           <div className="relative w-64 h-64 flex items-center justify-center mb-10">
             <svg className="absolute inset-0 w-full h-full transform -rotate-90">
@@ -650,10 +654,10 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
         </div>
       )}
 
-      {/* NEW CLEAN HEADER FOR ACTIVE WORKOUT */}
-      <div className="flex-none flex justify-between items-start pt-[max(env(safe-area-inset-top),3rem)] px-6 pb-4 border-b border-[hsl(var(--border))]/50 mt-4">
+      <div className={`flex-none flex justify-between items-start pt-[max(env(safe-area-inset-top),3rem)] px-6 pb-4 border-b border-[hsl(var(--border))]/50 mt-4 ${isActuallyPastWorkout ? 'pt-[calc(env(safe-area-inset-top)+3.5rem)]' : ''}`}>
         <div className="flex-1 min-w-0 pr-4">
-          <h1 className="text-3xl font-black tracking-tight drop-shadow-sm leading-tight truncate">{currentExercise.name}</h1>
+          {/* Un-truncated active workout title */}
+          <h1 className="text-3xl font-black tracking-tight drop-shadow-sm leading-tight whitespace-normal break-words">{currentExercise.name}</h1>
           <p className="font-black tracking-[0.2em] text-[10px] uppercase mt-2 text-[hsl(var(--muted))] flex items-center gap-2">
             Set {completedSets + 1} of {plannedSets.length}
             {!isExerciseDone && <span className="text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded">{tagLabels[currentTag as keyof typeof tagLabels]}</span>}
@@ -665,7 +669,7 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 overflow-y-auto px-6 py-6 pb-28 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <div className="flex justify-start mb-6">
           <button onClick={() => { setActiveTemplate(null); if(onClearPastDate) onClearPastDate(); }} className="text-[hsl(var(--muted))] flex items-center gap-1 text-[10px] font-black uppercase tracking-widest hover:text-red-500 transition-colors bg-[hsl(var(--surface))] px-4 py-2 rounded-xl border border-[hsl(var(--border))] shadow-sm active:scale-95">
             <ArrowLeft size={14} /> End Session
