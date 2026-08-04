@@ -66,57 +66,64 @@ export default function Home() {
     return <div className="h-[100dvh] bg-[hsl(var(--background))] flex items-center justify-center"><Loader2 className="animate-spin text-[hsl(var(--muted))]" size={32}/></div>;
   }
 
-  return (
-    <>
+return (
+    <main className={`min-h-[100dvh] w-full max-w-md mx-auto flex flex-col relative transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-transparent' : 'bg-[hsl(var(--background))]'}`}>      {/* 
+        Force Unlock Global Scrolling:
+        This overrides the native app lock in layout.tsx/globals.css so the 
+        page scrolls natively and the bottom lock gap disappears completely.
+      */}
+      <style dangerouslySetInnerHTML={{__html: `
+        html, body { 
+          overflow: visible !important; 
+          height: auto !important; 
+          overscroll-behavior-y: auto !important; 
+        }
+      `}} />
+
       {/* Global Fixed Background specifically to cover the entire screen for Progression */}
       {activeTab === 'progression' && (
         <div className="fixed inset-0 w-screen h-screen z-[-1] bg-[#09090b] transition-opacity duration-500" />
       )}
 
       {/* 
-        Internal Scroll Container: 
-        Locked to 100dvh. This prevents the mobile browser URL bar from collapsing 
-        and causing layout jumps. Scrolling happens INSIDE this container.
+        Native Scroll Container:
+        No overflow-hidden locks. The header is placed INSIDE this flow so it 
+        scrolls away as the user scrolls down the page.
       */}
-      <main className={`h-[100dvh] w-full max-w-md mx-auto overflow-y-auto relative transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-transparent' : 'bg-[hsl(var(--background))]'}`}>
+      <div className={`flex flex-col w-full pb-32 ${activeTab === 'progression' ? 'px-0' : 'px-4'}`}>
         
-        <div className={`flex flex-col w-full min-h-full pb-32 ${activeTab === 'progression' ? 'px-0' : 'px-4'}`}>
-          
-          {/* Header is now part of the scroll flow */}
-          <header className={`pt-[max(env(safe-area-inset-top),2rem)] pb-4 flex justify-between items-start transition-colors duration-500 ${activeTab === 'progression' ? 'text-white px-6' : ''}`}>
-            <div>
-              <h1 className="text-4xl font-black tracking-tight drop-shadow-sm">{header.title}</h1>
-              <p className={`font-black tracking-[0.2em] text-[10px] uppercase mt-1 ${activeTab === 'progression' ? 'text-blue-500 drop-shadow-md' : 'text-[hsl(var(--muted))]'}`}>
-                {header.subtitle}
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                if (activeTab === 'settings') setActiveTab(previousTab);
-                else { setPreviousTab(activeTab); setActiveTab('settings'); }
-              }}
-              className={`p-3 rounded-full transition-all duration-300 shadow-sm border ${activeTab === 'settings' ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] rotate-90 border-[hsl(var(--foreground))]' : (activeTab === 'progression' ? 'bg-white/10 text-white/70 hover:text-white border-white/20' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] bg-[hsl(var(--surface))] border-[hsl(var(--border))]')}`}
-            >
-              {activeTab === 'settings' ? <X size={20} /> : <SettingsIcon size={20} />}
-            </button>
-          </header>
+        <header className={`pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start transition-colors duration-500 ${activeTab === 'progression' ? 'text-white px-6' : ''}`}>
+          <div>
+            <h1 className="text-4xl font-black tracking-tight drop-shadow-sm">{header.title}</h1>
+            <p className={`font-black tracking-[0.2em] text-[10px] uppercase mt-1 ${activeTab === 'progression' ? 'text-blue-500 drop-shadow-md' : 'text-[hsl(var(--muted))]'}`}>
+              {header.subtitle}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              if (activeTab === 'settings') setActiveTab(previousTab);
+              else { setPreviousTab(activeTab); setActiveTab('settings'); }
+            }}
+            className={`p-3 rounded-full transition-all duration-300 shadow-sm border ${activeTab === 'settings' ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] rotate-90 border-[hsl(var(--foreground))]' : (activeTab === 'progression' ? 'bg-white/10 text-white/70 hover:text-white border-white/20' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] bg-[hsl(var(--surface))] border-[hsl(var(--border))]')}`}
+          >
+            {activeTab === 'settings' ? <X size={20} /> : <SettingsIcon size={20} />}
+          </button>
+        </header>
 
-          {activeTab === 'workout' && <ActiveSession pastWorkoutDate={pastWorkoutDate} onClearPastDate={() => setPastWorkoutDate(null)} />}
-          {activeTab === 'builder' && <WorkoutBuilder />}
-          {activeTab === 'progression' && <Progression />}
-          {activeTab === 'analytics' && <AnalyticsDashboard />}
-          {activeTab === 'library' && <ExerciseLibrary />}
-          {activeTab === 'settings' && <Settings />}
-        </div>
-      </main>
-
-      {/* 
+        {activeTab === 'workout' && <ActiveSession pastWorkoutDate={pastWorkoutDate} onClearPastDate={() => setPastWorkoutDate(null)} />}
+        {activeTab === 'builder' && <WorkoutBuilder />}
+        {activeTab === 'progression' && <Progression />}
+        {activeTab === 'analytics' && <AnalyticsDashboard />}
+        {activeTab === 'library' && <ExerciseLibrary />}
+        {activeTab === 'settings' && <Settings />}
+      </div>
+{/* 
         Fixed Floating Nav:
-        Sits exactly above the home indicator safe-area without jumping.
+        Stays glued to the viewport securely above the safe area.
       */}
       <div 
-        className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 0.5rem)' }}
+        className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90] bottom-4"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
       >
         <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem]">
           {navItems.map((tab) => {
@@ -149,6 +156,6 @@ export default function Home() {
           })}
         </nav>
       </div>
-    </>
+    </main>
   );
 }
