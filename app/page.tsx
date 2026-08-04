@@ -119,25 +119,30 @@ return (
       </div>
 {/* 
         Fixed Floating Nav:
-        Locked precisely to the bottom safe area to match image_a301df.png.
-        Using explicit bottom calculation with a 0px fallback ensures Safari does not drop the CSS rule, and transform-gpu locks it during iOS scroll.
+        Redesigned with a premium, highly isolated frosted-glass aesthetic.
+        Splitting the bottom and margin properties forces Safari to render the float immediately on load.
       */}
       <div 
-        className="fixed inset-x-0 w-full z-[90] flex justify-center pointer-events-none transform-gpu"
-        style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
+        className="fixed inset-x-0 z-[90] flex justify-center pointer-events-none transform-gpu"
+        style={{ bottom: 'env(safe-area-inset-bottom, 20px)', marginBottom: '1.5rem' }}
       >
-        <nav className="w-[92%] max-w-[400px] flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem] pointer-events-auto shadow-lg">          {navItems.map((tab) => {
+        <nav className="w-[92%] max-w-[400px] flex px-2 py-2 items-center justify-between bg-[#1a1a1c]/70 backdrop-blur-2xl border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-full pointer-events-auto">
+          {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
             const isCenter = tab.id === 'progression';
 
             if (isCenter) {
               return (
-                <div key={tab.id} className="relative flex items-center justify-center px-1">
+                <div key={tab.id} className="relative flex items-center justify-center px-2">
                   <button
                     onClick={() => handleTabClick(tab.id)}
-                    className={`absolute bottom-[-8px] flex items-center justify-center w-16 h-16 rounded-full border-[4px] border-[hsl(var(--background))] transition-all duration-500 active:scale-95 ${isActive ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] shadow-[0_5px_15px_rgba(0,0,0,0.2)]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] hover:brightness-110'} ${rankGlow && !isActive ? 'animate-pulse bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)] border-transparent' : ''}`}
+                    className={`absolute bottom-[-10px] flex items-center justify-center w-[68px] h-[68px] rounded-full transition-all duration-500 active:scale-95 ${
+                      isActive 
+                        ? 'bg-gradient-to-b from-gray-700 to-gray-900 text-white shadow-[0_8px_20px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.2)] border border-white/20' 
+                        : 'bg-[#121214] text-white/60 hover:text-white border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)]'
+                    } ${rankGlow && !isActive ? 'animate-pulse bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)] border-transparent' : ''}`}
                   >
-                    <tab.icon size={26} strokeWidth={2.5} className={isActive || (rankGlow && !isActive) ? "opacity-100" : "opacity-70"} />
+                    <tab.icon size={28} strokeWidth={isActive ? 2.5 : 2} className={isActive || (rankGlow && !isActive) ? "opacity-100" : "opacity-80"} />
                   </button>
                 </div>
               );
@@ -147,10 +152,16 @@ return (
               <button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-3xl transition-all duration-300 ${isActive ? 'text-[hsl(var(--foreground))]' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]'}`}
+                className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 px-1 rounded-full transition-all duration-300 ${
+                  isActive 
+                    ? 'text-white bg-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]' 
+                    : 'text-white/40 hover:text-white hover:bg-white/5'
+                }`}
               >
-                <tab.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                <span className="text-[9px] font-black uppercase tracking-widest">{tab.label}</span>
+                <tab.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                <span className={`text-[9px] font-black uppercase tracking-widest transition-all duration-300 ${isActive ? 'opacity-100 h-auto mt-1' : 'opacity-0 h-0 overflow-hidden'}`}>
+                  {tab.label}
+                </span>
               </button>
             );
           })}
