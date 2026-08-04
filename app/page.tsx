@@ -121,13 +121,13 @@ return (
       </div>
 {/* 
         Fixed Floating Nav:
-        - Absolute iOS Lock: explicit bottom: 0px with paddingBottom calc absolutely guarantees zero shift on viewport changes.
-        - CSS Grid: Forces exactly equal widths (grid-cols-5) so buttons never squeeze, clip, or shift adjacent items.
-        - Layout-free animations: Using translate-y and opacity instead of margins/heights to guarantee 60fps buttery smoothness.
+        - Pure CSS Lock: Moving the env() math out of React inline styles and into Tailwind arbitrary values 
+          forces iOS to calculate the safe area BEFORE JavaScript loads, permanently eliminating the startup jump.
+        - CSS Grid: Forces exactly equal widths (grid-cols-5).
+        - Layout-free animations: Using translate-y and opacity guarantees 60fps smoothness.
       */}
       <div 
-        className="fixed inset-x-0 z-[90] flex justify-center pointer-events-none transform-gpu"
-        style={{ bottom: '-20px', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+        className="fixed bottom-0 inset-x-0 z-[90] flex justify-center pointer-events-none transform-gpu pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
       >
         <nav className="w-[92%] max-w-[400px] h-[72px] grid grid-cols-5 items-center bg-[#0e0e11]/85 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-[2.5rem] pointer-events-auto touch-none px-1.5">
           {navItems.map((tab) => {
