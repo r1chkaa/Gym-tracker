@@ -127,7 +127,7 @@ return (
       */}
       <div 
         className="fixed inset-x-0 z-[90] flex justify-center pointer-events-none transform-gpu"
-        style={{ bottom: '0px', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+        style={{ bottom: '-20px', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
       >
         <nav className="w-[92%] max-w-[400px] h-[72px] grid grid-cols-5 items-center bg-[#0e0e11]/85 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-[2.5rem] pointer-events-auto touch-none px-1.5">
           {navItems.map((tab) => {
