@@ -104,7 +104,7 @@ export default function Home() {
       {/* Floating Bottom Nav Bar - Strictly anchored to bottom without padding gaps */}
       <div 
         className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]"
-        style={{ bottom: 'env(safe-area-inset-bottom, 12px)' }}
+        style={{ bottom: '12px' }}
       >
         <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/95 backdrop-blur-3xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
           {navItems.map((tab) => {
