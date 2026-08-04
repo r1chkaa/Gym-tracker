@@ -68,15 +68,17 @@ export default function Home() {
 
 return (
     <main className={`min-h-[100dvh] w-full max-w-md mx-auto flex flex-col relative transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-transparent' : 'bg-[hsl(var(--background))]'}`}>      {/* 
-        Force Unlock Global Scrolling:
-        This overrides the native app lock in layout.tsx/globals.css so the 
-        page scrolls natively and the bottom lock gap disappears completely.
+{/* 
+        Intelligent Scroll Lock:
+        Keeps the native document flow so backgrounds stretch fully behind the nav bar,
+        but sets overscroll-behavior to 'none' so short pages stay completely rigid 
+        and do not bounce or elastic-scroll when they shouldn't.
       */}
       <style dangerouslySetInnerHTML={{__html: `
         html, body { 
           overflow: visible !important; 
           height: auto !important; 
-          overscroll-behavior-y: auto !important; 
+          overscroll-behavior-y: none !important; 
         }
       `}} />
 
