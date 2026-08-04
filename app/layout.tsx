@@ -50,8 +50,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      {/* Removed w-screen h-screen here to stop it fighting with the iOS CSS fixes */}
-      <body className="antialiased bg-[hsl(var(--background))] text-[hsl(var(--foreground))] transition-colors duration-300 overflow-hidden">
+      <body className="antialiased bg-[hsl(var(--background))] text-[hsl(var(--foreground))] transition-colors duration-300">
         
         {/* Landscape Warning Screen */}
         <div id="landscape-blocker" className="hidden fixed inset-0 z-[999999] bg-[#09090b] text-white flex-col items-center justify-center p-6 text-center w-full h-full">
@@ -64,7 +63,7 @@ export default function RootLayout({
         </div>
 
         {/* Main App Content */}
-        <div id="main-app-content" className="w-full h-full relative">
+        <div id="main-app-content" className="fixed inset-0 w-full h-full">
           {children}
         </div>
       </body>
