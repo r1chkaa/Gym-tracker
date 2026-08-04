@@ -2,12 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, defaultExercises } from '@/lib/db';
-import { Trophy, Star, Shield, Swords, ArrowLeft, Crown, Target, X, Zap, Loader2, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
-
-const MUSCLE_DATA = [
-  { id: 'Chest' }, { id: 'Bicep' }, { id: 'Core' }, { id: 'Back' },
-  { id: 'Tricep' }, { id: 'Shoulder' }, { id: 'Forearms' }, { id: 'Legs' }
-];
+import { ArrowLeft, Crown, Target, X, Loader2, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 
 const SVG_HITBOXES_MALE: Record<string, string> = {
   Chest: "M 135,148 L 148,148 L 158,150 L 168,151 L 172,156 L 173,163 L 175,171 L 176,178 L 175,189 L 173,196 L 167,199 L 158,202 L 148,204 L 135,202 L 127,199 L 120,194 L 117,189 L 114,184 L 111,179 L 109,178 L 104,181 L 109,174 L 114,165 L 120,158 L 125,153 Z M 185,152 L 191,149 L 198,147 L 203,147 L 208,147 L 218,147 L 221,147 L 228,152 L 238,159 L 243,169 L 247,175 L 251,179 L 244,177 L 241,183 L 238,190 L 233,195 L 228,200 L 221,202 L 215,203 L 206,203 L 200,203 L 193,202 L 187,198 L 182,193 L 180,185 L 180,177 L 180,169 L 183,160 Z", 
@@ -82,16 +77,18 @@ export default function Progression() {
   const allSets = useLiveQuery(() => db.sets.toArray());
 
   useEffect(() => { 
-    setGender(localStorage.getItem('gym_gender') || 'male'); 
-    setCalibrationPts(Number(localStorage.getItem('gym_calibration_pts') || 0));
-    if (!localStorage.getItem('gym_calibrated')) {
-      setShowCalibration(true);
+    if (typeof window !== 'undefined') {
+      setGender(localStorage.getItem('gym_gender') || 'male'); 
+      setCalibrationPts(Number(localStorage.getItem('gym_calibration_pts') || 0));
+      if (!localStorage.getItem('gym_calibrated')) {
+        setShowCalibration(true);
+      }
+      setIsMounted(true);
     }
-    setIsMounted(true);
   }, []);
 
   if (!isMounted || allSets === undefined) {
-    return <div className="h-full flex items-center justify-center bg-transparent"><Loader2 className="animate-spin text-[hsl(var(--muted))]" size={32}/></div>;
+    return <div className="h-full w-full flex items-center justify-center bg-transparent"><Loader2 className="animate-spin text-[hsl(var(--muted))]" size={32}/></div>;
   }
 
   const volumes: Record<string, number> = {};
@@ -214,10 +211,10 @@ export default function Progression() {
   };
 
   return (
-    <div className="bg-transparent text-[hsl(var(--foreground))] overflow-x-hidden font-sans flex flex-col items-center relative w-full h-full pb-32">
+    <div className="bg-transparent text-[hsl(var(--foreground))] overflow-visible font-sans flex flex-col items-center relative w-full h-full pb-32">
       
-      <div className="fixed inset-0 pointer-events-none z-0 w-screen h-screen flex items-center justify-center">
-        <div className="absolute w-[800px] h-[800px] opacity-15 blur-[100px] rounded-full transition-colors duration-1000" style={{ backgroundColor: rankTheme.hex }} />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none z-0 flex items-center justify-center w-[200vw] h-[600px] overflow-visible">
+        <div className="absolute w-[600px] h-[600px] opacity-20 blur-[100px] rounded-full transition-colors duration-1000" style={{ backgroundColor: rankTheme.hex }} />
       </div>
 
       <style dangerouslySetInnerHTML={{__html: `

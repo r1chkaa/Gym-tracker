@@ -42,7 +42,7 @@ export default function Settings() {
     localStorage.setItem('gym_gender', newGender);
   };
 
-const handleUnitChange = async (newUnit: string) => {
+  const handleUnitChange = async (newUnit: string) => {
     if (unit === newUnit) return;
     const factor = newUnit === 'kg' ? (1 / 2.20462) : 2.20462;
     try {
@@ -61,7 +61,7 @@ const handleUnitChange = async (newUnit: string) => {
 
   const handleTimerChange = (type: 'min' | 'sec', val: string) => {
     let num = parseInt(val) || 0;
-    if (type === 'sec' && num > 59) num = 59; // Cap seconds
+    if (type === 'sec' && num > 59) num = 59;
     
     const newMin = type === 'min' ? num : timerMin;
     const newSec = type === 'sec' ? num : timerSec;
@@ -77,19 +77,23 @@ const handleUnitChange = async (newUnit: string) => {
   };
 
   const handleClearData = async () => {
-    if (window.confirm("WARNING: This will permanently delete all data. Are you sure?")) {
+    if (window.confirm("WARNING: This will permanently delete all data, including your rank. Are you sure?")) {
       await db.templates.clear();
       await db.sets.clear();
       await db.bodyWeightLogs.clear();
+      await db.favorites.clear();
+      
+      // Fully clear rank and calibration
+      localStorage.removeItem('gym_calibrated');
+      localStorage.removeItem('gym_calibration_pts');
+      
       window.location.reload();
     }
   };
 
   const handleExportDB = async () => {
     try {
-      // Dynamically import to avoid server-side prerendering errors
       const { exportDB } = await import("dexie-export-import");
-      
       const blob = await exportDB(db);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -113,7 +117,6 @@ const handleUnitChange = async (newUnit: string) => {
 
     if (window.confirm("WARNING: This will overwrite any existing data with the imported data. Are you sure?")) {
        try {
-           // Dynamically import to avoid server-side prerendering errors
            const { importInto } = await import("dexie-export-import");
            
            await db.templates.clear();
@@ -140,7 +143,6 @@ const handleUnitChange = async (newUnit: string) => {
         <h2 className="text-xl font-bold text-[hsl(var(--foreground))] mb-6">Preferences</h2>
         
         <div className="space-y-6">
-          {/* Theme Toggle */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               {theme === 'dark' ? <Moon size={20} className="text-[hsl(var(--muted))]" /> : <Sun size={20} className="text-[hsl(var(--muted))]" />}
@@ -152,19 +154,17 @@ const handleUnitChange = async (newUnit: string) => {
             </div>
           </div>
 
-          {/* Gender Toggle */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <User size={20} className="text-[hsl(var(--muted))]" />
               <span className="text-[hsl(var(--foreground))] font-bold">Anatomy Model</span>
             </div>
             <div className="flex bg-[hsl(var(--surface))] rounded-lg border border-[hsl(var(--border))] p-1">
-              <button onClick={() => handleGenderChange('male')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-colors ${gender === 'male' ? 'bg-blue-600 text-white' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]'}`}>Male</button>
-              <button onClick={() => handleGenderChange('female')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-colors ${gender === 'female' ? 'bg-blue-600 text-white' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]'}`}>Female</button>
+              <button onClick={() => handleGenderChange('male')} className={`px-4 py-1.5 rounded-md text-lg font-bold transition-colors ${gender === 'male' ? 'bg-blue-600 text-white' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]'}`}>♂</button>
+              <button onClick={() => handleGenderChange('female')} className={`px-4 py-1.5 rounded-md text-lg font-bold transition-colors ${gender === 'female' ? 'bg-blue-600 text-white' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]'}`}>♀</button>
             </div>
           </div>
 
-          {/* Unit Toggle */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <Scale size={20} className="text-[hsl(var(--muted))]" />
@@ -176,7 +176,6 @@ const handleUnitChange = async (newUnit: string) => {
             </div>
           </div>
 
-          {/* Precise Rest Timer */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <Clock size={20} className="text-[hsl(var(--muted))]" />
@@ -195,7 +194,6 @@ const handleUnitChange = async (newUnit: string) => {
             </div>
           </div>
 
-          {/* Wake Lock */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <Sun size={20} className="text-[hsl(var(--muted))]" />

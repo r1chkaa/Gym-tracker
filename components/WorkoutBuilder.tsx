@@ -18,8 +18,6 @@ export default function WorkoutBuilder() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const [openDropdown, setOpenDropdown] = useState<{ex: number, set: number} | null>(null);
   const [showInfoModal, setShowInfoModal] = useState<any | null>(null);
 
   const tagLabels = { normal: 'Normal', warmup: 'Warm-up', drop: 'Dropset', failure: 'Failure' };
@@ -30,7 +28,6 @@ export default function WorkoutBuilder() {
       { id: exercise.id, name: exercise.name, sets: [{ tag: 'normal' as SetType, targetReps: '8-12' }] }
     ];
     setSelectedExercises(newExercises);
-    setExpandedIndex(newExercises.length - 1); 
     setIsModalOpen(false);
     setActiveCategory(null);
     setSearchQuery("");
@@ -42,9 +39,12 @@ export default function WorkoutBuilder() {
     setSelectedExercises(updated);
   };
 
-  const updateSetTag = (exIndex: number, setIndex: number, tag: SetType) => {
+  const cycleTag = (exIndex: number, setIndex: number) => {
+    const tags: SetType[] = ['normal', 'warmup', 'drop', 'failure'];
+    const current = selectedExercises[exIndex].sets[setIndex].tag;
+    const next = tags[(tags.indexOf(current) + 1) % tags.length];
     const updated = [...selectedExercises];
-    updated[exIndex].sets[setIndex].tag = tag;
+    updated[exIndex].sets[setIndex].tag = next;
     setSelectedExercises(updated);
   };
 
@@ -56,7 +56,6 @@ export default function WorkoutBuilder() {
 
   const removeExercise = (index: number) => {
     setSelectedExercises(selectedExercises.filter((_, i) => i !== index));
-    if (expandedIndex === index) setExpandedIndex(null);
   };
 
   const moveExercise = (index: number, direction: -1 | 1) => {
@@ -66,8 +65,6 @@ export default function WorkoutBuilder() {
     updated[index] = updated[index + direction];
     updated[index + direction] = temp;
     setSelectedExercises(updated);
-    if (expandedIndex === index) setExpandedIndex(index + direction);
-    else if (expandedIndex === index + direction) setExpandedIndex(index);
   };
 
   const handleSaveTemplate = async () => {
@@ -82,7 +79,6 @@ export default function WorkoutBuilder() {
       alert("Routine saved successfully!");
       setTemplateName("");
       setSelectedExercises([]);
-      setExpandedIndex(null);
     } catch (error) { console.error("Failed to save template:", error); }
   };
 
@@ -118,11 +114,7 @@ export default function WorkoutBuilder() {
   return (
     <div className="bg-transparent rounded-[2rem] p-0 relative flex flex-col h-full">
       
-      {openDropdown && (
-        <div className="fixed inset-0 z-[50]" onClick={() => setOpenDropdown(null)} />
-      )}
-
-      <div className="flex-none flex items-center gap-3 mb-6 border-b border-[hsl(var(--border))] pb-3 focus-within:border-blue-500 transition-colors mx-2">
+      <div className="flex-none flex items-center gap-3 mb-6 border-b border-[hsl(var(--border))] pb-3 focus-within:border-blue-500 transition-colors mx-2 mt-4">
         <input 
           type="text" 
           value={templateName}
@@ -141,71 +133,50 @@ export default function WorkoutBuilder() {
         )}
         
         {selectedExercises.map((ex, exIdx) => (
-          <div key={exIdx} className={`bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] transition-all ${expandedIndex === exIdx ? 'relative z-[60]' : 'relative z-10'}`}>
-            <div 
-              className="flex justify-between items-center p-4 bg-[hsl(var(--card))] border-b border-[hsl(var(--border))] cursor-pointer active:brightness-110 rounded-t-2xl"
-              onClick={() => setExpandedIndex(expandedIndex === exIdx ? null : exIdx)}
-            >
-              <div className="flex items-center gap-3 pr-2 min-w-0">
-                <ChevronDown size={18} className={`text-[hsl(var(--muted))] flex-shrink-0 transition-transform ${expandedIndex === exIdx ? 'rotate-180 text-[hsl(var(--foreground))]' : ''}`} />
-                <span className="font-black text-[hsl(var(--foreground))] text-base leading-tight truncate">{ex.name}</span>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <div className="flex flex-col border-r border-[hsl(var(--border))] pr-2 mr-1">
-                  <button onClick={(e) => { e.stopPropagation(); moveExercise(exIdx, -1); }} disabled={exIdx === 0} className="text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] disabled:opacity-20 transition-colors p-0.5"><ChevronUp size={16} /></button>
-                  <button onClick={(e) => { e.stopPropagation(); moveExercise(exIdx, 1); }} disabled={exIdx === selectedExercises.length - 1} className="text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] disabled:opacity-20 transition-colors p-0.5"><ChevronDown size={16} /></button>
-                </div>
-                <span className="text-[9px] font-black text-[hsl(var(--muted))] uppercase tracking-widest bg-[hsl(var(--background))] px-2 py-1 rounded-md border border-[hsl(var(--border))]">
-                  {ex.sets.length} Sets
-                </span>
-                <button onClick={(e) => { e.stopPropagation(); removeExercise(exIdx); }} className="text-[hsl(var(--muted))] hover:text-red-500 transition-colors ml-1 p-1 active:scale-75">
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-            
-            {expandedIndex === exIdx && (
-              <div className="p-4 space-y-3 animate-in slide-in-from-top-2">
+          <div key={exIdx} className="bg-[hsl(var(--surface))] rounded-3xl p-5 border border-[hsl(var(--border))] shadow-sm mb-4 animate-in slide-in-from-bottom-2 relative">
+             <div className="flex justify-between items-start mb-4">
+                 <h3 className="font-black text-[hsl(var(--foreground))] text-xl pr-2 leading-tight">{ex.name}</h3>
+                 <div className="flex flex-col gap-1 items-center bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-lg p-1 shrink-0">
+                     <button onClick={() => moveExercise(exIdx, -1)} disabled={exIdx === 0} className="text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] disabled:opacity-20 transition-colors p-1"><ChevronUp size={16}/></button>
+                     <div className="w-full h-px bg-[hsl(var(--border))]"></div>
+                     <button onClick={() => moveExercise(exIdx, 1)} disabled={exIdx === selectedExercises.length - 1} className="text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] disabled:opacity-20 transition-colors p-1"><ChevronDown size={16}/></button>
+                 </div>
+             </div>
+             
+             <div className="space-y-2.5">
                 {ex.sets.map((set, setIdx) => (
-                  <div key={setIdx} className="flex items-center gap-3 bg-[hsl(var(--background))] p-2.5 rounded-xl border border-[hsl(var(--border))] shadow-inner relative">
-                    <span className="text-[hsl(var(--muted))] font-black text-[10px] uppercase w-12 text-center tracking-widest">SET {setIdx + 1}</span>
-                    <div className="flex-1 relative">
-                      <button 
-                        onClick={() => setOpenDropdown(openDropdown?.ex === exIdx && openDropdown?.set === setIdx ? null : {ex: exIdx, set: setIdx})}
-                        className="w-full bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] p-3 rounded-lg border border-[hsl(var(--border))] focus:border-blue-500 outline-none text-sm font-bold flex justify-between items-center transition-colors relative z-[60]"
-                      >
-                        {tagLabels[set.tag]}
-                        <ChevronDown size={16} className="text-[hsl(var(--muted))]" />
-                      </button>
-
-                      {openDropdown?.ex === exIdx && openDropdown?.set === setIdx && (
-                        <div className="absolute top-10 left-0 right-0 mt-2 bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-xl shadow-2xl z-[70]">
-                          {Object.entries(tagLabels).map(([val, label]) => (
-                            <div 
-                              key={val}
-                              onClick={() => { updateSetTag(exIdx, setIdx, val as SetType); setOpenDropdown(null); }}
-                              className={`p-3 text-sm font-bold cursor-pointer transition-colors border-b border-[hsl(var(--border))] last:border-0 ${set.tag === val ? 'bg-blue-600 text-white' : 'text-[hsl(var(--foreground))] hover:bg-[hsl(var(--border))]'}`}
-                            >
-                              {label}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <button onClick={() => removeSet(exIdx, setIdx)} className="text-[hsl(var(--muted))] hover:text-red-500 p-2 active:scale-75 transition-transform"><X size={18}/></button>
-                  </div>
+                   <div key={setIdx} className="flex justify-between items-center bg-[hsl(var(--background))] p-3 rounded-2xl border border-[hsl(var(--border))] shadow-inner">
+                       <span className="font-bold text-[hsl(var(--muted))] w-14 uppercase text-[10px] tracking-widest">Set {setIdx + 1}</span>
+                       <button 
+                         onClick={() => cycleTag(exIdx, setIdx)} 
+                         className={`flex-1 mx-2 py-1.5 rounded-xl text-xs font-black tracking-widest uppercase transition-colors active:scale-95 border ${
+                           set.tag === 'normal' ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] border-transparent' :
+                           set.tag === 'warmup' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                           set.tag === 'drop' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                           'bg-red-500/10 text-red-500 border-red-500/20'
+                         }`}
+                       >
+                          {tagLabels[set.tag]}
+                       </button>
+                       <button onClick={() => removeSet(exIdx, setIdx)} className="text-[hsl(var(--muted))] hover:text-red-500 p-2 active:scale-75 transition-transform"><Trash2 size={16}/></button>
+                   </div>
                 ))}
-                <button onClick={() => addSet(exIdx)} className="w-full mt-2 py-3 text-xs font-black text-blue-500 bg-blue-500/10 hover:bg-blue-500/20 rounded-xl transition-all border border-blue-500/30 active:scale-95 shadow-inner">
-                  + ADD ANOTHER SET
-                </button>
-              </div>
-            )}
+             </div>
+             
+             <div className="flex gap-2 mt-4">
+                 <button onClick={() => addSet(exIdx)} className="flex-1 bg-blue-500/10 text-blue-500 font-black py-3 rounded-2xl uppercase tracking-widest text-[10px] hover:bg-blue-500/20 active:scale-95 transition-all border border-blue-500/20">
+                    + Add Set
+                 </button>
+                 <button onClick={() => removeExercise(exIdx)} className="bg-red-500/10 text-red-500 font-black px-4 py-3 rounded-2xl hover:bg-red-500/20 active:scale-95 transition-all border border-red-500/20">
+                    <Trash2 size={16} />
+                 </button>
+             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex-none space-y-4 pt-4 pb-8 border-t border-[hsl(var(--border))] z-10 relative bg-transparent">
-        <button onClick={() => setIsModalOpen(true)} className="w-full bg-[hsl(var(--surface))] text-blue-500 p-4 rounded-2xl border border-blue-500/30 font-black flex justify-center items-center gap-2 transition-all shadow-sm active:scale-95">
+      <div className="flex-none space-y-4 pt-4 pb-8 border-t border-[hsl(var(--border))] z-10 relative bg-[hsl(var(--background))]">
+        <button onClick={() => setIsModalOpen(true)} className="w-full bg-[hsl(var(--surface))] text-blue-500 p-4 rounded-2xl border border-blue-500/30 font-black flex justify-center items-center gap-2 transition-all shadow-sm active:scale-95 hover:brightness-110">
           <Plus size={20} /> ADD EXERCISE
         </button>
 

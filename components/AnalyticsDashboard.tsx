@@ -95,6 +95,14 @@ export default function AnalyticsDashboard() {
   }, {} as Record<string, LoggedSet[]>);
 
   const handleDayClick = (dateStr: string) => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const cellDate = new Date(y, m, d);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    // Lock out future dates
+    if (cellDate > today) return; 
+
     setSelectedDateString(dateStr);
     setShowWorkoutModal(true);
   };
@@ -128,27 +136,39 @@ export default function AnalyticsDashboard() {
           {calendarCells.map((cell, idx) => {
             const dateStr = `${cell.y}-${cell.m}-${cell.d}`;
             const isWorkout = workoutDates.has(dateStr);
-            const isToday = new Date().getFullYear() === cell.y && new Date().getMonth() === cell.m && new Date().getDate() === cell.d;
             
-            let baseClasses = "aspect-square flex items-center justify-center rounded-xl text-xs font-bold transition-all cursor-pointer ";
+            const cellDate = new Date(cell.y, cell.m, cell.d);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const isToday = cellDate.getTime() === today.getTime();
+            const isFuture = cellDate > today;
+            
+            let baseClasses = "aspect-square flex items-center justify-center rounded-xl text-xs font-bold transition-all ";
 
-            if (cell.isCurrentMonth) {
-              if (isWorkout) baseClasses += "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)] hover:brightness-110 active:scale-95 ";
-              else if (isToday) baseClasses += "border-2 border-blue-500 text-blue-500 bg-blue-500/10 ";
-              else baseClasses += "bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--border))] active:scale-95 ";
+            if (isFuture) {
+              baseClasses += "opacity-20 cursor-not-allowed text-[hsl(var(--muted))] bg-[hsl(var(--surface))]";
             } else {
-              if (isWorkout) baseClasses += "bg-blue-500/20 text-blue-500/80 active:scale-95 ";
-              else baseClasses += "bg-[hsl(var(--surface))] text-[hsl(var(--muted))] opacity-30 hover:opacity-60 ";
+              baseClasses += "cursor-pointer ";
+              if (cell.isCurrentMonth) {
+                if (isWorkout) baseClasses += "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)] hover:brightness-110 active:scale-95 ";
+                else if (isToday) baseClasses += "border-2 border-blue-500 text-blue-500 bg-blue-500/10 ";
+                else baseClasses += "bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--border))] active:scale-95 ";
+              } else {
+                if (isWorkout) baseClasses += "bg-blue-500/20 text-blue-500/80 active:scale-95 ";
+                else baseClasses += "bg-[hsl(var(--surface))] text-[hsl(var(--muted))] opacity-30 hover:opacity-60 ";
+              }
             }
             
             return (
               <button 
                 key={`${dateStr}-${idx}`} 
                 onClick={() => {
+                  if (isFuture) return;
                   if (!cell.isCurrentMonth) setCurrentMonth(new Date(cell.y, cell.m, 1));
                   handleDayClick(dateStr);
                 }}
                 className={baseClasses}
+                disabled={isFuture}
               >
                 {cell.d}
               </button>

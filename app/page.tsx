@@ -13,12 +13,26 @@ export default function Home() {
   const [previousTab, setPreviousTab] = useState<'workout' | 'builder' | 'progression' | 'analytics' | 'library'>('workout');
   const [isMounted, setIsMounted] = useState(false);
   const [rankGlow, setRankGlow] = useState(false);
+  
+  // Backdating State
+  const [pastWorkoutDate, setPastWorkoutDate] = useState<number | null>(null);
 
   useEffect(() => { 
     setIsMounted(true); 
     const handleGlow = () => setRankGlow(true);
     window.addEventListener('rank-glow-update', handleGlow);
-    return () => window.removeEventListener('rank-glow-update', handleGlow);
+
+    const handlePastWorkout = (e: any) => {
+      setPastWorkoutDate(e.detail.timestamp);
+      setActiveTab('workout');
+      setPreviousTab('analytics');
+    };
+    window.addEventListener('start-past-workout', handlePastWorkout);
+
+    return () => {
+      window.removeEventListener('rank-glow-update', handleGlow);
+      window.removeEventListener('start-past-workout', handlePastWorkout);
+    };
   }, []);
 
   const getHeaderInfo = () => {
@@ -54,11 +68,11 @@ export default function Home() {
   }
 
   return (
-    <main className="h-[100dvh] max-w-md mx-auto flex flex-col bg-transparent text-[hsl(var(--foreground))] overflow-hidden relative transition-colors duration-300">
+    <main className="h-full w-full max-w-md mx-auto flex flex-col bg-transparent text-[hsl(var(--foreground))] relative transition-colors duration-300 overflow-hidden">
       
       <div className={`fixed inset-0 w-screen h-screen z-[-2] transition-colors duration-500 ${activeTab === 'progression' ? 'bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`} />
 
-      <div className="flex-1 flex flex-col overflow-y-auto pb-32 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 flex flex-col overflow-y-auto pb-[120px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10 w-full">
         
         <header className={`flex-none px-6 pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start transition-colors duration-500 ${activeTab === 'progression' ? 'text-white' : ''}`}>
           <div>
@@ -78,8 +92,8 @@ export default function Home() {
           </button>
         </header>
 
-        <div className="px-4 flex-1 flex flex-col min-h-0">
-          {activeTab === 'workout' && <ActiveSession />}
+        <div className="px-4 flex-1 flex flex-col min-h-0 relative">
+          {activeTab === 'workout' && <ActiveSession pastWorkoutDate={pastWorkoutDate} onClearPastDate={() => setPastWorkoutDate(null)} />}
           {activeTab === 'builder' && <WorkoutBuilder />}
           {activeTab === 'progression' && <Progression />}
           {activeTab === 'analytics' && <AnalyticsDashboard />}
@@ -88,8 +102,8 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]">
-        <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
+      <div className="fixed bottom-4 pb-[env(safe-area-inset-bottom)] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]">
+        <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/95 backdrop-blur-3xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
           {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
             const isCenter = tab.id === 'progression';
