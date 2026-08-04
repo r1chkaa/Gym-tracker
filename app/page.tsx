@@ -119,14 +119,14 @@ return (
       </div>
 {/* 
         Fixed Floating Nav:
-        Stays glued to the viewport securely above the safe area.
+        Locked precisely to the bottom safe area to match image_a30967.png.
+        Using inset flex centering avoids iOS transform jitter.
       */}
       <div 
-        className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90] bottom-4"
-        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+        className="fixed bottom-0 inset-x-0 w-full z-[90] flex justify-center pointer-events-none"
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
       >
-        <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem]">
-          {navItems.map((tab) => {
+        <nav className="w-[92%] max-w-[400px] flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem] pointer-events-auto shadow-lg">          {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
             const isCenter = tab.id === 'progression';
 
