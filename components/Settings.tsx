@@ -142,17 +142,16 @@ const handleClearData = async () => {
 
 return (
     <>
-{isDeleting && (
-        <div className="fixed inset-0 z-[999999] bg-white flex flex-col items-center justify-center animate-[world-collapse_2.5s_ease-in_forwards] pointer-events-none origin-center">
+      {isDeleting && (
+        <div className="fixed inset-0 z-[999999] flex flex-col items-center justify-center animate-[system-overload_2.5s_ease-in_forwards] pointer-events-none origin-center mix-blend-screen">
           <style dangerouslySetInnerHTML={{__html: `
-            @keyframes world-collapse {
-              0% { opacity: 0; filter: brightness(1); transform: scale(1) translate(0, 0); }
-              10% { opacity: 1; filter: brightness(2); transform: scale(1.02) translate(2px, -2px); }
-              20% { opacity: 1; filter: brightness(3); transform: scale(1.05) translate(-4px, 4px) rotate(1deg); }
-              40% { opacity: 1; filter: brightness(5); transform: scale(1.1) translate(6px, -4px) rotate(-1deg); }
-              60% { opacity: 1; filter: brightness(8); transform: scale(1.15) translate(-8px, 6px) rotate(2deg); }
-              80% { opacity: 1; filter: brightness(10); transform: scale(1.2) translate(10px, -8px) rotate(-2deg); background-color: white;}
-              100% { opacity: 1; filter: brightness(20); transform: scale(1.5) translate(0, 0); background-color: white; }
+            @keyframes system-overload {
+              0% { opacity: 0; transform: scale(1) translate(0, 0); backdrop-filter: blur(0px) brightness(1); background-color: transparent; }
+              20% { opacity: 0.5; transform: scale(1.01) translate(3px, -3px); backdrop-filter: blur(2px) brightness(1.5) hue-rotate(90deg); background-color: rgba(255,255,255,0.1); }
+              40% { opacity: 0.8; transform: scale(1.03) translate(-5px, 5px) skew(1deg); backdrop-filter: blur(5px) brightness(2) hue-rotate(-90deg); background-color: rgba(255,255,255,0.3); }
+              60% { opacity: 1; transform: scale(1.05) translate(8px, -8px) skew(-2deg); backdrop-filter: blur(10px) brightness(4); background-color: rgba(255,255,255,0.6); }
+              80% { opacity: 1; transform: scale(1.1) translate(-10px, 10px); backdrop-filter: blur(20px) brightness(10); background-color: rgba(255,255,255,0.9); }
+              100% { opacity: 1; transform: scale(1.2) translate(0, 0); backdrop-filter: blur(50px) brightness(20); background-color: white; }
             }
           `}} />
         </div>
