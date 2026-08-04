@@ -71,7 +71,7 @@ export default function Home() {
       
       <div className={`fixed inset-0 w-screen h-screen z-[-2] transition-colors duration-500 ${activeTab === 'progression' ? 'bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`} />
 
-      <div className="flex-1 flex flex-col overflow-y-auto pb-[100px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10 w-full">
+      <div className="flex-1 flex flex-col overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10 w-full">
         
         <header className={`flex-none px-6 pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start transition-colors duration-500 ${activeTab === 'progression' ? 'text-white' : ''}`}>
           <div>
@@ -101,12 +101,12 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Floating Bottom Nav Bar - Strictly anchored to bottom without padding gaps */}
+      {/* Bottom Nav Bar - laid out in the flex column so it always sits at the true bottom of the 100dvh container, immune to iOS PWA viewport-resize quirks */}
       <div 
-        className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]"
-        style={{ bottom: '12px' }}
+        className="flex-none w-full px-4 z-[90]"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)', paddingTop: '8px' }}
       >
-        <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/95 backdrop-blur-3xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
+        <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/95 backdrop-blur-3xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl max-w-[400px] mx-auto">
           {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
             const isCenter = tab.id === 'progression';
