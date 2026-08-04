@@ -67,8 +67,7 @@ export default function Home() {
   }
 
 return (
-    <main className={`min-h-[100svh] w-full max-w-md mx-auto flex flex-col relative transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-transparent' : 'bg-[hsl(var(--background))]'}`}>      
-      {/* 
+    <main className={`min-h-[100dvh] w-full max-w-md mx-auto flex flex-col relative transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-transparent' : 'bg-[hsl(var(--background))]'}`}>      {/* 
         Force Unlock Global Scrolling:
         This overrides the native app lock in layout.tsx/globals.css so the 
         page scrolls natively and the bottom lock gap disappears completely.
@@ -120,10 +119,11 @@ return (
       </div>
 {/* 
         Fixed Floating Nav:
-        Uses bottom-0 and applies safe-area as padding to prevent dynamic jumps 
+        Stays glued to the viewport securely above the safe area.
       */}
       <div 
-        className="fixed left-0 right-0 mx-auto w-[92%] max-w-[400px] z-[90] bottom-0 pb-[calc(1rem+env(safe-area-inset-bottom))]"
+        className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90] bottom-4"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
       >
         <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem]">
           {navItems.map((tab) => {
