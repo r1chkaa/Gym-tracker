@@ -67,8 +67,7 @@ export default function Home() {
   }
 
   return (
-    <main className={`h-[100dvh] max-w-md mx-auto flex flex-col overflow-hidden relative transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`}>
-
+    <main className={`h-full w-full max-w-md mx-auto flex flex-col overflow-hidden relative transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`}>
       <header className={`flex-none px-6 pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start relative z-40 transition-colors duration-500 ${activeTab === 'progression' ? 'text-white bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`}>
         <div>
           <h1 className="text-4xl font-black tracking-tight drop-shadow-sm">{header.title}</h1>
