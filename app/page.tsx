@@ -67,7 +67,18 @@ export default function Home() {
   }
 
 return (
-    <main className={`h-[100dvh] w-full max-w-md mx-auto flex flex-col relative transition-colors duration-300 text-[hsl(var(--foreground))] overflow-hidden ${activeTab === 'progression' ? 'bg-transparent' : 'bg-[hsl(var(--background))]'}`}>
+    <main className={`min-h-[100dvh] w-full max-w-md mx-auto flex flex-col relative transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-transparent' : 'bg-[hsl(var(--background))]'}`}>      {/* 
+        Force Unlock Global Scrolling:
+        This overrides the native app lock in layout.tsx/globals.css so the 
+        page scrolls natively and the bottom lock gap disappears completely.
+      */}
+      <style dangerouslySetInnerHTML={{__html: `
+        html, body { 
+          overflow: visible !important; 
+          height: auto !important; 
+          overscroll-behavior-y: auto !important; 
+        }
+      `}} />
 
       {/* Global Fixed Background specifically to cover the entire screen for Progression */}
       {activeTab === 'progression' && (
@@ -75,11 +86,11 @@ return (
       )}
 
       {/* 
-        Strict App Bounds Scroll Container:
-        Replaces the global scroll unlock. Locks scrolling strictly inside this container.
-        If content doesn't exceed the viewport height, scrolling is physically impossible.
+        Native Scroll Container:
+        No overflow-hidden locks. The header is placed INSIDE this flow so it 
+        scrolls away as the user scrolls down the page.
       */}
-      <div className={`flex-1 overflow-y-auto w-full pb-32 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${activeTab === 'progression' ? 'px-0' : 'px-4'}`}>
+      <div className={`flex flex-col w-full pb-32 ${activeTab === 'progression' ? 'px-0' : 'px-4'}`}>
         
         <header className={`pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start transition-colors duration-500 ${activeTab === 'progression' ? 'text-white px-6' : ''}`}>
           <div>
