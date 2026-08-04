@@ -210,10 +210,12 @@ export default function Progression() {
   };
 
   return (
-    <div className="bg-transparent text-[hsl(var(--foreground))] overflow-x-hidden font-sans flex flex-col items-center relative w-full h-full pb-32">
+    <div className="bg-transparent text-white overflow-x-hidden font-sans flex flex-col items-center relative w-full h-full pb-32">
       
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none z-0 flex items-center justify-center w-full max-w-full overflow-hidden h-[600px]">
-        <div className="absolute w-[600px] h-[600px] opacity-20 blur-[100px] rounded-full transition-colors duration-1000" style={{ backgroundColor: rankTheme.hex }} />
+      {/* Global Fixed Glow explicitly engineered to sweep across the full screen seamlessly */}
+      <div className="fixed inset-0 pointer-events-none z-[-1] flex items-center justify-center w-screen h-screen overflow-hidden">
+        <div className="absolute top-[-10%] w-[1000px] h-[1000px] opacity-[0.25] blur-[150px] rounded-full transition-colors duration-1000" style={{ backgroundColor: rankTheme.hex }} />
+        <div className="absolute bottom-[-20%] w-[800px] h-[800px] opacity-[0.15] blur-[120px] rounded-full transition-colors duration-1000" style={{ backgroundColor: rankTheme.hex }} />
       </div>
 
       <style dangerouslySetInnerHTML={{__html: `
@@ -236,7 +238,7 @@ export default function Progression() {
             <img src={`/ranks/${currentRank.image}`} alt={currentRank.fullName} loading="eager" className={`w-40 h-40 md:w-48 md:h-48 object-contain relative z-10 transform-gpu will-change-transform drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] ${rankTheme.anim}`} style={{ transform: 'translateZ(0)' }} />
           </div>
           <h2 className={`mt-8 text-5xl font-black uppercase tracking-tighter drop-shadow-md z-10 ${isGod ? 'bg-gradient-to-r from-[#fef08a] via-white to-[#fef08a] bg-[length:200%_auto] text-transparent bg-clip-text animate-[shimmer_3s_infinite]' : ''}`} style={!isGod ? { color: rankTheme.hex } : {}}>{currentRank.name}</h2>
-          <span className="text-sm font-bold text-[hsl(var(--foreground))]/90 tracking-[0.2em] mt-2 z-10 uppercase">{currentRank.name === 'God' ? 'MAXIMUM RANK' : currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
+          <span className="text-sm font-bold text-white/90 tracking-[0.2em] mt-2 z-10 uppercase">{currentRank.name === 'God' ? 'MAXIMUM RANK' : currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
         </div>
 
         <div className="w-full mt-10 mb-20 relative z-10">
@@ -244,7 +246,7 @@ export default function Progression() {
             <span className="text-xl font-black tracking-widest drop-shadow-md" style={{ color: rankTheme.hex, textShadow: `0 0 15px ${rankTheme.hex}80` }}>{Math.floor(activePoints).toLocaleString()} PTS</span>
             <span className="text-[10px] font-bold text-[hsl(var(--muted))] uppercase tracking-widest">{currentRank.next ? `${currentRank.next.toLocaleString()} PTS` : 'UNLIMITED'}</span>
           </div>
-          <div className="w-full h-[6px] bg-[hsl(var(--surface))] rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)]">
+          <div className="w-full h-[6px] bg-white/10 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)]">
             <div className={`h-full rounded-r-full transition-all duration-1000 ease-out relative shadow-[0_0_15px_currentColor] ${isGod ? 'w-full bg-gradient-to-r from-[#fef08a] to-white bg-[length:200%_auto] animate-[shimmer_2s_infinite]' : ''}`} style={!isGod ? { width: `${Math.min(100, Math.max(0, currentRank.progress))}%`, backgroundColor: rankTheme.hex } : {}}>
               {!isGod && <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]" />}
             </div>
