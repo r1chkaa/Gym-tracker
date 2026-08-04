@@ -50,10 +50,11 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-[hsl(var(--background))] text-[hsl(var(--foreground))] transition-colors duration-300 overflow-hidden w-screen h-screen">
+      {/* Removed w-screen h-screen here to stop it fighting with the iOS CSS fixes */}
+      <body className="antialiased bg-[hsl(var(--background))] text-[hsl(var(--foreground))] transition-colors duration-300 overflow-hidden">
         
         {/* Landscape Warning Screen */}
-        <div id="landscape-blocker" className="hidden fixed inset-0 z-[999999] bg-[#09090b] text-white flex-col items-center justify-center p-6 text-center w-screen h-screen">
+        <div id="landscape-blocker" className="hidden fixed inset-0 z-[999999] bg-[#09090b] text-white flex-col items-center justify-center p-6 text-center w-full h-full">
           <svg className="w-16 h-16 mb-6 text-blue-500 animate-[spin_3s_linear_infinite]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
             <path d="M21 3v5h-5"/>
