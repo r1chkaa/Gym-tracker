@@ -96,10 +96,9 @@ export default function Home() {
         {activeTab === 'settings' && <Settings />}
       </div>
 
-      {/* Restored your floating pill, positioned exactly as your red arrow requested */}
+{/* Restored your floating pill, positioned exactly as your red arrow requested */}
       <div 
-        className="absolute left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]"
-        style={{ bottom: 'max(env(safe-area-inset-bottom), 1rem)' }}
+        className="absolute left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90] bottom-4 pb-safe"
       >
         <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
           {navItems.map((tab) => {
