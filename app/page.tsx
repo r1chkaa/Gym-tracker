@@ -101,8 +101,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Floating Bottom Nav Bar - Moved down safely against the edge */}
-      <div className="fixed bottom-0 pb-[max(env(safe-area-inset-bottom),0.5rem)] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]">
+      {/* Floating Bottom Nav Bar - Strictly anchored to bottom without padding gaps */}
+      <div 
+        className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]"
+        style={{ bottom: 'max(env(safe-area-inset-bottom), 12px)' }}
+      >
         <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/95 backdrop-blur-3xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
           {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
