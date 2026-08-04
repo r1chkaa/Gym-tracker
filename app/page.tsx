@@ -119,14 +119,15 @@ return (
       </div>
 {/* 
         Fixed Floating Nav:
-        Redesigned with a premium, highly isolated frosted-glass aesthetic.
-        Splitting the bottom and margin properties forces Safari to render the float immediately on load.
+        - Bulletproof iOS startup fix: fixed bottom-0 with paddingBottom calc ensures it never drops to 0px on initial paint.
+        - Premium deep-glass aesthetic with Apple-like spring animations (cubic-bezier).
+        - touch-none and replacement of mobile hover states with active states fix the "swipe away" sticky bug.
       */}
       <div 
-        className="fixed inset-x-0 z-[90] flex justify-center pointer-events-none transform-gpu"
-        style={{ bottom: 'env(safe-area-inset-bottom, 20px)', marginBottom: '1.5rem' }}
+        className="fixed bottom-0 inset-x-0 w-full z-[90] flex justify-center pointer-events-none transform-gpu"
+        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
       >
-        <nav className="w-[92%] max-w-[400px] flex px-2 py-2 items-center justify-between bg-[#1a1a1c]/70 backdrop-blur-2xl border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-full pointer-events-auto">
+        <nav className="w-[92%] max-w-[400px] flex px-2 py-2 items-center justify-between bg-[#0e0e11]/80 backdrop-blur-3xl border border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-[2.5rem] pointer-events-auto touch-none">
           {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
             const isCenter = tab.id === 'progression';
@@ -136,13 +137,13 @@ return (
                 <div key={tab.id} className="relative flex items-center justify-center px-2">
                   <button
                     onClick={() => handleTabClick(tab.id)}
-                    className={`absolute bottom-[-10px] flex items-center justify-center w-[68px] h-[68px] rounded-full transition-all duration-500 active:scale-95 ${
+                    className={`absolute bottom-[-6px] flex items-center justify-center w-[64px] h-[64px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] outline-none active:scale-90 ${
                       isActive 
-                        ? 'bg-gradient-to-b from-gray-700 to-gray-900 text-white shadow-[0_8px_20px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.2)] border border-white/20' 
-                        : 'bg-[#121214] text-white/60 hover:text-white border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)]'
+                        ? 'bg-gradient-to-b from-gray-700 to-gray-900 text-white shadow-[0_8px_24px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.3)] border border-white/20 scale-100' 
+                        : 'bg-[#18181b] text-white/50 border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.05)] md:hover:text-white'
                     } ${rankGlow && !isActive ? 'animate-pulse bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)] border-transparent' : ''}`}
                   >
-                    <tab.icon size={28} strokeWidth={isActive ? 2.5 : 2} className={isActive || (rankGlow && !isActive) ? "opacity-100" : "opacity-80"} />
+                    <tab.icon size={28} strokeWidth={isActive ? 2.5 : 2} className={`transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? 'scale-110 opacity-100' : 'opacity-80'}`} />
                   </button>
                 </div>
               );
@@ -152,14 +153,14 @@ return (
               <button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 px-1 rounded-full transition-all duration-300 ${
+                className={`group flex-1 flex flex-col items-center justify-center gap-1 py-3 px-1 rounded-[2rem] transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] outline-none active:scale-90 active:bg-white/5 ${
                   isActive 
-                    ? 'text-white bg-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]' 
-                    : 'text-white/40 hover:text-white hover:bg-white/5'
+                    ? 'text-white bg-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]' 
+                    : 'text-white/40 md:hover:text-white/80'
                 }`}
               >
-                <tab.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                <span className={`text-[9px] font-black uppercase tracking-widest transition-all duration-300 ${isActive ? 'opacity-100 h-auto mt-1' : 'opacity-0 h-0 overflow-hidden'}`}>
+                <tab.icon size={22} strokeWidth={isActive ? 2.5 : 2} className={`transition-transform duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? 'scale-110' : 'group-active:scale-95'}`} />
+                <span className={`text-[9px] font-black uppercase tracking-widest transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? 'opacity-100 max-h-4 translate-y-0 mt-1' : 'opacity-0 max-h-0 translate-y-2 overflow-hidden'}`}>
                   {tab.label}
                 </span>
               </button>
