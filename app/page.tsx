@@ -67,7 +67,7 @@ export default function Home() {
   }
 
   return (
-    <main className="h-full w-full max-w-md mx-auto flex flex-col bg-transparent text-[hsl(var(--foreground))] relative transition-colors duration-300 overflow-hidden">
+    <main className="h-[100dvh] w-full max-w-md mx-auto flex flex-col bg-transparent text-[hsl(var(--foreground))] relative transition-colors duration-300 overflow-hidden">
       
       <div className={`fixed inset-0 w-screen h-screen z-[-2] transition-colors duration-500 ${activeTab === 'progression' ? 'bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`} />
 
@@ -104,7 +104,7 @@ export default function Home() {
       {/* Floating Bottom Nav Bar - Strictly anchored to bottom without padding gaps */}
       <div 
         className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]"
-        style={{ bottom: 'max(env(safe-area-inset-bottom), 12px)' }}
+        style={{ bottom: 'env(safe-area-inset-bottom, 12px)' }}
       >
         <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/95 backdrop-blur-3xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
           {navItems.map((tab) => {
