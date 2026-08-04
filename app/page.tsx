@@ -119,27 +119,27 @@ return (
       </div>
 {/* 
         Fixed Floating Nav:
-        - Bulletproof iOS startup fix: fixed bottom-0 with paddingBottom calc ensures it never drops to 0px on initial paint.
-        - Premium deep-glass aesthetic with Apple-like spring animations (cubic-bezier).
-        - touch-none and replacement of mobile hover states with active states fix the "swipe away" sticky bug.
+        - Absolute iOS Lock: explicit bottom: 0px with paddingBottom calc absolutely guarantees zero shift on viewport changes.
+        - CSS Grid: Forces exactly equal widths (grid-cols-5) so buttons never squeeze, clip, or shift adjacent items.
+        - Layout-free animations: Using translate-y and opacity instead of margins/heights to guarantee 60fps buttery smoothness.
       */}
       <div 
-        className="fixed bottom-0 inset-x-0 w-full z-[90] flex justify-center pointer-events-none transform-gpu"
-        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+        className="fixed inset-x-0 z-[90] flex justify-center pointer-events-none transform-gpu"
+        style={{ bottom: '0px', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
       >
-        <nav className="w-[92%] max-w-[400px] flex px-2 py-2 items-center justify-between bg-[#0e0e11]/80 backdrop-blur-3xl border border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-[2.5rem] pointer-events-auto touch-none">
+        <nav className="w-[92%] max-w-[400px] h-[72px] grid grid-cols-5 items-center bg-[#0e0e11]/85 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-[2.5rem] pointer-events-auto touch-none px-1.5">
           {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
             const isCenter = tab.id === 'progression';
 
             if (isCenter) {
               return (
-                <div key={tab.id} className="relative flex items-center justify-center px-2">
+                <div key={tab.id} className="relative flex items-center justify-center w-full h-full">
                   <button
                     onClick={() => handleTabClick(tab.id)}
-                    className={`absolute bottom-[-6px] flex items-center justify-center w-[64px] h-[64px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] outline-none active:scale-90 ${
+                    className={`absolute bottom-[10px] flex items-center justify-center w-[64px] h-[64px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] outline-none active:scale-90 ${
                       isActive 
-                        ? 'bg-gradient-to-b from-gray-700 to-gray-900 text-white shadow-[0_8px_24px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.3)] border border-white/20 scale-100' 
+                        ? 'bg-gradient-to-b from-gray-700 to-gray-900 text-white shadow-[0_8px_24px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.3)] border border-white/20' 
                         : 'bg-[#18181b] text-white/50 border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.05)] md:hover:text-white'
                     } ${rankGlow && !isActive ? 'animate-pulse bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)] border-transparent' : ''}`}
                   >
@@ -153,14 +153,18 @@ return (
               <button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
-                className={`group flex-1 flex flex-col items-center justify-center gap-1 py-3 px-1 rounded-[2rem] transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] outline-none active:scale-90 active:bg-white/5 ${
-                  isActive 
-                    ? 'text-white bg-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]' 
-                    : 'text-white/40 md:hover:text-white/80'
-                }`}
+                className="relative flex flex-col items-center justify-center w-full h-[60px] rounded-[2rem] outline-none active:scale-90 transition-transform duration-300 group"
               >
-                <tab.icon size={22} strokeWidth={isActive ? 2.5 : 2} className={`transition-transform duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? 'scale-110' : 'group-active:scale-95'}`} />
-                <span className={`text-[9px] font-black uppercase tracking-widest transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? 'opacity-100 max-h-4 translate-y-0 mt-1' : 'opacity-0 max-h-0 translate-y-2 overflow-hidden'}`}>
+                {/* Active Background Pill */}
+                <div className={`absolute inset-0 rounded-[2rem] transition-all duration-500 ease-out ${isActive ? 'bg-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]' : 'bg-transparent group-hover:bg-white/5'}`} />
+                
+                {/* Icon Container (Moves up smoothly when active) */}
+                <div className={`relative z-10 flex flex-col items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? '-translate-y-2.5 text-white' : 'translate-y-0 text-white/40 group-hover:text-white/80'}`}>
+                  <tab.icon size={22} strokeWidth={isActive ? 2.5 : 2} className={`transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? 'scale-110' : 'scale-100'}`} />
+                </div>
+
+                {/* Label Container (Fades in and slides up from bottom, does not affect height) */}
+                <span className={`absolute bottom-2.5 z-10 text-[9px] font-black uppercase tracking-widest text-white transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3 pointer-events-none'}`}>
                   {tab.label}
                 </span>
               </button>
