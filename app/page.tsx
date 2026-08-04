@@ -9,17 +9,21 @@ import Progression from "@/components/Progression";
 import { Dumbbell, ListPlus, TrendingUp, BookOpen, Settings as SettingsIcon, X, Crown, Loader2 } from 'lucide-react';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'workout' | 'builder' | 'progression' | 'analytics' | 'library' | 'settings'>('workout');
-  const [previousTab, setPreviousTab] = useState<'workout' | 'builder' | 'progression' | 'analytics' | 'library'>('workout');
+  const [activeTab, setActiveTab] = useState<'workout' | 'builder' | 'progression' | 'analytics' | 'library' | 'settings'>('progression');
+  const [previousTab, setPreviousTab] = useState<'workout' | 'builder' | 'progression' | 'analytics' | 'library'>('progression');
   const [isMounted, setIsMounted] = useState(false);
+  const [isNavVisible, setIsNavVisible] = useState(false);
   const [rankGlow, setRankGlow] = useState(false);
 
   const [pastWorkoutDate, setPastWorkoutDate] = useState<number | null>(null);
 
-  useEffect(() => {
+useEffect(() => {
     setIsMounted(true);
+    setIsNavVisible(!!localStorage.getItem('gym_calibrated'));
     const handleGlow = () => setRankGlow(true);
+    const handleCalibrated = () => setIsNavVisible(true);
     window.addEventListener('rank-glow-update', handleGlow);
+    window.addEventListener('gym-calibrated', handleCalibrated);
 
     const handlePastWorkout = (e: any) => {
       setPastWorkoutDate(e.detail.timestamp);
@@ -28,9 +32,10 @@ export default function Home() {
     };
     window.addEventListener('start-past-workout', handlePastWorkout);
 
-    return () => {
+return () => {
       window.removeEventListener('rank-glow-update', handleGlow);
       window.removeEventListener('start-past-workout', handlePastWorkout);
+      window.removeEventListener('gym-calibrated', handleCalibrated);
     };
   }, []);
 
@@ -92,10 +97,9 @@ return (
         No overflow-hidden locks. The header is placed INSIDE this flow so it 
         scrolls away as the user scrolls down the page.
       */}
-      <div className={`flex flex-col w-full pb-32 ${activeTab === 'progression' ? 'px-0' : 'px-4'}`}>
+<div className={`flex flex-col w-full pb-32 ${activeTab === 'progression' ? 'px-0' : 'px-4'}`}>
         
-        <header className={`pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start transition-colors duration-500 ${activeTab === 'progression' ? 'text-white px-6' : ''}`}>
-          <div>
+        <header className={`pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${!isNavVisible ? 'opacity-0 -translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0'} ${activeTab === 'progression' ? 'text-white px-6' : ''}`}>          <div>
             <h1 className="text-4xl font-black tracking-tight drop-shadow-sm">{header.title}</h1>
             <p className={`font-black tracking-[0.2em] text-[10px] uppercase mt-1 ${activeTab === 'progression' ? 'text-blue-500 drop-shadow-md' : 'text-[hsl(var(--muted))]'}`}>
               {header.subtitle}
@@ -125,9 +129,9 @@ return (
         - CSS Grid: Forces exactly equal widths (grid-cols-5) so buttons never squeeze, clip, or shift adjacent items.
         - Layout-free animations: Using translate-y and opacity instead of margins/heights to guarantee 60fps buttery smoothness.
       */}
-      <div 
-        className="fixed inset-x-0 z-[90] flex justify-center pointer-events-none transform-gpu"
-        style={{ bottom: '0px', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+<div 
+        className={`fixed inset-x-0 bottom-0 z-[90] flex justify-center pointer-events-none transform-gpu pb-6 transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${!isNavVisible ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         <nav className="w-[92%] max-w-[400px] h-[72px] grid grid-cols-5 items-center bg-[#0e0e11]/85 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-[2.5rem] pointer-events-auto touch-none px-1.5">
           {navItems.map((tab) => {

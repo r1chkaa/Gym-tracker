@@ -2,8 +2,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { db } from '@/lib/db';
 import { Download, Trash2, Database, Scale, Clock, Sun, Moon, User, Upload } from 'lucide-react';
-
 export default function Settings() {
+  const [isDeleting, setIsDeleting] = useState(false);
   const [unit, setUnit] = useState('lbs');
   const [timerMin, setTimerMin] = useState(1);
   const [timerSec, setTimerSec] = useState(30);
@@ -76,17 +76,18 @@ export default function Settings() {
     localStorage.setItem('gym_wakelock', checked.toString());
   };
 
-  const handleClearData = async () => {
+const handleClearData = async () => {
     if (window.confirm("WARNING: This will permanently delete all data, including your rank. Are you sure?")) {
+      setIsDeleting(true);
       await db.templates.clear();
       await db.sets.clear();
       await db.bodyWeightLogs.clear();
       await db.favorites.clear();
+      localStorage.clear();
       
-      localStorage.removeItem('gym_calibrated');
-      localStorage.removeItem('gym_calibration_pts');
-      
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 2500);
     }
   };
 
@@ -136,7 +137,23 @@ export default function Settings() {
     }
   };
 
-  return (
+return (
+    <>
+      {isDeleting && (
+        <div className="fixed inset-0 z-[999999] bg-white flex flex-col items-center justify-center animate-[world-collapse_2.5s_ease-in_forwards] pointer-events-none origin-center">
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes world-collapse {
+              0% { opacity: 0; filter: brightness(1); transform: scale(1) translate(0, 0); }
+              10% { opacity: 1; filter: brightness(2); transform: scale(1.02) translate(2px, -2px); }
+              20% { opacity: 1; filter: brightness(3); transform: scale(1.05) translate(-4px, 4px) rotate(1deg); }
+              40% { opacity: 1; filter: brightness(5); transform: scale(1.1) translate(6px, -4px) rotate(-1deg); }
+              60% { opacity: 1; filter: brightness(8); transform: scale(1.15) translate(-8px, 6px) rotate(2deg); }
+              80% { opacity: 1; filter: brightness(10); transform: scale(1.2) translate(10px, -8px) rotate(-2deg); background-color: white;}
+              100% { opacity: 1; filter: brightness(20); transform: scale(1.5) translate(0, 0); background-color: white; }
+            }
+          `}} />
+        </div>
+      )}
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="bg-[hsl(var(--card))] rounded-3xl p-6 border border-[hsl(var(--border))] shadow-sm">
         <h2 className="text-xl font-bold text-[hsl(var(--foreground))] mb-6">Preferences</h2>
@@ -236,7 +253,8 @@ export default function Settings() {
             <Trash2 size={20} />
           </button>
         </div>
-      </div>
+</div>
     </div>
+    </>
   );
 }

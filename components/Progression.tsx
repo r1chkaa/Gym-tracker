@@ -69,6 +69,8 @@ export default function Progression() {
   const [gender, setGender] = useState('male');
   
   const [showCalibration, setShowCalibration] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(1);
+  const [userName, setUserName] = useState('');
   const [liftMonths, setLiftMonths] = useState(8);
   const [calibrationPts, setCalibrationPts] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
@@ -109,35 +111,72 @@ export default function Progression() {
   const rankTheme = RANK_THEMES[currentRank.name] || RANK_THEMES['Wood'];
   const isGod = currentRank.name === 'God';
 
-  const handleCalibrate = () => {
+const completeCalibration = () => {
+    localStorage.setItem('gym_username', userName);
     localStorage.setItem('gym_calibrated', 'true');
     const newCalibrationPts = liftMonths * 30000;
     localStorage.setItem('gym_calibration_pts', newCalibrationPts.toString());
     setCalibrationPts(newCalibrationPts);
     setShowCalibration(false);
+    window.dispatchEvent(new Event('gym-calibrated'));
   };
 
   if (showCalibration) {
     return (
-      <div className="fixed inset-0 z-[200] bg-[#09090b] flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
-        <div className="bg-white/10 border border-white/20 p-8 rounded-3xl backdrop-blur-xl w-full max-w-sm flex flex-col items-center shadow-2xl">
-          <Calendar className="text-blue-500 mb-6" size={48} />
-          <h2 className="text-2xl font-black text-white text-center mb-2">Initial Calibration</h2>
-          <p className="text-white/60 text-center text-sm mb-8">How many months have you been consistently lifting before using this app?</p>
-          
-          <div className="flex items-center gap-6 mb-8 w-full justify-center">
-            <button onClick={() => setLiftMonths(Math.max(0, liftMonths - 1))} className="p-4 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white font-black"><ChevronDown size={24} /></button>
-            <div className="flex flex-col items-center w-24">
-              <span className="text-5xl font-black text-white">{liftMonths}</span>
-              <span className="text-[10px] font-black tracking-widest text-white/40 uppercase mt-1">Months</span>
-            </div>
-            <button onClick={() => setLiftMonths(Math.min(120, liftMonths + 1))} className="p-4 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white font-black"><ChevronUp size={24} /></button>
+      <div className="fixed inset-0 z-[999] bg-[#09090b] flex flex-col items-center justify-center p-6 w-screen h-screen overflow-hidden">
+        {onboardingStep === 1 && (
+          <div className="flex flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-1000 w-full max-w-sm text-center">
+            <Crown className="text-blue-500 mb-8 w-20 h-20 animate-pulse" />
+            <h1 className="text-4xl font-black text-white mb-4 tracking-tight leading-tight">Welcome to<br/>Gym Tracker</h1>
+            <p className="text-blue-500/80 font-black uppercase tracking-[0.2em] text-xs mb-16">The place where you will track your gains</p>
+            <button onClick={() => setOnboardingStep(2)} className="w-full bg-white text-black font-black py-5 rounded-full tracking-widest uppercase transition-all shadow-[0_0_40px_rgba(255,255,255,0.3)] active:scale-95 text-sm">Continue</button>
           </div>
-
-          <button onClick={handleCalibrate} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl tracking-widest uppercase transition-all shadow-md active:scale-95">
-            Set Starting Rank
-          </button>
-        </div>
+        )}
+        {onboardingStep === 2 && (
+          <div className="flex flex-col items-center justify-center animate-in slide-in-from-right-10 fade-in duration-700 w-full max-w-sm">
+            <h2 className="text-3xl font-black text-white mb-2 text-center">Introduce yourself!</h2>
+            <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-10 text-center">What should we call you?</p>
+            <input autoFocus type="text" value={userName} onChange={e => setUserName(e.target.value)} placeholder="Your Name" className="w-full bg-white/5 border border-white/10 text-white text-3xl font-black p-6 rounded-3xl text-center focus:outline-none focus:border-blue-500 transition-colors mb-8 placeholder:text-white/20" />
+            <button disabled={!userName.trim()} onClick={() => setOnboardingStep(3)} className="w-full bg-blue-600 disabled:opacity-50 disabled:bg-white/10 text-white font-black py-5 rounded-full tracking-widest uppercase transition-all active:scale-95 text-sm">Next</button>
+          </div>
+        )}
+        {onboardingStep === 3 && (
+          <div className="flex flex-col items-center justify-center animate-in slide-in-from-bottom-10 fade-in duration-1000 w-full max-w-sm text-center">
+            <h2 className="text-4xl font-black text-white mb-4">Nice to meet you,<br/><span className="text-blue-500">{userName}</span>!</h2>
+            <p className="text-white/50 text-sm font-bold uppercase tracking-widest mb-16">Okay {userName}, let's begin.</p>
+            <button onClick={() => setOnboardingStep(4)} className="w-full bg-white text-black font-black py-5 rounded-full tracking-widest uppercase transition-all shadow-[0_0_40px_rgba(255,255,255,0.3)] active:scale-95 text-sm">Ready</button>
+          </div>
+        )}
+        {onboardingStep === 4 && (
+          <div className="flex flex-col items-center justify-center animate-in zoom-in-95 fade-in duration-700 w-full max-w-sm">
+            <Calendar className="text-blue-500 mb-6" size={48} />
+            <h2 className="text-3xl font-black text-white text-center mb-4 leading-tight">Your Experience</h2>
+            <p className="text-white/50 text-center text-xs font-bold uppercase tracking-widest leading-relaxed mb-12">How many months have you been<br/>consistently lifting?</p>
+            <div className="flex items-center gap-6 mb-12 w-full justify-center">
+              <button onClick={() => setLiftMonths(Math.max(0, liftMonths - 1))} className="p-5 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white font-black"><ChevronDown size={28} /></button>
+              <div className="flex flex-col items-center w-28">
+                <span className="text-6xl font-black text-white tracking-tighter">{liftMonths}</span>
+                <span className="text-[10px] font-black tracking-widest text-blue-500 uppercase mt-2">Months</span>
+              </div>
+              <button onClick={() => setLiftMonths(Math.min(120, liftMonths + 1))} className="p-5 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white font-black"><ChevronUp size={28} /></button>
+            </div>
+            <button onClick={() => setOnboardingStep(5)} className="w-full bg-blue-600 text-white font-black py-5 rounded-full tracking-widest uppercase transition-all shadow-[0_0_30px_rgba(37,99,235,0.4)] active:scale-95 text-sm">Calibrate Rank</button>
+          </div>
+        )}
+        {onboardingStep === 5 && (() => {
+           const calcRank = getAccountRank(liftMonths * 30000);
+           const tTheme = RANK_THEMES[calcRank.name] || RANK_THEMES['Wood'];
+           return (
+             <div className="flex flex-col items-center justify-center animate-in zoom-in-50 fade-in duration-[1500ms] w-full h-full relative" onAnimationEnd={(e) => { if(e.animationName.includes('zoom-in')) setTimeout(completeCalibration, 3500); }}>
+                <div className="absolute inset-0 w-full h-full bg-black z-[-1]" />
+                <div className="absolute w-[800px] h-[800px] opacity-40 blur-[100px] rounded-full animate-pulse transition-colors duration-1000 z-0" style={{ backgroundColor: tTheme.hex }} />
+                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/50 mb-8 z-10 animate-in slide-in-from-top-10 fade-in duration-1000 delay-500 fill-mode-both">Starting Rank Established</span>
+                <img src={`/ranks/${calcRank.image}`} alt={calcRank.name} className="w-64 h-64 object-contain z-10 drop-shadow-[0_0_40px_rgba(255,255,255,0.2)] animate-[idle-float_4s_ease-in-out_infinite]" />
+                <h1 className="text-6xl font-black uppercase tracking-tighter mt-8 z-10 text-center animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-1000 fill-mode-both" style={{ color: tTheme.hex, textShadow: `0 0 30px ${tTheme.hex}80` }}>{calcRank.name}</h1>
+                <span className="text-sm font-bold text-white/80 tracking-[0.3em] uppercase mt-4 z-10 animate-in fade-in duration-1000 delay-1500 fill-mode-both">{calcRank.tier || `LEVEL ${calcRank.tier}`}</span>
+             </div>
+           );
+        })()}
       </div>
     );
   }
