@@ -119,12 +119,12 @@ return (
       </div>
 {/* 
         Fixed Floating Nav:
-        Locked precisely to the bottom safe area to match image_a30967.png.
-        Using inset flex centering avoids iOS transform jitter.
+        Locked precisely to the bottom safe area to match image_a301df.png.
+        Using explicit bottom calculation with a 0px fallback ensures Safari does not drop the CSS rule, and transform-gpu locks it during iOS scroll.
       */}
       <div 
-        className="fixed bottom-0 inset-x-0 w-full z-[90] flex justify-center pointer-events-none"
-        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+        className="fixed inset-x-0 w-full z-[90] flex justify-center pointer-events-none transform-gpu"
+        style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
       >
         <nav className="w-[92%] max-w-[400px] flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem] pointer-events-auto shadow-lg">          {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
