@@ -135,11 +135,22 @@ const goToStep = (step: number) => {
     window.dispatchEvent(new Event('gym-calibrated'));
   };
 
-  if (showCalibration) {
+if (showCalibration) {
     return (
-      <div className="fixed inset-0 z-[999] bg-[#09090b] w-screen h-[100dvh] flex flex-col items-center justify-center overflow-hidden touch-none">
+      <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center px-6 transition-colors duration-1000">
         
-        {/* Flash Overlay: Fades from pure white back to black if coming from the deletion wipe */}
+        {/* Smart Scroll Lock to prevent dark rectangle artifacts */}
+        <style dangerouslySetInnerHTML={{__html: `
+          html, body { overflow: visible !important; height: auto !important; overscroll-behavior-y: none !important; }
+        `}} />
+
+        {/* Premium Atmospheric Background */}
+        <div className="absolute inset-0 z-[-1] bg-[#09090b] overflow-hidden pointer-events-none">
+          <div className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] bg-blue-900/20 rounded-full mix-blend-screen filter blur-[80px] animate-[pulse_6s_ease-in-out_infinite]" />
+          <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-indigo-900/20 rounded-full mix-blend-screen filter blur-[80px] animate-[pulse_8s_ease-in-out_infinite_reverse]" />
+        </div>
+
+        {/* Flash Overlay: Fades from pure white back to atmospheric black if coming from the deletion wipe */}
         {isWipedFlash && (
           <div className="absolute inset-0 z-[1000] bg-white pointer-events-none animate-[flash-fade_2.5s_ease-out_forwards]">
             <style dangerouslySetInnerHTML={{__html: `@keyframes flash-fade { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }`}} />
@@ -147,68 +158,79 @@ const goToStep = (step: number) => {
         )}
 
         {onboardingStep < 5 ? (
-          <div className={`w-full max-w-sm flex flex-col items-center justify-center px-6 transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isTransitioning ? 'opacity-0 scale-90 blur-[10px] -translate-y-8 pointer-events-none' : 'opacity-100 scale-100 blur-0 translate-y-0'}`}>
+          <div className={`w-full max-w-sm flex flex-col items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isTransitioning ? 'opacity-0 scale-95 blur-[8px] -translate-y-4 pointer-events-none' : 'opacity-100 scale-100 blur-0 translate-y-0'}`}>
             
             {onboardingStep === 1 && (
               <>
-                <Crown className="text-blue-500 mb-8 w-20 h-20 animate-pulse drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
-                <h1 className="text-4xl font-black text-white mb-4 tracking-tight leading-tight text-center">Welcome to<br/>Gym Tracker</h1>
-                <p className="text-blue-500/80 font-black uppercase tracking-[0.2em] text-xs mb-16 text-center">The place where you will track your gains</p>
-                <button onClick={() => goToStep(2)} className="w-full bg-white text-black font-black py-5 rounded-full tracking-widest uppercase transition-all shadow-[0_0_40px_rgba(255,255,255,0.2)] active:scale-95 text-sm">Begin</button>
+                <Crown className="text-blue-500 mb-8 w-20 h-20 animate-[idle-float_4s_ease-in-out_infinite] drop-shadow-[0_0_20px_rgba(59,130,246,0.4)]" />
+                <h1 className="text-4xl font-black text-white mb-4 tracking-tight leading-tight text-center">Welcome to the<br/>Forge</h1>
+                <p className="text-blue-400/80 font-black uppercase tracking-[0.2em] text-[10px] mb-16 text-center drop-shadow-sm">Your personal ledger for muscle mastery</p>
+                <button onClick={() => goToStep(2)} className="w-full bg-white text-black font-black py-5 rounded-full tracking-widest uppercase transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-95 text-sm">Begin</button>
               </>
             )}
             
             {onboardingStep === 2 && (
               <>
-                <h2 className="text-3xl font-black text-white mb-2 text-center">Introduce yourself!</h2>
-                <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-10 text-center">What should we call you?</p>
-                <input autoFocus type="text" value={userName} onChange={e => setUserName(e.target.value)} placeholder="Athlete Name" className="w-full bg-white/5 border border-white/10 text-white text-3xl font-black p-6 rounded-3xl text-center focus:outline-none focus:border-blue-500 transition-colors mb-8 placeholder:text-white/20 shadow-inner" />
-                <button disabled={!userName.trim()} onClick={() => goToStep(3)} className="w-full bg-blue-600 disabled:opacity-50 disabled:bg-white/10 text-white font-black py-5 rounded-full tracking-widest uppercase transition-all active:scale-95 text-sm shadow-[0_0_20px_rgba(37,99,235,0.3)]">Next</button>
+                <h2 className="text-3xl font-black text-white mb-2 text-center drop-shadow-sm">Identify Yourself.</h2>
+                <p className="text-white/50 text-[10px] font-black uppercase tracking-widest mb-10 text-center">Enter your designation</p>
+                <input autoFocus type="text" value={userName} onChange={e => setUserName(e.target.value)} placeholder="Your Name" className="w-full bg-white/5 border border-white/10 text-white text-3xl font-black p-6 rounded-[2rem] text-center focus:outline-none focus:border-blue-500 transition-all mb-8 placeholder:text-white/20 shadow-inner backdrop-blur-md" />
+                <button disabled={!userName.trim()} onClick={() => goToStep(3)} className="w-full bg-blue-600 disabled:opacity-50 disabled:bg-white/5 text-white font-black py-5 rounded-full tracking-widest uppercase transition-all active:scale-95 text-sm shadow-[0_0_20px_rgba(37,99,235,0.3)] disabled:shadow-none">Proceed</button>
               </>
             )}
             
             {onboardingStep === 3 && (
               <>
-                <h2 className="text-4xl font-black text-white mb-4 text-center">Nice to meet you,<br/><span className="text-blue-500">{userName}</span>!</h2>
-                <p className="text-white/50 text-sm font-bold uppercase tracking-widest mb-16 text-center leading-relaxed">Okay {userName}, let's start.</p>
-                <button onClick={() => goToStep(4)} className="w-full bg-white text-black font-black py-5 rounded-full tracking-widest uppercase transition-all shadow-[0_0_40px_rgba(255,255,255,0.2)] active:scale-95 text-sm">Continue</button>
+                <h2 className="text-4xl font-black text-white mb-4 text-center">Acknowledged,<br/><span className="text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.4)]">{userName}</span>.</h2>
+                <p className="text-white/50 text-[10px] font-black uppercase tracking-widest mb-16 text-center leading-relaxed">Let's forge your path.</p>
+                <button onClick={() => goToStep(4)} className="w-full bg-white text-black font-black py-5 rounded-full tracking-widest uppercase transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-95 text-sm">Continue</button>
               </>
             )}
             
             {onboardingStep === 4 && (
               <>
-                <Calendar className="text-blue-500 mb-6" size={48} />
-                <h2 className="text-3xl font-black text-white text-center mb-4 leading-tight">Your Experience</h2>
-                <p className="text-white/50 text-center text-xs font-bold uppercase tracking-widest leading-relaxed mb-12">How long have you been<br/>lifting?</p>
+                <Calendar className="text-blue-500 mb-6 drop-shadow-[0_0_15px_rgba(59,130,246,0.4)]" size={48} />
+                <h2 className="text-3xl font-black text-white text-center mb-4 leading-tight">Combat History</h2>
+                <p className="text-white/50 text-center text-[10px] font-black uppercase tracking-widest leading-relaxed mb-12">How many months have you been<br/>moving iron?</p>
                 <div className="flex items-center gap-6 mb-12 w-full justify-center">
-                  <button onClick={() => setLiftMonths(Math.max(0, liftMonths - 1))} className="p-5 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white font-black"><ChevronDown size={28} /></button>
+                  <button onClick={() => setLiftMonths(Math.max(0, liftMonths - 1))} className="p-5 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-90 transition-all border border-white/10 text-white font-black backdrop-blur-md"><ChevronDown size={28} /></button>
                   <div className="flex flex-col items-center w-28">
-                    <span className="text-6xl font-black text-white tracking-tighter drop-shadow-md">{liftMonths}</span>
+                    <span className="text-7xl font-black text-white tracking-tighter drop-shadow-lg">{liftMonths}</span>
                     <span className="text-[10px] font-black tracking-widest text-blue-500 uppercase mt-2">Months</span>
                   </div>
-                  <button onClick={() => setLiftMonths(Math.min(120, liftMonths + 1))} className="p-5 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white font-black"><ChevronUp size={28} /></button>
+                  <button onClick={() => setLiftMonths(Math.min(120, liftMonths + 1))} className="p-5 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-90 transition-all border border-white/10 text-white font-black backdrop-blur-md"><ChevronUp size={28} /></button>
                 </div>
-                <button onClick={() => goToStep(5)} className="w-full bg-blue-600 text-white font-black py-5 rounded-full tracking-widest uppercase transition-all shadow-[0_0_30px_rgba(37,99,235,0.4)] active:scale-95 text-sm">Calibrate Rank</button>
+                <button onClick={() => goToStep(5)} className="w-full bg-blue-600 text-white font-black py-5 rounded-full tracking-widest uppercase transition-all shadow-[0_0_30px_rgba(37,99,235,0.4)] active:scale-95 text-sm">Calibrate</button>
               </>
             )}
           </div>
         ) : (() => {
-           // Step 5: Absolute bounds to guarantee no letterboxing
+           // Step 5: Epic Cinematic Rank Slam
            const calcRank = getAccountRank(liftMonths * 30000);
            const tTheme = RANK_THEMES[calcRank.name] || RANK_THEMES['Wood'];
            return (
              <div 
-               className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-[#09090b] z-50 cursor-pointer animate-in fade-in duration-1000" 
+               className="absolute inset-0 w-full h-full flex flex-col items-center justify-center z-50 cursor-pointer overflow-hidden touch-none" 
                onClick={completeCalibration}
              >
-                <div className="absolute w-[800px] h-[800px] opacity-30 blur-[120px] rounded-full animate-pulse transition-colors duration-1000 z-0" style={{ backgroundColor: tTheme.hex }} />
-                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/50 mb-12 z-10 animate-in slide-in-from-top-10 fade-in duration-1000 delay-500 fill-mode-both">Starting Rank Established</span>
-                <img src={`/ranks/${calcRank.image}`} alt={calcRank.name} className="w-64 h-64 object-contain z-10 drop-shadow-[0_0_40px_rgba(255,255,255,0.2)] animate-[idle-float_4s_ease-in-out_infinite]" />
-                <h1 className="text-6xl font-black uppercase tracking-tighter mt-10 z-10 text-center animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-1000 fill-mode-both" style={{ color: tTheme.hex, textShadow: `0 0 30px ${tTheme.hex}80` }}>{calcRank.name}</h1>
-                <span className="text-sm font-bold text-white/80 tracking-[0.3em] uppercase mt-4 z-10 animate-in fade-in duration-1000 delay-1500 fill-mode-both">{calcRank.tier || `LEVEL ${calcRank.tier}`}</span>
+                <style dangerouslySetInnerHTML={{__html: `
+                  @keyframes rank-slam { 0% { transform: scale(3) translateY(-50px); opacity: 0; filter: blur(20px); } 30% { transform: scale(0.9) translateY(10px); opacity: 1; filter: blur(0px); } 50% { transform: scale(1.05) translateY(-5px); } 100% { transform: scale(1) translateY(0); } }
+                  @keyframes shockwave-pulse { 0% { transform: scale(0.5); opacity: 1; border-width: 15px; } 100% { transform: scale(3.5); opacity: 0; border-width: 0px; } }
+                `}} />
+                <div className="absolute w-[800px] h-[800px] opacity-20 blur-[100px] rounded-full animate-pulse transition-colors duration-1000 z-0" style={{ backgroundColor: tTheme.hex }} />
                 
-                {/* Skippable prompt */}
-                <div className="absolute bottom-16 text-[10px] font-black uppercase tracking-widest text-white/40 animate-in fade-in duration-1000 delay-[2500ms] fill-mode-both">
+                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/50 mb-12 z-10 animate-in slide-in-from-top-10 fade-in duration-1000 delay-500 fill-mode-both">Starting Rank Established</span>
+                
+                <div className="relative flex justify-center items-center w-64 h-64 z-10 animate-[rank-slam_1.2s_ease-out_forwards]">
+                  <div className="absolute inset-0 rounded-full animate-[shockwave-pulse_1s_ease-out_0.2s_forwards]" style={{ borderColor: tTheme.hex }} />
+                  <div className="absolute inset-0 rounded-full animate-[shockwave-pulse_1.5s_ease-out_0.4s_forwards]" style={{ borderColor: tTheme.hex }} />
+                  <div className="absolute inset-0 blur-[80px] rounded-full opacity-60 animate-ping" style={{ backgroundColor: tTheme.hex }} />
+                  <img src={`/ranks/${calcRank.image}`} alt={calcRank.name} className={`w-56 h-56 object-contain relative z-20 drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] ${tTheme.anim}`} />
+                </div>
+
+                <h1 className="text-6xl font-black uppercase tracking-tighter mt-10 z-10 text-center animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-700 fill-mode-both" style={{ color: tTheme.hex, textShadow: `0 0 30px ${tTheme.hex}80` }}>{calcRank.name}</h1>
+                <span className="text-sm font-bold text-white/80 tracking-[0.3em] uppercase mt-4 z-10 animate-in fade-in duration-1000 delay-1000 fill-mode-both">{calcRank.tier || `LEVEL ${calcRank.tier}`}</span>
+                
+                <div className="absolute bottom-16 text-[10px] font-black uppercase tracking-widest text-white/40 animate-in fade-in duration-1000 delay-[2000ms] fill-mode-both bg-black/20 px-6 py-3 rounded-full backdrop-blur-sm border border-white/10">
                   <span className="animate-pulse">Tap anywhere to continue</span>
                 </div>
              </div>

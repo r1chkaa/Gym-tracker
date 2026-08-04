@@ -142,16 +142,17 @@ const handleClearData = async () => {
 
 return (
     <>
-      {isDeleting && (
-        <div className="fixed inset-0 z-[999999] flex flex-col items-center justify-center animate-[system-overload_2.5s_ease-in_forwards] pointer-events-none origin-center mix-blend-screen">
+{isDeleting && (
+        <div className="fixed inset-0 z-[999999] flex flex-col items-center justify-center animate-[core-meltdown_2.5s_ease-in_forwards] pointer-events-none origin-center mix-blend-screen">
           <style dangerouslySetInnerHTML={{__html: `
-            @keyframes system-overload {
-              0% { opacity: 0; transform: scale(1) translate(0, 0); backdrop-filter: blur(0px) brightness(1); background-color: transparent; }
-              20% { opacity: 0.5; transform: scale(1.01) translate(3px, -3px); backdrop-filter: blur(2px) brightness(1.5) hue-rotate(90deg); background-color: rgba(255,255,255,0.1); }
-              40% { opacity: 0.8; transform: scale(1.03) translate(-5px, 5px) skew(1deg); backdrop-filter: blur(5px) brightness(2) hue-rotate(-90deg); background-color: rgba(255,255,255,0.3); }
-              60% { opacity: 1; transform: scale(1.05) translate(8px, -8px) skew(-2deg); backdrop-filter: blur(10px) brightness(4); background-color: rgba(255,255,255,0.6); }
-              80% { opacity: 1; transform: scale(1.1) translate(-10px, 10px); backdrop-filter: blur(20px) brightness(10); background-color: rgba(255,255,255,0.9); }
-              100% { opacity: 1; transform: scale(1.2) translate(0, 0); backdrop-filter: blur(50px) brightness(20); background-color: white; }
+            @keyframes core-meltdown {
+              0% { opacity: 0; transform: scale(1); filter: brightness(1) contrast(1); background-color: transparent; }
+              10% { opacity: 1; transform: scale(1.02) translate(1px, -1px); filter: brightness(1.2) contrast(1.5); background-color: rgba(255, 0, 0, 0.05); box-shadow: inset 0 0 50px rgba(255,0,0,0.2); }
+              30% { opacity: 1; transform: scale(1.05) translate(-3px, 3px) skew(1deg); filter: brightness(1.5) contrast(2) hue-rotate(-10deg); background-color: rgba(255, 0, 0, 0.2); box-shadow: inset 0 0 100px rgba(255,0,0,0.5); }
+              50% { opacity: 1; transform: scale(1.1) translate(5px, -5px) skew(-2deg); filter: brightness(3) blur(2px); background-color: rgba(255, 100, 100, 0.5); box-shadow: inset 0 0 200px rgba(255,100,100,0.8); }
+              70% { opacity: 1; transform: scale(1.15) translate(-8px, 8px); filter: brightness(8) blur(5px); background-color: rgba(255, 200, 200, 0.8); }
+              85% { opacity: 1; transform: scale(1.2) translate(10px, -10px); filter: brightness(15) blur(10px); background-color: #fff; }
+              100% { opacity: 1; transform: scale(1.5) translate(0, 0); filter: brightness(20) blur(20px); background-color: #fff; }
             }
           `}} />
         </div>
