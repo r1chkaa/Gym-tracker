@@ -96,9 +96,8 @@ export default function Home() {
         {activeTab === 'settings' && <Settings />}
       </div>
 
-      {/* Floating Navigation with safe area bottom padding */}
-      <div className="fixed bottom-[max(env(safe-area-inset-bottom),1.5rem)] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-50">
-        <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/80 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]">
+        <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
           {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
             const isCenter = tab.id === 'progression';
@@ -108,7 +107,7 @@ export default function Home() {
                 <div key={tab.id} className="relative flex items-center justify-center px-1">
                   <button
                     onClick={() => handleTabClick(tab.id)}
-                    className={`absolute bottom-[-8px] flex items-center justify-center w-16 h-16 rounded-full border-[4px] border-[hsl(var(--background))] transition-all duration-300 active:scale-95 ${isActive ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] shadow-[0_5px_15px_rgba(0,0,0,0.2)]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] hover:brightness-110'} ${rankGlow && !isActive ? 'animate-pulse bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)] border-transparent' : ''}`}
+                    className={`absolute bottom-[-8px] flex items-center justify-center w-16 h-16 rounded-full border-[4px] border-[hsl(var(--background))] transition-all duration-500 active:scale-95 ${isActive ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] shadow-[0_5px_15px_rgba(0,0,0,0.2)]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] hover:brightness-110'} ${rankGlow && !isActive ? 'animate-pulse bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)] border-transparent' : ''}`}
                   >
                     <tab.icon size={26} strokeWidth={2.5} className={isActive || (rankGlow && !isActive) ? "opacity-100" : "opacity-70"} />
                   </button>
