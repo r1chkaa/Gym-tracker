@@ -71,7 +71,7 @@ export default function Home() {
       
       <div className={`fixed inset-0 w-screen h-screen z-[-2] transition-colors duration-500 ${activeTab === 'progression' ? 'bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`} />
 
-      <div className="flex-1 flex flex-col overflow-y-auto pb-[90px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10 w-full">
+      <div className="flex-1 flex flex-col overflow-y-auto pb-[100px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10 w-full">
         
         <header className={`flex-none px-6 pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start transition-colors duration-500 ${activeTab === 'progression' ? 'text-white' : ''}`}>
           <div>
@@ -101,19 +101,19 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Flush Bottom Nav Bar */}
-      <div className="fixed bottom-0 left-0 w-full z-[90] bg-[hsl(var(--card))]/95 backdrop-blur-3xl border-t border-[hsl(var(--border))] pb-[env(safe-area-inset-bottom)]">
-        <nav className="flex px-4 py-2 items-center justify-between max-w-md mx-auto relative">
+      {/* Floating Bottom Nav Bar - Moved down safely against the edge */}
+      <div className="fixed bottom-0 pb-[max(env(safe-area-inset-bottom),0.5rem)] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]">
+        <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/95 backdrop-blur-3xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
           {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
             const isCenter = tab.id === 'progression';
 
             if (isCenter) {
               return (
-                <div key={tab.id} className="relative flex items-center justify-center px-2">
+                <div key={tab.id} className="relative flex items-center justify-center px-1">
                   <button 
                     onClick={() => handleTabClick(tab.id)}
-                    className={`absolute bottom-[10px] flex items-center justify-center w-16 h-16 rounded-full border-[4px] border-[hsl(var(--background))] transition-all duration-500 active:scale-95 ${isActive ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] shadow-[0_5px_15px_rgba(0,0,0,0.2)]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] hover:brightness-110'} ${rankGlow && !isActive ? 'animate-pulse bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)] border-transparent' : ''}`}
+                    className={`absolute bottom-[-8px] flex items-center justify-center w-16 h-16 rounded-full border-[4px] border-[hsl(var(--background))] transition-all duration-500 active:scale-95 ${isActive ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] shadow-[0_5px_15px_rgba(0,0,0,0.2)]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] hover:brightness-110'} ${rankGlow && !isActive ? 'animate-pulse bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)] border-transparent' : ''}`}
                   >
                     <tab.icon size={26} strokeWidth={2.5} className={isActive || (rankGlow && !isActive) ? "opacity-100" : "opacity-70"} />
                   </button>
@@ -125,7 +125,7 @@ export default function Home() {
               <button 
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)} 
-                className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-2 px-1 rounded-2xl transition-all duration-300 ${isActive ? 'text-[hsl(var(--foreground))] bg-[hsl(var(--surface))] shadow-inner border border-[hsl(var(--border))]' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] border border-transparent'}`}
+                className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-3xl transition-all duration-300 ${isActive ? 'text-[hsl(var(--foreground))] bg-[hsl(var(--surface))] shadow-inner border border-[hsl(var(--border))]' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] border border-transparent'}`}
               >
                 <tab.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                 <span className="text-[9px] font-black uppercase tracking-widest">{tab.label}</span>
