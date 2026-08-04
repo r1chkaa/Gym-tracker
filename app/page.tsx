@@ -120,13 +120,13 @@ export default function Home() {
         {activeTab === 'settings' && <Settings />}
       </div>
 
-      {/* 
+{/* 
         Fixed Floating Nav:
-        Changed from 'absolute' to 'fixed' so it stays glued to the viewport
-        screen while the native page scrolls underneath it.
+        Stays glued to the viewport securely above the safe area.
       */}
       <div 
-        className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90] bottom-[max(env(safe-area-inset-bottom),1rem)]"
+        className="fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90] bottom-4"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
       >
         <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem]">
           {navItems.map((tab) => {
