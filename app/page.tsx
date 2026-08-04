@@ -100,8 +100,7 @@ export default function Home() {
       <div 
         className="absolute left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90] bottom-4 pb-safe"
       >
-        <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
-          {navItems.map((tab) => {
+<nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem]">          {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
             const isCenter = tab.id === 'progression';
 
@@ -119,10 +118,10 @@ export default function Home() {
             }
 
             return (
-              <button
+<button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-3xl transition-all duration-300 ${isActive ? 'text-[hsl(var(--foreground))] bg-[hsl(var(--surface))] shadow-inner border border-[hsl(var(--border))]' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] border border-transparent'}`}
+                className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-3xl transition-all duration-300 ${isActive ? 'text-[hsl(var(--foreground))]' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]'}`}
               >
                 <tab.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                 <span className="text-[9px] font-black uppercase tracking-widest">{tab.label}</span>
