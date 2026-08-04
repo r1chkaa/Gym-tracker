@@ -63,11 +63,11 @@ export default function Home() {
   ];
 
   if (!isMounted) {
-    return <div className="fixed inset-0 bg-[hsl(var(--background))] flex items-center justify-center"><Loader2 className="animate-spin text-[hsl(var(--muted))]" size={32}/></div>;
+    return <div className="h-[100dvh] bg-[hsl(var(--background))] flex items-center justify-center"><Loader2 className="animate-spin text-[hsl(var(--muted))]" size={32}/></div>;
   }
 
   return (
-    <main className={`fixed inset-0 w-full h-full max-w-md mx-auto flex flex-col overflow-hidden transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`}>
+    <main className={`h-full w-full max-w-md mx-auto flex flex-col overflow-hidden relative transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`}>
       
       <header className={`flex-none px-6 pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start relative z-40 transition-colors duration-500 ${activeTab === 'progression' ? 'text-white bg-[#09090b]' : 'bg-[hsl(var(--background))]'}`}>
         <div>
@@ -87,7 +87,7 @@ export default function Home() {
         </button>
       </header>
 
-      <div className="flex-1 flex flex-col overflow-y-auto px-4 pt-2 pb-[120px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10">
+      <div className="flex-1 flex flex-col overflow-y-auto px-4 pt-2 pb-28 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {activeTab === 'workout' && <ActiveSession pastWorkoutDate={pastWorkoutDate} onClearPastDate={() => setPastWorkoutDate(null)} />}
         {activeTab === 'builder' && <WorkoutBuilder />}
         {activeTab === 'progression' && <Progression />}
@@ -96,21 +96,24 @@ export default function Home() {
         {activeTab === 'settings' && <Settings />}
       </div>
 
-      {/* THE FIX: Completely docked bottom bar that bleeds behind the iPhone home indicator */}
-      <div className="fixed bottom-0 left-0 w-full z-[90] bg-[hsl(var(--card))]/95 backdrop-blur-3xl border-t border-[hsl(var(--border))] pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2">
-        <nav className="flex px-4 items-center justify-between max-w-md mx-auto relative">
+      {/* Restored your floating pill, positioned exactly as your red arrow requested */}
+      <div 
+        className="absolute left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] z-[90]"
+        style={{ bottom: 'max(env(safe-area-inset-bottom), 1rem)' }}
+      >
+        <nav className="flex px-2 py-2 items-center justify-between bg-[hsl(var(--card))]/90 backdrop-blur-2xl border border-[hsl(var(--border))] rounded-[2rem] shadow-xl">
           {navItems.map((tab) => {
             const isActive = activeTab === tab.id;
             const isCenter = tab.id === 'progression';
 
             if (isCenter) {
               return (
-                <div key={tab.id} className="relative flex items-center justify-center px-2">
+                <div key={tab.id} className="relative flex items-center justify-center px-1">
                   <button
                     onClick={() => handleTabClick(tab.id)}
-                    className={`absolute bottom-[4px] flex items-center justify-center w-[4.25rem] h-[4.25rem] rounded-full border-[6px] border-[hsl(var(--background))] transition-all duration-500 active:scale-95 ${isActive ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] shadow-[0_5px_15px_rgba(0,0,0,0.2)]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] hover:brightness-110'} ${rankGlow && !isActive ? 'animate-pulse bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)] border-transparent' : ''}`}
+                    className={`absolute bottom-[-8px] flex items-center justify-center w-16 h-16 rounded-full border-[4px] border-[hsl(var(--background))] transition-all duration-500 active:scale-95 ${isActive ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] shadow-[0_5px_15px_rgba(0,0,0,0.2)]' : 'bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] hover:brightness-110'} ${rankGlow && !isActive ? 'animate-pulse bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)] border-transparent' : ''}`}
                   >
-                    <tab.icon size={28} strokeWidth={2.5} className={isActive || (rankGlow && !isActive) ? "opacity-100" : "opacity-70"} />
+                    <tab.icon size={26} strokeWidth={2.5} className={isActive || (rankGlow && !isActive) ? "opacity-100" : "opacity-70"} />
                   </button>
                 </div>
               );
@@ -120,10 +123,10 @@ export default function Home() {
               <button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-2 px-1 rounded-xl transition-all duration-300 ${isActive ? 'text-[hsl(var(--foreground))]' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]'}`}
+                className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-3xl transition-all duration-300 ${isActive ? 'text-[hsl(var(--foreground))] bg-[hsl(var(--surface))] shadow-inner border border-[hsl(var(--border))]' : 'text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] border border-transparent'}`}
               >
-                <tab.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                <span className="text-[10px] font-black uppercase tracking-widest">{tab.label}</span>
+                <tab.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                <span className="text-[9px] font-black uppercase tracking-widest">{tab.label}</span>
               </button>
             );
           })}
