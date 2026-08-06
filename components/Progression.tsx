@@ -137,11 +137,12 @@ const goToStep = (step: number) => {
 
 if (showCalibration) {
     return (
-      <div className="fixed top-[-100px] bottom-[-100px] left-0 right-0 z-[999999] bg-[#09090b] overflow-hidden touch-none transition-colors duration-1000 flex flex-col items-center justify-center">
-        <div className="w-full flex flex-col items-center justify-center px-6">
-          {/* Smart Scroll Lock to prevent dark rectangle artifacts */}
+      <div className="fixed inset-0 w-screen h-screen z-[9999999] bg-[#09090b] overflow-hidden touch-none transition-colors duration-1000 flex flex-col items-center justify-center">
+        <div className="absolute inset-0 w-full h-full bg-[#09090b] z-[-1]" />
+        <div className="w-full h-full flex flex-col items-center justify-center px-6 relative z-10">
+          {/* Strict Scroll Lock and Background Color Enforcer */}
           <style dangerouslySetInnerHTML={{__html: `
-            html, body { overflow: hidden !important; height: 100% !important; overscroll-behavior-y: none !important; }
+            html, body { overflow: hidden !important; height: 100dvh !important; overscroll-behavior-y: none !important; background-color: #09090b !important; }
           `}} />
 
           {/* Premium Atmospheric Background */}
@@ -226,8 +227,8 @@ if (showCalibration) {
                className="fixed inset-0 w-full h-full flex flex-col items-center justify-center z-50 cursor-pointer overflow-hidden touch-none bg-[#09090b]" 
                onClick={completeCalibration}
              >
-                <style dangerouslySetInnerHTML={{__html: `
-                  @keyframes rank-scale-in { 0% { transform: scale(0.5); opacity: 0; filter: brightness(3) blur(10px); } 60% { transform: scale(1.1); opacity: 1; filter: brightness(1.5) blur(0px); } 100% { transform: scale(1); filter: brightness(1); } }
+<style dangerouslySetInnerHTML={{__html: `
+                  @keyframes rank-scale-in { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
                   @keyframes rank-flash { 0% { background-color: rgba(255,255,255,1); opacity: 1; } 100% { background-color: rgba(255,255,255,0); opacity: 0; pointer-events: none; } }
                   @keyframes orb-breathe { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.2); opacity: 0.5; } }
                 `}} />
@@ -304,7 +305,7 @@ if (showCalibration) {
               const isDimmed = highlight && !isFocused;
               
               return (
-                <path
+<path
                   key={`group-${id}`}
                   d={path}
                   onClick={() => { if (!highlight) setSelectedMuscle(id) }}
@@ -312,7 +313,7 @@ if (showCalibration) {
                   className={`transition-all duration-500 outline-none
                     ${isFocused ? 'opacity-70 mix-blend-screen pointer-events-none' : ''}
                     ${isDimmed ? 'opacity-0 pointer-events-none' : ''}
-                    ${!highlight && xp > 0 ? 'opacity-0 cursor-pointer mix-blend-screen hover:!opacity-60 hover:filter hover:drop-shadow-[0_0_15px_currentColor]' : ''}
+                    ${!highlight && xp > 0 ? 'opacity-70 cursor-pointer mix-blend-screen drop-shadow-[0_0_10px_currentColor] hover:!opacity-100' : ''}
                     ${!highlight && xp === 0 ? 'opacity-0 cursor-pointer hover:!opacity-30 hover:!fill-white mix-blend-overlay' : ''}
                   `}
                 />

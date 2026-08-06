@@ -151,8 +151,8 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
     <div className="fixed inset-0 w-screen h-screen z-[999999] bg-[#09090b] flex flex-col items-center justify-center p-0 m-0 overflow-hidden animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
 {step === 'rank' && (
             <div className={`fixed inset-0 w-full h-full flex flex-col items-center justify-center bg-[#09090b] z-[150] touch-none ${isRankLeveling ? 'animate-in fade-in duration-500' : 'animate-in slide-in-from-bottom-8 duration-700'}`}>
-              <style dangerouslySetInnerHTML={{__html: `
-                @keyframes rank-scale-in { 0% { transform: scale(0.5); opacity: 0; filter: brightness(3) blur(10px); } 60% { transform: scale(1.1); opacity: 1; filter: brightness(1.5) blur(0px); } 100% { transform: scale(1); filter: brightness(1); } }
+<style dangerouslySetInnerHTML={{__html: `
+                @keyframes rank-scale-in { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
                 @keyframes rank-flash { 0% { background-color: rgba(255,255,255,1); opacity: 1; } 100% { background-color: rgba(255,255,255,0); opacity: 0; pointer-events: none; } }
                 @keyframes orb-breathe { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.2); opacity: 0.5; } }
               `}} />

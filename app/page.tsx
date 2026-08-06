@@ -92,11 +92,11 @@ return (
         }
       `}} />
 
-      {/* Global Fixed Background specifically to cover the entire screen for Progression */}
+      {/* Global Fixed Background specifically to cover the entire screen for Progression *
       {activeTab === 'progression' && (
         <div className="fixed inset-0 w-screen h-screen z-[-1] bg-[#09090b] transition-opacity duration-500" />
       )}
-
+/}
       {/* 
         Native Scroll Container:
         No overflow-hidden locks. The header is placed INSIDE this flow so it 

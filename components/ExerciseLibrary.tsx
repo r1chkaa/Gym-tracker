@@ -166,13 +166,19 @@ export default function ExerciseLibrary() {
   if (activeCategory) {
     return (
       <div className="fixed inset-0 z-[60] bg-[hsl(var(--background))] flex flex-col animate-in slide-in-from-right-4 duration-300 w-screen h-screen">
-        <div className="flex-none flex items-center gap-4 p-6 pt-[max(env(safe-area-inset-top),3rem)] bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] shadow-sm z-10">
-          <button onClick={() => { setActiveCategory(null); setSelectedEquipment(null); setSearchQuery(""); }} className="p-2 bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] transition-colors flex-shrink-0">
-            <ArrowLeft size={20} />
-          </button>
-          <h2 className="text-2xl font-black text-[hsl(var(--foreground))] uppercase tracking-wider truncate flex-1">
-            {activeCategory}
-          </h2>
+<div className="flex-none pt-[max(env(safe-area-inset-top),3rem)] bg-[hsl(var(--background))] z-10 relative overflow-hidden pb-6 shadow-sm border-b border-[hsl(var(--border))]">
+          <div className="absolute -right-6 -top-6 opacity-10 scale-150 pointer-events-none grayscale">
+            {MuscleIcons[activeCategory as keyof typeof MuscleIcons]?.()}
+          </div>
+          <div className="flex flex-col px-6 relative z-10">
+            <button onClick={() => { setActiveCategory(null); setSelectedEquipment(null); setSearchQuery(""); }} className="w-12 h-12 flex items-center justify-center bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-full text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] hover:scale-105 active:scale-95 transition-all shadow-sm mb-6">
+              <ArrowLeft size={20} strokeWidth={2.5} />
+            </button>
+            <h2 className="text-5xl font-black text-[hsl(var(--foreground))] uppercase tracking-tighter truncate leading-none">
+              {activeCategory}
+            </h2>
+            <span className="text-[10px] font-black tracking-[0.3em] uppercase text-blue-500 mt-2">Exercise Database</span>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto flex flex-col min-w-0 max-w-[600px] mx-auto w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -257,8 +263,8 @@ export default function ExerciseLibrary() {
   }
 
 return (
-    <div className="flex-1 grid grid-cols-2 grid-rows-4 gap-3 pb-8 px-4 h-full min-h-0 max-h-[calc(100dvh-150px)] overflow-hidden">
-      {categories.map((category) => {
+    <div className="flex-1 grid grid-cols-2 grid-rows-4 gap-3 pb-6 px-4 w-full h-full min-h-0">  
+        {categories.map((category) => {
         const Icon = MuscleIcons[category as keyof typeof MuscleIcons];
         return (
           <button
