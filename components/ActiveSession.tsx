@@ -149,27 +149,37 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
   const isGod = currentRank.name === 'God';
 
   return (
-    <div className="fixed top-[-150px] bottom-[-150px] left-[-150px] right-[-150px] z-[999999] bg-[#09090b] flex flex-col items-center justify-center p-0 m-0 overflow-hidden animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
-      {step === 'rank' && (
-            <div className={`fixed top-[-150px] bottom-[-150px] left-[-150px] right-[-150px] flex flex-col items-center justify-center bg-[#09090b] z-[150] touch-none ${isRankLeveling ? 'animate-in fade-in duration-500' : 'animate-in slide-in-from-bottom-8 duration-700'}`}>
-              <style dangerouslySetInnerHTML={{__html: `
-                html, body { background-color: #09090b !important; overflow: hidden !important; }
-                @keyframes rank-scale-in { 0% { transform: scale(0.3) translateZ(0); opacity: 0; filter: brightness(3) blur(20px); } 50% { transform: scale(1.15) translateZ(0); opacity: 1; filter: brightness(1.5) blur(0px); } 100% { transform: scale(1) translateZ(0); filter: brightness(1); } }
-                @keyframes rank-flash { 0% { background-color: rgba(255,255,255,1); opacity: 1; } 100% { background-color: rgba(255,255,255,0); opacity: 0; pointer-events: none; } }
-                @keyframes orb-breathe { 0%, 100% { transform: scale(1) translateZ(0); opacity: 0.4; } 50% { transform: scale(1.3) translateZ(0); opacity: 0.7; } }
-              `}} />
-              
+    <div className="fixed inset-0 w-screen h-[100dvh] z-[999999] bg-[#09090b] flex flex-col items-center justify-center p-0 m-0 overflow-hidden animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
+      <style dangerouslySetInnerHTML={{__html: `
+        html, body { background-color: #09090b !important; overflow: hidden !important; overscroll-behavior-y: none !important; }
+        @keyframes rank-flash { 0% { background-color: rgba(255,255,255,1); opacity: 1; } 100% { background-color: rgba(255,255,255,0); opacity: 0; pointer-events: none; } }
+        @keyframes orb-breathe { 0%, 100% { transform: scale(1) translateZ(0); opacity: 0.4; } 50% { transform: scale(1.3) translateZ(0); opacity: 0.7; } }
+        @keyframes idle-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+        @keyframes idle-pulse { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.08); filter: brightness(1.2); } }
+        @keyframes idle-heavy { 0%, 100% { transform: translateY(0px) scale(1); } 50% { transform: translateY(-15px) scale(1.05); } }
+        @keyframes idle-shake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(2deg); } 75% { transform: rotate(-2deg); } }
+        @keyframes idle-titan { 0%, 100% { filter: drop-shadow(0 0 15px #22d3ee); transform: scale(1); } 50% { filter: drop-shadow(0 0 40px #22d3ee); transform: scale(1.05); } }
+        @keyframes idle-god { 0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 25px #fef08a); } 50% { transform: translateY(-20px) scale(1.1); filter: drop-shadow(0 0 70px #fef08a) brightness(1.2); } }
+        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+      `}} />
+      
+      {step === 'rank' && (() => {
+        const themeHex = isGod ? '#fef08a' : (['Titan'].includes(currentRank.name) ? '#22d3ee' : '#3b82f6');
+        const themeAnim = isGod ? 'animate-[idle-god_5s_ease-in-out_infinite]' : (['Titan'].includes(currentRank.name) ? 'animate-[idle-titan_3s_ease-in-out_infinite]' : 'animate-[idle-float_4s_ease-in-out_infinite]');
+        
+        return (
+            <div className={`fixed inset-0 w-full h-[100dvh] flex flex-col items-center justify-center bg-[#09090b] z-[150] touch-none ${isRankLeveling ? 'animate-in fade-in duration-500' : 'animate-in slide-in-from-bottom-8 duration-700'}`}>
               {isRankLeveling && <div className="absolute inset-0 z-[100] animate-[rank-flash_1.5s_cubic-bezier(0.22,1,0.36,1)_forwards]" />}
               
-              <div className="absolute w-[150vw] h-[150vw] max-w-[800px] max-h-[800px] rounded-full animate-[orb-breathe_6s_ease-in-out_infinite] z-0 pointer-events-none" style={{ background: `radial-gradient(circle, ${isGod ? '#fef08a' : '#3b82f6'}40 0%, transparent 60%)` }} />
+              <div className="absolute w-[150vw] h-[150vw] max-w-[800px] max-h-[800px] rounded-full animate-[orb-breathe_6s_ease-in-out_infinite] z-0 pointer-events-none" style={{ background: `radial-gradient(circle, ${themeHex}40 0%, transparent 60%)` }} />
 
               <span className={`text-[10px] font-black uppercase tracking-[0.4em] mb-12 z-10 ${isRankLeveling ? 'text-blue-400 animate-pulse drop-shadow-[0_0_15px_rgba(96,165,250,1)]' : 'text-blue-500'}`}>{isRankLeveling ? "RANK UP ACHIEVED" : "Workout Complete"}</span>
               
-              <div className={`relative flex justify-center items-center mb-12 w-48 h-48 z-10 ${isRankLeveling ? 'animate-[rank-scale-in_1s_cubic-bezier(0.34,1.56,0.64,1)_forwards]' : ''}`}>
-                <img src={`/ranks/${currentRank.image}`} alt="Rank" className={`w-48 h-48 object-contain relative z-20 drop-shadow-[0_0_30px_rgba(255,255,255,0.15)] ${isRankLeveling ? 'animate-[idle-titan_2.5s_ease-in-out_infinite]' : ''}`} />
+              <div className="relative flex justify-center items-center w-64 h-64 z-10 animate-in zoom-in-50 duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+                <img src={`/ranks/${currentRank.image}`} alt="Rank" className={`w-64 h-64 object-contain relative z-20 drop-shadow-[0_0_30px_rgba(255,255,255,0.15)] ${isRankLeveling ? themeAnim : ''}`} />
               </div>
               
-              <h2 className="text-5xl font-black uppercase tracking-widest text-white mb-2 z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{currentRank.name}</h2>
+              <h2 className="text-5xl font-black uppercase tracking-widest text-white mt-12 mb-2 z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{currentRank.name}</h2>
               <span className="text-sm font-bold text-white/60 tracking-[0.4em] uppercase mb-16 z-10">{currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
               
               <div className="w-full max-w-sm flex justify-between items-end mb-3 px-6 z-10">
@@ -188,11 +198,12 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
                 <span className="animate-pulse">Tap anywhere to continue</span>
               </div>
             </div>
-          )}
+        );
+      })()}
 
       {step === 'xp' && (
-        <div className="fixed top-[-100px] bottom-[-100px] left-[-100px] right-[-100px] flex flex-col items-center bg-[#09090b] z-[150] touch-none pt-[120px] pb-32 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <div className="w-full max-w-sm flex flex-col items-center px-6">
+        <div className="fixed inset-0 w-screen h-[100dvh] flex flex-col items-center bg-[#09090b] z-[150] touch-none pt-[max(env(safe-area-inset-top),4rem)] pb-32 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="w-full max-w-md flex flex-col items-center px-4">
             <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8 animate-in fade-in duration-500">Muscle Mastery</span>
             <div className="w-full space-y-4">
               {Object.entries(earnedXP).map(([muscle]: any, idx) => {
@@ -200,26 +211,29 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
                 const isLeveling = levelUpMuscles[muscle];
                 
                 return (
-                  <div key={muscle} style={{ animationDelay: `${idx * 150}ms` }} className={`bg-white/5 border p-5 rounded-3xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-4 fade-in fill-mode-both duration-500 ${isLeveling ? 'border-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] scale-105' : 'border-white/10'}`}>
-                    <div className="flex justify-between items-end mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-black text-white text-xl">{muscle}</span>
-                        <span className="text-[10px] font-black tracking-widest" style={{ color: details.hex }}>LVL {details.level}</span>
+                  <div key={muscle} style={{ animationDelay: `${idx * 200}ms`, animationFillMode: 'both' }} className={`bg-[#0e0e11] border p-5 rounded-[2rem] transition-all animate-in slide-in-from-bottom-8 fade-in duration-700 relative overflow-hidden ${isLeveling ? 'border-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] scale-[1.02]' : 'border-white/10 shadow-lg'}`}>
+                    <div className="absolute inset-0 opacity-[0.03] bg-gradient-to-tr from-white to-transparent pointer-events-none" />
+                    <div className="flex justify-between items-start mb-2 gap-2 relative z-10">
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-black text-white text-2xl truncate">{muscle}</span>
+                        <span className="text-[10px] font-black tracking-widest uppercase mt-0.5" style={{ color: details.hex }}>LVL {details.level}</span>
                       </div>
-                      <span className="font-black text-blue-400 text-lg">+{Math.floor((displayXP[muscle] || 0) - (initialXP[muscle]||0)).toLocaleString()}</span>
+                      <span className="font-black text-blue-400 text-xl sm:text-2xl shrink min-w-0 break-all text-right leading-none">+{Math.floor((displayXP[muscle] || 0) - (initialXP[muscle]||0)).toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-[10px] font-bold text-white/40 mb-3 px-0.5">
-                      <span>{Math.floor(displayXP[muscle] || 0).toLocaleString()}</span>
-                      <span>{details.nextXP.toLocaleString()}</span>
+                    <div className="flex justify-between text-[10px] font-bold text-white/40 mb-2 px-0.5 mt-4 relative z-10">
+                      <span className="truncate pr-2">{Math.floor(displayXP[muscle] || 0).toLocaleString()}</span>
+                      <span className="truncate pl-2">{details.nextXP.toLocaleString()}</span>
                     </div>
-                    <div className="w-full h-1.5 bg-black/50 rounded-full overflow-hidden">
-                      <div className="h-full rounded-r-full transition-none" style={{ width: `${details.progress}%`, backgroundColor: details.hex, boxShadow: `0 0 10px ${details.hex}` }} />
+                    <div className="w-full h-2 bg-black/60 rounded-full overflow-hidden shadow-[inset_0_1px_3px_rgba(0,0,0,0.8)] relative z-10">
+                      <div className="h-full rounded-r-full transition-none relative" style={{ width: `${details.progress}%`, backgroundColor: details.hex, boxShadow: `0 0 15px ${details.hex}` }}>
+                        <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]" />
+                      </div>
                     </div>
                 </div>
                 );
               })}
             </div>
-            <div className={`mt-16 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 pb-20 ${isXPAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to finish</div>
+            <div className={`mt-12 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 pb-20 ${isXPAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to finish</div>
           </div>
         </div>
       )}
@@ -536,7 +550,7 @@ const closeSummary = () => {
 
   if (showSettingsModal) {
     return (
-      <div className="fixed inset-0 bg-[hsl(var(--background))] z-[200] flex flex-col px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in slide-in-from-bottom-4 w-screen h-screen">
+      <div className="fixed inset-0 bg-[hsl(var(--background))] z-[200] flex flex-col px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in slide-in-from-bottom-4 w-screen h-[100dvh]">
         <div className="flex justify-between items-center mb-8 px-2">
           <h2 className="text-3xl font-black text-[hsl(var(--foreground))]">Settings</h2>
           <button onClick={() => setShowSettingsModal(false)} className="text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] p-2 bg-[hsl(var(--surface))] rounded-full border border-[hsl(var(--border))]"><X size={24} /></button>
@@ -562,7 +576,7 @@ const closeSummary = () => {
 
   if (showInfoModal) {
     return (
-      <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-[200] flex flex-col p-6 animate-in fade-in zoom-in-95 w-screen h-screen">
+      <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-[200] flex flex-col p-6 animate-in fade-in zoom-in-95 w-screen h-[100dvh]">
         <div className="flex justify-between items-center mb-6 pt-[max(env(safe-area-inset-top),1rem)]">
           <h2 className="text-2xl font-black text-white truncate pr-4">{showInfoModal.name}</h2>
           <button onClick={() => setShowInfoModal(null)} className="text-white/50 hover:text-white p-2 bg-white/10 rounded-full border border-white/20 shrink-0"><X size={24} /></button>
@@ -617,7 +631,7 @@ const closeSummary = () => {
 
   if (previewTemplate) {
     return (
-      <div className="fixed inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in slide-in-from-right-4 w-screen h-screen pb-safe">
+      <div className="fixed inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in slide-in-from-right-4 w-screen h-[100dvh] pb-safe">
         {isActuallyPastWorkout && (
           <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-center py-2 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] z-10 shadow-md break-words flex flex-col items-center justify-center min-h-[calc(env(safe-area-inset-top)+3.5rem)] leading-tight">
             <span>Logging Past Workout:</span>
@@ -649,7 +663,7 @@ const closeSummary = () => {
   if (!currentExercise || !currentSetup) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col w-screen h-screen animate-in slide-in-from-bottom-4">
+    <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col w-screen h-[100dvh] animate-in slide-in-from-bottom-4">
       {isActuallyPastWorkout && (
         <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-center py-2 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] z-50 shadow-md break-words flex flex-col items-center justify-center min-h-[calc(env(safe-area-inset-top)+3.5rem)] leading-tight">
           <span>Logging Past Workout:</span>

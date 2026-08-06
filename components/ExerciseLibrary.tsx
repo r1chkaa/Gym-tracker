@@ -166,18 +166,20 @@ export default function ExerciseLibrary() {
   if (activeCategory) {
     return (
       <div className="fixed inset-0 z-[60] bg-[hsl(var(--background))] flex flex-col animate-in slide-in-from-right-4 duration-300 w-screen h-screen">
-<div className="flex-none pt-[max(env(safe-area-inset-top),3rem)] bg-[hsl(var(--background))] z-10 relative overflow-hidden pb-6 shadow-sm border-b border-[hsl(var(--border))]">
-          <div className="absolute -right-6 -top-6 opacity-10 scale-150 pointer-events-none grayscale">
+<div className="flex-none pt-[max(env(safe-area-inset-top),3rem)] bg-[hsl(var(--background))] z-10 relative overflow-hidden pb-6 shadow-sm border-b border-[hsl(var(--border))] px-4">
+          <div className="absolute -right-6 -top-6 opacity-[0.03] scale-150 pointer-events-none grayscale">
             {MuscleIcons[activeCategory as keyof typeof MuscleIcons]?.()}
           </div>
-          <div className="flex flex-col px-6 relative z-10">
-            <button onClick={() => { setActiveCategory(null); setSelectedEquipment(null); setSearchQuery(""); }} className="w-12 h-12 flex items-center justify-center bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-full text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] hover:scale-105 active:scale-95 transition-all shadow-sm mb-6">
+          <div className="flex items-center gap-4 relative z-10">
+            <button onClick={() => { setActiveCategory(null); setSelectedEquipment(null); setSearchQuery(""); }} className="w-12 h-12 shrink-0 flex items-center justify-center bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-full text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] hover:scale-105 active:scale-95 transition-all shadow-sm">
               <ArrowLeft size={20} strokeWidth={2.5} />
             </button>
-            <h2 className="text-5xl font-black text-[hsl(var(--foreground))] uppercase tracking-tighter truncate leading-none">
-              {activeCategory}
-            </h2>
-            <span className="text-[10px] font-black tracking-[0.3em] uppercase text-blue-500 mt-2">Exercise Database</span>
+            <div className="flex flex-col min-w-0">
+              <h2 className="text-3xl font-black text-[hsl(var(--foreground))] uppercase tracking-tighter truncate leading-none">
+                {activeCategory}
+              </h2>
+              <span className="text-[10px] font-black tracking-[0.3em] uppercase text-blue-500 mt-1.5 truncate">Exercise Database</span>
+            </div>
           </div>
         </div>
 
@@ -263,24 +265,27 @@ export default function ExerciseLibrary() {
   }
 
 return (
-    <div className="flex-1 grid grid-cols-2 grid-rows-4 gap-3 pb-6 px-4 w-full h-full min-h-0">  
-        {categories.map((category) => {
+    <div className="flex-1 flex flex-col gap-2 pb-6 px-4 w-full h-full min-h-0">
+      {categories.map((category) => {
         const Icon = MuscleIcons[category as keyof typeof MuscleIcons];
         return (
           <button
             key={category}
             onClick={() => setActiveCategory(category)}
-            className="group relative flex flex-col items-center justify-center w-full h-full bg-[hsl(var(--surface))] rounded-[2rem] border border-[hsl(var(--border))] shadow-sm hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-300 active:scale-[0.95] overflow-hidden"
+            className="group relative flex-1 flex items-center justify-between w-full bg-[hsl(var(--surface))] rounded-[1.5rem] border border-[hsl(var(--border))] shadow-sm hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all duration-300 active:scale-[0.98] overflow-hidden px-6"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            <div className="relative z-10 flex flex-col items-center transform-gpu group-hover:-translate-y-1 transition-transform duration-300">
-              <div className="w-12 h-12 mb-1 flex items-center justify-center drop-shadow-md">
+            <div className="absolute right-[-10px] top-1/2 -translate-y-1/2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 scale-[2.5] pointer-events-none">
+              {Icon && <Icon />}
+            </div>
+            <div className="flex items-center gap-5 relative z-10">
+              <div className="w-10 h-10 flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-sm">
                 {Icon && <Icon />}
               </div>
-              <span className="font-black text-[13px] tracking-widest uppercase text-[hsl(var(--foreground))] drop-shadow-sm">
+              <span className="font-black text-lg sm:text-xl tracking-[0.2em] uppercase text-[hsl(var(--foreground))] drop-shadow-sm group-hover:text-blue-500 transition-colors">
                 {category}
               </span>
             </div>
+            <ChevronRight size={20} className="text-[hsl(var(--muted))] group-hover:text-blue-500 transition-colors relative z-10" strokeWidth={3} />
           </button>
         );
       })}

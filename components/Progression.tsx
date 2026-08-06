@@ -138,10 +138,9 @@ const goToStep = (step: number) => {
 
 if (showCalibration) {
     return (
-      <div className="fixed inset-0 w-screen h-screen z-[9999999] bg-[#09090b] overflow-hidden touch-none transition-colors duration-1000 flex flex-col items-center justify-center">
-        <div className="absolute inset-0 w-full h-full bg-[#09090b] z-[-1]" />
+      <div className="fixed inset-0 w-screen h-[100dvh] z-[9999999] bg-[#09090b] overflow-hidden touch-none transition-colors duration-1000 flex flex-col items-center justify-center">
         <div className="w-full h-full flex flex-col items-center justify-center px-6 relative z-10">
-          {/* Strict Scroll Lock and Background Color Enforcer */}
+          {/* Strict Scroll Lock and Core Background Color Enforcer */}
           <style dangerouslySetInnerHTML={{__html: `
             html, body { overflow: hidden !important; height: 100dvh !important; overscroll-behavior-y: none !important; background-color: #09090b !important; }
           `}} />
@@ -329,12 +328,11 @@ if (showCalibration) {
   return (
     <div className="bg-transparent text-white overflow-x-hidden font-sans flex flex-col items-center relative w-full h-full pb-32">
       
-{/* Absolute overflow destruction: Expanded bounds eliminate any safe-area/status-bar clipping gaps completely */}
+{/* Pure Transparent Overlay - No conflicting background colors to clip the title bar */}
       <div 
-        className="fixed top-[-150px] bottom-[-150px] left-[-150px] right-[-150px] pointer-events-none z-[-1] transition-colors duration-1000"
+        className="fixed inset-0 w-screen h-[100dvh] pointer-events-none z-[-1] transition-colors duration-1000"
         style={{
-          background: `radial-gradient(circle at 50% 0%, ${rankTheme.hex}45 0%, transparent 60%), radial-gradient(circle at 50% 100%, ${rankTheme.hex}30 0%, transparent 60%)`,
-          backgroundColor: '#09090b'
+          background: `radial-gradient(circle at 50% -10%, ${rankTheme.hex}40 0%, transparent 60%), radial-gradient(circle at 50% 110%, ${rankTheme.hex}25 0%, transparent 60%)`
         }} 
       />
 
@@ -360,10 +358,10 @@ if (showCalibration) {
 <h2 className={`mt-8 text-4xl sm:text-5xl font-black uppercase tracking-tighter drop-shadow-md z-10 text-center px-4 leading-none w-full break-words ${isGod ? 'bg-gradient-to-r from-[#fef08a] via-white to-[#fef08a] bg-[length:200%_auto] text-transparent bg-clip-text animate-[shimmer_3s_infinite]' : ''}`} style={!isGod ? { color: rankTheme.hex } : {}}>{currentRank.name}</h2>          <span className="text-sm font-bold text-white/90 tracking-[0.2em] mt-2 z-10 uppercase">{currentRank.name === 'God' ? 'MAXIMUM RANK' : currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
         </div>
 
-        <div className="w-full mt-10 mb-20 relative z-10">
-          <div className="w-full flex justify-between items-end mb-3 px-1">
-            <span className="text-xl font-black tracking-widest drop-shadow-md" style={{ color: rankTheme.hex, textShadow: `0 0 15px ${rankTheme.hex}80` }}>{Math.floor(activePoints).toLocaleString()} PTS</span>
-            <span className="text-[10px] font-bold text-[hsl(var(--muted))] uppercase tracking-widest">{currentRank.next ? `${currentRank.next.toLocaleString()} PTS` : 'UNLIMITED'}</span>
+<div className="w-full mt-8 sm:mt-10 mb-20 relative z-10">
+          <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-end mb-3 px-1 gap-1">
+            <span className="text-3xl sm:text-4xl font-black tracking-tighter drop-shadow-md shrink min-w-0 break-all leading-none" style={{ color: rankTheme.hex, textShadow: `0 0 15px ${rankTheme.hex}80` }}>{Math.floor(activePoints).toLocaleString()} PTS</span>
+            <span className="text-[10px] font-bold text-[hsl(var(--muted))] uppercase tracking-widest whitespace-nowrap">{currentRank.next ? `${currentRank.next.toLocaleString()} PTS` : 'UNLIMITED'}</span>
           </div>
           <div className="w-full h-[6px] bg-white/10 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)]">
             <div className={`h-full rounded-r-full transition-all duration-1000 ease-out relative shadow-[0_0_15px_currentColor] ${isGod ? 'w-full bg-gradient-to-r from-[#fef08a] to-white bg-[length:200%_auto] animate-[shimmer_2s_infinite]' : ''}`} style={!isGod ? { width: `${Math.min(100, Math.max(0, currentRank.progress))}%`, backgroundColor: rankTheme.hex } : {}}>
