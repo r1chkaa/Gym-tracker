@@ -159,49 +159,67 @@ return (
       )}
     <div className="space-y-6 animate-in fade-in duration-300">
 {showTimerModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] flex flex-col items-center justify-end p-4 animate-in fade-in duration-200 overscroll-none touch-none">
-          <div className="bg-[hsl(var(--card))] w-full max-w-sm rounded-[2rem] border border-[hsl(var(--border))] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
-            <div className="flex justify-between items-center p-5 border-b border-[hsl(var(--border))]">
-              <span className="font-black text-[hsl(var(--foreground))] tracking-wide">Set Rest Timer</span>
-              <button onClick={() => setShowTimerModal(false)} className="p-2 bg-[hsl(var(--surface))] rounded-full text-[hsl(var(--muted))] active:scale-95"><X size={18}/></button>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[999] flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 overscroll-none touch-none">
+          <div className="bg-[hsl(var(--card))] w-full max-w-[320px] rounded-[2.5rem] border border-[hsl(var(--border))] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="flex justify-between items-center p-6 border-b border-[hsl(var(--border))]/50 bg-[hsl(var(--surface))]">
+              <span className="font-black text-[hsl(var(--foreground))] text-lg uppercase tracking-widest">Rest Timer</span>
+              <button onClick={() => setShowTimerModal(false)} className="p-2 bg-[hsl(var(--background))] rounded-full text-[hsl(var(--muted))] hover:text-white active:scale-95 transition-all border border-[hsl(var(--border))]"><X size={16}/></button>
             </div>
-            <div className="flex justify-center items-center h-48 relative bg-[hsl(var(--background))]">
-              <div className="absolute top-1/2 -translate-y-1/2 w-[80%] h-12 bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] pointer-events-none" />
-              <div className="flex w-1/2 justify-center h-full overflow-y-auto snap-y snap-mandatory hide-scrollbar relative z-10 pointer-events-auto"
-                   ref={(el) => { if (el && el.scrollTop === 0) el.scrollTop = timerMin * 48; }}
+            
+            <div className="flex justify-center items-center h-[240px] relative bg-[hsl(var(--background))]">
+              {/* Highlight Pill */}
+              <div className="absolute top-1/2 -translate-y-1/2 w-[85%] h-[56px] bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] pointer-events-none shadow-sm" />
+              
+              {/* Fade Masks */}
+              <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-[hsl(var(--background))] to-transparent z-20 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[hsl(var(--background))] to-transparent z-20 pointer-events-none" />
+
+              {/* Minutes Wheel */}
+              <div className="flex w-1/2 justify-center h-full overflow-y-auto snap-y snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10 pointer-events-auto"
+                   ref={(el) => { if (el && el.scrollTop === 0 && timerMin > 0) el.scrollTop = timerMin * 56; }}
                    onScroll={(e) => {
                      const el = e.currentTarget;
-                     const idx = Math.round(el.scrollTop / 48);
-                     setTimerMin(idx);
-                     localStorage.setItem('gym_timer', ((idx * 60) + timerSec).toString());
+                     const idx = Math.round(el.scrollTop / 56);
+                     if(idx !== timerMin) {
+                        setTimerMin(idx);
+                        localStorage.setItem('gym_timer', ((idx * 60) + timerSec).toString());
+                     }
                    }}>
-                <div className="pb-[calc(100%-48px)] pt-[calc(50%-24px)]">
+                <div className="py-[92px]">
                   {Array.from({length: 60}).map((_, i) => (
-                    <div key={`m-${i}`} className="h-12 flex items-center justify-center snap-center">
-                      <span className={`font-black transition-colors duration-200 ${timerMin === i ? 'text-2xl text-[hsl(var(--foreground))]' : 'text-xl text-[hsl(var(--muted))]'}`}>{i.toString().padStart(2, '0')} <span className="text-[10px] ml-0.5">m</span></span>
+                    <div key={`m-${i}`} className="h-[56px] flex items-center justify-center snap-center">
+                      <span className={`font-black transition-all duration-200 ${timerMin === i ? 'text-4xl text-blue-500 scale-110 drop-shadow-md' : 'text-2xl text-[hsl(var(--muted))] scale-90 opacity-40'}`}>{i.toString().padStart(2, '0')} <span className={`text-[12px] uppercase tracking-widest ml-0.5 ${timerMin === i ? 'text-blue-500' : 'text-[hsl(var(--muted))]'}`}>m</span></span>
                     </div>
                   ))}
                 </div>
               </div>
-              <span className="font-black text-[hsl(var(--foreground))] z-10 text-2xl mb-1">:</span>
-              <div className="flex w-1/2 justify-center h-full overflow-y-auto snap-y snap-mandatory hide-scrollbar relative z-10 pointer-events-auto"
-                   ref={(el) => { if (el && el.scrollTop === 0) el.scrollTop = timerSec * 48; }}
+
+              <span className="font-black text-[hsl(var(--foreground))] z-10 text-3xl mb-1 opacity-30">:</span>
+
+              {/* Seconds Wheel */}
+              <div className="flex w-1/2 justify-center h-full overflow-y-auto snap-y snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10 pointer-events-auto"
+                   ref={(el) => { if (el && el.scrollTop === 0 && timerSec > 0) el.scrollTop = timerSec * 56; }}
                    onScroll={(e) => {
                      const el = e.currentTarget;
-                     const idx = Math.round(el.scrollTop / 48);
-                     setTimerSec(idx);
-                     localStorage.setItem('gym_timer', ((timerMin * 60) + idx).toString());
+                     const idx = Math.round(el.scrollTop / 56);
+                     if(idx !== timerSec) {
+                        setTimerSec(idx);
+                        localStorage.setItem('gym_timer', ((timerMin * 60) + idx).toString());
+                     }
                    }}>
-                <div className="pb-[calc(100%-48px)] pt-[calc(50%-24px)]">
+                <div className="py-[92px]">
                   {Array.from({length: 60}).map((_, i) => (
-                    <div key={`s-${i}`} className="h-12 flex items-center justify-center snap-center">
-                      <span className={`font-black transition-colors duration-200 ${timerSec === i ? 'text-2xl text-[hsl(var(--foreground))]' : 'text-xl text-[hsl(var(--muted))]'}`}>{i.toString().padStart(2, '0')} <span className="text-[10px] ml-0.5">s</span></span>
+                    <div key={`s-${i}`} className="h-[56px] flex items-center justify-center snap-center">
+                      <span className={`font-black transition-all duration-200 ${timerSec === i ? 'text-4xl text-blue-500 scale-110 drop-shadow-md' : 'text-2xl text-[hsl(var(--muted))] scale-90 opacity-40'}`}>{i.toString().padStart(2, '0')} <span className={`text-[12px] uppercase tracking-widest ml-0.5 ${timerSec === i ? 'text-blue-500' : 'text-[hsl(var(--muted))]'}`}>s</span></span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-            <button onClick={() => setShowTimerModal(false)} className="w-full p-5 bg-blue-600 text-white font-black uppercase tracking-widest text-sm hover:bg-blue-500 transition-colors">Done</button>
+            
+            <div className="p-5 bg-[hsl(var(--surface))] border-t border-[hsl(var(--border))]/50">
+              <button onClick={() => setShowTimerModal(false)} className="w-full py-4 bg-blue-600 text-white font-black uppercase tracking-widest text-sm rounded-xl hover:bg-blue-500 active:scale-95 transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)]">Confirm</button>
+            </div>
           </div>
         </div>
       )}
