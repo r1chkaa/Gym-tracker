@@ -189,8 +189,9 @@ let baseClasses = "aspect-square flex items-center justify-center rounded-2xl te
       </div>
 
 {showWorkoutModal && (
-        <div className="fixed inset-0 bg-[#09090b]/95 backdrop-blur-2xl z-[200] flex flex-col w-screen h-[100dvh] px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in fade-in duration-200 touch-none">
-          <div className="bg-[hsl(var(--card))] w-full max-w-md mx-auto rounded-[2rem] p-6 border border-[hsl(var(--border))] shadow-2xl flex flex-col max-h-[85vh] pointer-events-auto" onTouchMove={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-[#09090b]/95 backdrop-blur-2xl z-[200] flex flex-col w-screen h-[100dvh] px-4 pt-[max(env(safe-area-inset-top),3rem)] pb-[env(safe-area-inset-bottom)] animate-in fade-in duration-200">
+          <div className="absolute inset-0 z-0" onClick={() => setShowWorkoutModal(false)} />
+          <div className="bg-[hsl(var(--card))] w-full max-w-md mx-auto rounded-[2rem] p-6 border border-[hsl(var(--border))] shadow-2xl flex flex-col max-h-[85vh] relative z-10 overscroll-contain">
             <div className="flex justify-between items-center mb-6 border-b border-[hsl(var(--border))] pb-4">
               <div>
                 <h3 className="text-2xl font-black text-[hsl(var(--foreground))]">Day Summary</h3>

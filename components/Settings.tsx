@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { db } from '@/lib/db';
 import { Download, Trash2, Database, Scale, Clock, Sun, Moon, User, Upload } from 'lucide-react';
 export default function Settings() {
+  const [showTimerModal, setShowTimerModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [unit, setUnit] = useState('lbs');
   const [timerMin, setTimerMin] = useState(1);
@@ -157,7 +158,55 @@ return (
         </div>
       )}
     <div className="space-y-6 animate-in fade-in duration-300">
-<div className="space-y-8 animate-in fade-in duration-300 pb-12">
+{showTimerModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] flex flex-col items-center justify-end p-4 animate-in fade-in duration-200 overscroll-none touch-none">
+          <div className="bg-[hsl(var(--card))] w-full max-w-sm rounded-[2rem] border border-[hsl(var(--border))] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
+            <div className="flex justify-between items-center p-5 border-b border-[hsl(var(--border))]">
+              <span className="font-black text-[hsl(var(--foreground))] tracking-wide">Set Rest Timer</span>
+              <button onClick={() => setShowTimerModal(false)} className="p-2 bg-[hsl(var(--surface))] rounded-full text-[hsl(var(--muted))] active:scale-95"><X size={18}/></button>
+            </div>
+            <div className="flex justify-center items-center h-48 relative bg-[hsl(var(--background))]">
+              <div className="absolute top-1/2 -translate-y-1/2 w-[80%] h-12 bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] pointer-events-none" />
+              <div className="flex w-1/2 justify-center h-full overflow-y-auto snap-y snap-mandatory hide-scrollbar relative z-10 pointer-events-auto"
+                   ref={(el) => { if (el && el.scrollTop === 0) el.scrollTop = timerMin * 48; }}
+                   onScroll={(e) => {
+                     const el = e.currentTarget;
+                     const idx = Math.round(el.scrollTop / 48);
+                     setTimerMin(idx);
+                     localStorage.setItem('gym_timer', ((idx * 60) + timerSec).toString());
+                   }}>
+                <div className="pb-[calc(100%-48px)] pt-[calc(50%-24px)]">
+                  {Array.from({length: 60}).map((_, i) => (
+                    <div key={`m-${i}`} className="h-12 flex items-center justify-center snap-center">
+                      <span className={`font-black transition-colors duration-200 ${timerMin === i ? 'text-2xl text-[hsl(var(--foreground))]' : 'text-xl text-[hsl(var(--muted))]'}`}>{i.toString().padStart(2, '0')} <span className="text-[10px] ml-0.5">m</span></span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <span className="font-black text-[hsl(var(--foreground))] z-10 text-2xl mb-1">:</span>
+              <div className="flex w-1/2 justify-center h-full overflow-y-auto snap-y snap-mandatory hide-scrollbar relative z-10 pointer-events-auto"
+                   ref={(el) => { if (el && el.scrollTop === 0) el.scrollTop = timerSec * 48; }}
+                   onScroll={(e) => {
+                     const el = e.currentTarget;
+                     const idx = Math.round(el.scrollTop / 48);
+                     setTimerSec(idx);
+                     localStorage.setItem('gym_timer', ((timerMin * 60) + idx).toString());
+                   }}>
+                <div className="pb-[calc(100%-48px)] pt-[calc(50%-24px)]">
+                  {Array.from({length: 60}).map((_, i) => (
+                    <div key={`s-${i}`} className="h-12 flex items-center justify-center snap-center">
+                      <span className={`font-black transition-colors duration-200 ${timerSec === i ? 'text-2xl text-[hsl(var(--foreground))]' : 'text-xl text-[hsl(var(--muted))]'}`}>{i.toString().padStart(2, '0')} <span className="text-[10px] ml-0.5">s</span></span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <button onClick={() => setShowTimerModal(false)} className="w-full p-5 bg-blue-600 text-white font-black uppercase tracking-widest text-sm hover:bg-blue-500 transition-colors">Done</button>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-8 animate-in fade-in duration-300 pb-12">
         <div>
           <h2 className="text-[10px] font-black text-[hsl(var(--muted))] uppercase tracking-widest mb-3 px-4">Preferences</h2>
           <div className="bg-[hsl(var(--card))] rounded-[2rem] border border-[hsl(var(--border))] shadow-sm overflow-hidden flex flex-col">
@@ -171,7 +220,7 @@ return (
             </div>
 
             <div className="flex justify-between items-center p-5 border-b border-[hsl(var(--border))]">
-              <div className="flex items-center gap-3"><User size={20} className="text-[hsl(var(--muted))]" /><span className="text-[hsl(var(--foreground))] font-bold text-sm">Anatomy</span></div>
+              <div className="flex items-center gap-3"><User size={20} className="text-[hsl(var(--muted))]" /><span className="text-[hsl(var(--foreground))] font-bold text-sm">Anatomy Model</span></div>
               <div className="flex bg-[hsl(var(--background))] rounded-lg border border-[hsl(var(--border))] p-1">
                 <button onClick={() => handleGenderChange('male')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-colors ${gender === 'male' ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] shadow-md' : 'text-[hsl(var(--muted))]'}`}>Male</button>
                 <button onClick={() => handleGenderChange('female')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-colors ${gender === 'female' ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] shadow-md' : 'text-[hsl(var(--muted))]'}`}>Female</button>
@@ -179,27 +228,19 @@ return (
             </div>
 
             <div className="flex justify-between items-center p-5 border-b border-[hsl(var(--border))]">
-              <div className="flex items-center gap-3"><Scale size={20} className="text-[hsl(var(--muted))]" /><span className="text-[hsl(var(--foreground))] font-bold text-sm">Weight</span></div>
+              <div className="flex items-center gap-3"><Scale size={20} className="text-[hsl(var(--muted))]" /><span className="text-[hsl(var(--foreground))] font-bold text-sm">Weight Unit</span></div>
               <div className="flex bg-[hsl(var(--background))] rounded-lg border border-[hsl(var(--border))] p-1">
                 <button onClick={() => handleUnitChange('lbs')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-colors ${unit === 'lbs' ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] shadow-md' : 'text-[hsl(var(--muted))]'}`}>lbs</button>
                 <button onClick={() => handleUnitChange('kg')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-colors ${unit === 'kg' ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))] shadow-md' : 'text-[hsl(var(--muted))]'}`}>kg</button>
               </div>
             </div>
 
-            <div className="flex justify-between items-center p-5 border-b border-[hsl(var(--border))]">
-              <div className="flex items-center gap-3"><Clock size={20} className="text-[hsl(var(--muted))]" /><span className="text-[hsl(var(--foreground))] font-bold text-sm">Timer</span></div>
-              <div className="flex items-center gap-1.5">
-                <div className="relative">
-                  <input type="number" value={timerMin} onChange={(e) => handleTimerChange('min', e.target.value)} className="w-14 bg-[hsl(var(--background))] text-[hsl(var(--foreground))] text-center font-black p-2 rounded-xl border border-[hsl(var(--border))] focus:border-blue-500 focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none shadow-inner" />
-                  <span className="absolute text-[8px] text-[hsl(var(--muted))] font-black top-full left-0 w-full text-center mt-1">MIN</span>
-                </div>
-                <span className="font-black text-[hsl(var(--muted))] pb-3">:</span>
-                <div className="relative">
-                  <input type="number" value={timerSec} onChange={(e) => handleTimerChange('sec', e.target.value)} className="w-14 bg-[hsl(var(--background))] text-[hsl(var(--foreground))] text-center font-black p-2 rounded-xl border border-[hsl(var(--border))] focus:border-blue-500 focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none shadow-inner" />
-                  <span className="absolute text-[8px] text-[hsl(var(--muted))] font-black top-full left-0 w-full text-center mt-1">SEC</span>
-                </div>
+            <button onClick={() => setShowTimerModal(true)} className="flex w-full justify-between items-center p-5 border-b border-[hsl(var(--border))] active:bg-[hsl(var(--surface))] transition-colors text-left">
+              <div className="flex items-center gap-3"><Clock size={20} className="text-[hsl(var(--muted))]" /><span className="text-[hsl(var(--foreground))] font-bold text-sm">Rest Timer</span></div>
+              <div className="flex items-center gap-1.5 text-[hsl(var(--foreground))] font-black text-sm bg-[hsl(var(--background))] px-3 py-1.5 rounded-lg border border-[hsl(var(--border))]">
+                <span>{timerMin.toString().padStart(2, '0')}:{timerSec.toString().padStart(2, '0')}</span>
               </div>
-            </div>
+            </button>
 
             <div className="flex justify-between items-center p-5">
               <div className="flex items-center gap-3"><Sun size={20} className="text-[hsl(var(--muted))]" />

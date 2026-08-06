@@ -216,12 +216,12 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
         );
       })()}
 
-      {step === 'xp' && (() => {
+{step === 'xp' && (() => {
         const currentMuscle = muscleKeys[xpIndex];
         const details = getMuscleDetails(displayXP);
-return (
+        return (
         <div className="fixed inset-0 w-screen h-[100dvh] flex flex-col items-center justify-center bg-[#09090b] z-[150] touch-none overflow-hidden">
-          <div className="absolute w-[150vw] h-[150vw] max-w-[800px] max-h-[800px] rounded-full mix-blend-screen opacity-30 blur-[100px] pointer-events-none transition-colors duration-1000" style={{ backgroundColor: details.hex }} />
+          <div className="absolute top-[-50vh] bottom-[-50vh] left-[-50vw] right-[-50vw] pointer-events-none transition-colors duration-1000 mix-blend-screen opacity-40" style={{ background: `radial-gradient(circle at center, ${details.hex} 0%, transparent 50%)` }} />
           <div key={currentMuscle} className="w-full flex flex-col items-center px-6 animate-in slide-in-from-bottom-8 fade-in duration-700 relative z-10">
             <span className="text-[10px] font-black uppercase text-white/50 tracking-[0.5em] mb-6 drop-shadow-sm">Muscle Mastery</span>
             
@@ -644,19 +644,23 @@ const closeSummary = () => {
     );
   }
 
-  if (previewTemplate) {
+if (previewTemplate) {
     return (
-<div className="fixed inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col animate-in slide-in-from-right-4 w-screen h-[100dvh] pb-safe relative">
-        {isActuallyPastWorkout && (
-          <div className="absolute top-[max(env(safe-area-inset-top),1rem)] left-1/2 -translate-x-1/2 bg-blue-500/10 backdrop-blur-xl border border-blue-500/30 text-blue-500 text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full z-[150] shadow-sm flex items-center gap-1.5 whitespace-nowrap pointer-events-none">
-            <Clock size={12} /> {new Date(pastWorkoutDate as number).toLocaleDateString()}
+      <div className="fixed inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col w-full h-[100dvh] overflow-hidden overscroll-none animate-in slide-in-from-right-4">
+        <div className="flex-none pt-[max(env(safe-area-inset-top),1.5rem)] px-4 pb-4 flex flex-col gap-4 bg-[hsl(var(--background))] z-10 border-b border-[hsl(var(--border))]/50">
+          {isActuallyPastWorkout && (
+            <div className="flex items-center justify-center">
+              <div className="bg-blue-500/10 border border-blue-500/30 text-blue-500 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full flex items-center gap-2">
+                <Clock size={14} /> {new Date(pastWorkoutDate as number).toLocaleDateString()}
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-4">
+            <button onClick={() => { setPreviewTemplate(null); if(onClearPastDate) onClearPastDate(); }} className="p-3 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] text-[hsl(var(--muted))] active:scale-95 transition-transform"><ArrowLeft size={20} /></button>
+            <div className="flex-1 min-w-0"><span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))] block mb-1">Preview</span><h2 className="text-3xl font-black text-[hsl(var(--foreground))] truncate leading-none">{previewTemplate.name}</h2></div>
           </div>
-        )}
-        <div className={`flex-none flex items-center gap-4 mb-8 px-4 ${isActuallyPastWorkout ? 'pt-[max(env(safe-area-inset-top),4rem)] mt-2' : 'pt-[max(env(safe-area-inset-top),3rem)] mt-6'}`}>
-          <button onClick={() => { setPreviewTemplate(null); if(onClearPastDate) onClearPastDate(); }} className="p-3 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] text-[hsl(var(--muted))]"><ArrowLeft size={20} /></button>
-          <div className="flex-1 min-w-0"><span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))]">Preview</span><h2 className="text-3xl font-black text-[hsl(var(--foreground))] truncate">{previewTemplate.name}</h2></div>
         </div>
-<div className="flex-1 overflow-y-auto space-y-3 pb-8 px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex-1 overflow-y-auto space-y-3 px-4 py-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {previewTemplate.exercises.map((setup, i) => (
             <div key={i} className="bg-[hsl(var(--surface))] border border-[hsl(var(--border))] p-4 rounded-[1.5rem] flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-4">
@@ -676,9 +680,9 @@ const closeSummary = () => {
 
   if (!currentExercise || !currentSetup) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col w-screen h-[100dvh] animate-in slide-in-from-bottom-4">
-{isActuallyPastWorkout && (
+return (
+    <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col w-full h-[100dvh] overflow-hidden overscroll-none animate-in slide-in-from-bottom-4">
+      {showTimerOverlay && (
         <div className="flex-none w-full bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest text-center py-2 px-4 pt-[max(env(safe-area-inset-top),1rem)] z-[60] shadow-md break-words flex flex-col items-center justify-center leading-tight">
           <span>Logging Past Workout:</span>
           <span>{new Date(pastWorkoutDate as number).toLocaleDateString()}</span>
@@ -709,21 +713,29 @@ const closeSummary = () => {
           <button onClick={handleSkipTimer} className="flex items-center gap-2 text-white/50 hover:text-white bg-white/10 px-8 py-4 rounded-full font-black tracking-widest uppercase text-xs border border-white/20 transition-all active:scale-95 shadow-sm">
             Skip Rest <SkipForward size={16} />
           </button>
-        </div>
+</div>
       )}
 
-<div className={`flex-none flex justify-between items-start px-6 pb-4 border-b border-[hsl(var(--border))]/50 ${isActuallyPastWorkout ? 'pt-4' : 'pt-[max(env(safe-area-inset-top),3rem)] mt-4'}`}>
-        <div className="flex-1 min-w-0 pr-4">
-          {/* Un-truncated active workout title */}
-          <h1 className="text-3xl font-black tracking-tight drop-shadow-sm leading-tight whitespace-normal break-words">{currentExercise.name}</h1>
-          <p className="font-black tracking-[0.2em] text-[10px] uppercase mt-2 text-[hsl(var(--muted))] flex items-center gap-2">
-            Set {completedSets + 1} of {plannedSets.length}
-            {!isExerciseDone && <span className="text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded">{tagLabels[currentTag as keyof typeof tagLabels]}</span>}
-          </p>
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <button onClick={() => setShowInfoModal(currentExercise)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] hover:text-blue-500 transition-colors"><Info size={20} /></button>
-          <button onClick={() => setShowSettingsModal(true)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] transition-colors"><SettingsIcon size={20} /></button>
+      <div className="flex-none pt-[max(env(safe-area-inset-top),1.5rem)] px-6 pb-4 flex flex-col gap-4 border-b border-[hsl(var(--border))]/50 bg-[hsl(var(--background))] z-10">
+        {isActuallyPastWorkout && (
+          <div className="flex items-center justify-center w-full">
+            <div className="bg-blue-500/10 border border-blue-500/30 text-blue-500 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full flex items-center gap-2">
+              <Clock size={14} /> {new Date(pastWorkoutDate as number).toLocaleDateString()}
+            </div>
+          </div>
+        )}
+        <div className="flex justify-between items-start">
+          <div className="flex-1 min-w-0 pr-4">
+            <h1 className="text-3xl font-black tracking-tight drop-shadow-sm leading-tight whitespace-normal break-words">{currentExercise.name}</h1>
+            <p className="font-black tracking-[0.2em] text-[10px] uppercase mt-2 text-[hsl(var(--muted))] flex items-center gap-2">
+              Set {completedSets + 1} of {plannedSets.length}
+              {!isExerciseDone && <span className="text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded">{tagLabels[currentTag as keyof typeof tagLabels]}</span>}
+            </p>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <button onClick={() => setShowInfoModal(currentExercise)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] active:scale-95 transition-transform"><Info size={20} /></button>
+            <button onClick={() => setShowSettingsModal(true)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] active:scale-95 transition-transform"><SettingsIcon size={20} /></button>
+          </div>
         </div>
       </div>
 

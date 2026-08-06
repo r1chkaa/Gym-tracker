@@ -247,7 +247,7 @@ if (showCalibration) {
 
 <h1 className="text-5xl sm:text-6xl font-black uppercase tracking-tighter mt-12 z-10 text-center px-4 leading-none animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-500 fill-mode-both w-full break-words" style={{ color: tTheme.hex, textShadow: `0 0 40px ${tTheme.hex}60` }}>{calcRank.name}</h1>                <span className="text-sm font-bold text-white/80 tracking-[0.4em] uppercase mt-4 z-10 animate-in fade-in duration-1000 delay-[800ms] fill-mode-both">{calcRank.tier || `LEVEL ${calcRank.tier}`}</span>
                 
-                <div className="absolute bottom-[max(env(safe-area-inset-bottom),3rem)] text-[10px] font-black uppercase tracking-widest text-white/40 animate-in fade-in duration-1000 delay-[1500ms] fill-mode-both bg-white/5 px-8 py-4 rounded-full backdrop-blur-md border border-white/10 shadow-lg hover:bg-white/10 transition-colors">
+<div className="absolute bottom-[max(env(safe-area-inset-bottom),4rem)] text-[10px] font-black uppercase tracking-widest text-white/50 animate-in fade-in duration-1000 delay-[1500ms] fill-mode-both">
                   <span className="animate-pulse">Tap anywhere to continue</span>
                 </div>
              </div>
