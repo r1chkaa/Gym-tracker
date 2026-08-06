@@ -159,66 +159,70 @@ return (
       )}
     <div className="space-y-6 animate-in fade-in duration-300">
 {showTimerModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[999] flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 overscroll-none touch-none">
-          <div className="bg-[hsl(var(--card))] w-full max-w-[320px] rounded-[2.5rem] border border-[hsl(var(--border))] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="flex justify-between items-center p-6 border-b border-[hsl(var(--border))]/50 bg-[hsl(var(--surface))]">
-              <span className="font-black text-[hsl(var(--foreground))] text-lg uppercase tracking-widest">Rest Timer</span>
-              <button onClick={() => setShowTimerModal(false)} className="p-2 bg-[hsl(var(--background))] rounded-full text-[hsl(var(--muted))] hover:text-white active:scale-95 transition-all border border-[hsl(var(--border))]"><X size={16}/></button>
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[9999] flex flex-col items-center justify-center p-4 animate-in fade-in duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] overscroll-none touch-none">
+          <div className="bg-[#0e0e11] w-full max-w-[340px] rounded-[2.5rem] border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-in zoom-in-[0.98] slide-in-from-bottom-8 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+            <div className="flex justify-between items-center p-6 border-b border-white/5 relative">
+              <span className="font-black text-white text-sm uppercase tracking-[0.2em] opacity-80">Rest Timer</span>
+              <button onClick={() => setShowTimerModal(false)} className="p-2 bg-white/5 rounded-full text-white/50 hover:text-white active:scale-95 transition-all border border-white/10"><X size={16} strokeWidth={3} /></button>
             </div>
             
-            <div className="flex justify-center items-center h-[240px] relative bg-[hsl(var(--background))]">
+            <div className="flex justify-center items-center h-[260px] relative bg-transparent">
               {/* Highlight Pill */}
-              <div className="absolute top-1/2 -translate-y-1/2 w-[85%] h-[56px] bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] pointer-events-none shadow-sm" />
+              <div className="absolute top-1/2 -translate-y-1/2 w-[90%] h-[64px] bg-white/5 rounded-[1.5rem] pointer-events-none shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] border border-white/5" />
               
               {/* Fade Masks */}
-              <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-[hsl(var(--background))] to-transparent z-20 pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[hsl(var(--background))] to-transparent z-20 pointer-events-none" />
+              <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-[#0e0e11] to-transparent z-20 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#0e0e11] to-transparent z-20 pointer-events-none" />
 
               {/* Minutes Wheel */}
               <div className="flex w-1/2 justify-center h-full overflow-y-auto snap-y snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10 pointer-events-auto"
-                   ref={(el) => { if (el && el.scrollTop === 0 && timerMin > 0) el.scrollTop = timerMin * 56; }}
+                   ref={(el) => { if (el && el.scrollTop === 0 && timerMin > 0) el.scrollTop = timerMin * 64; }}
                    onScroll={(e) => {
                      const el = e.currentTarget;
-                     const idx = Math.round(el.scrollTop / 56);
+                     const idx = Math.round(el.scrollTop / 64);
                      if(idx !== timerMin) {
                         setTimerMin(idx);
                         localStorage.setItem('gym_timer', ((idx * 60) + timerSec).toString());
                      }
                    }}>
-                <div className="py-[92px]">
+                <div className="flex flex-col w-full">
+                  <div className="h-[98px] shrink-0 w-full" />
                   {Array.from({length: 60}).map((_, i) => (
-                    <div key={`m-${i}`} className="h-[56px] flex items-center justify-center snap-center">
-                      <span className={`font-black transition-all duration-200 ${timerMin === i ? 'text-4xl text-blue-500 scale-110 drop-shadow-md' : 'text-2xl text-[hsl(var(--muted))] scale-90 opacity-40'}`}>{i.toString().padStart(2, '0')} <span className={`text-[12px] uppercase tracking-widest ml-0.5 ${timerMin === i ? 'text-blue-500' : 'text-[hsl(var(--muted))]'}`}>m</span></span>
+                    <div key={`m-${i}`} className="h-[64px] shrink-0 w-full flex items-center justify-center snap-center">
+                      <span className={`font-black transition-all duration-300 transform-gpu ${timerMin === i ? 'text-5xl text-white scale-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'text-3xl text-white/30 scale-90'}`}>{i.toString().padStart(2, '0')}</span>
                     </div>
                   ))}
+                  <div className="h-[98px] shrink-0 w-full" />
                 </div>
               </div>
 
-              <span className="font-black text-[hsl(var(--foreground))] z-10 text-3xl mb-1 opacity-30">:</span>
+              <span className="font-black text-white/30 z-10 text-4xl mb-2">:</span>
 
               {/* Seconds Wheel */}
               <div className="flex w-1/2 justify-center h-full overflow-y-auto snap-y snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10 pointer-events-auto"
-                   ref={(el) => { if (el && el.scrollTop === 0 && timerSec > 0) el.scrollTop = timerSec * 56; }}
+                   ref={(el) => { if (el && el.scrollTop === 0 && timerSec > 0) el.scrollTop = timerSec * 64; }}
                    onScroll={(e) => {
                      const el = e.currentTarget;
-                     const idx = Math.round(el.scrollTop / 56);
+                     const idx = Math.round(el.scrollTop / 64);
                      if(idx !== timerSec) {
                         setTimerSec(idx);
                         localStorage.setItem('gym_timer', ((timerMin * 60) + idx).toString());
                      }
                    }}>
-                <div className="py-[92px]">
+                <div className="flex flex-col w-full">
+                  <div className="h-[98px] shrink-0 w-full" />
                   {Array.from({length: 60}).map((_, i) => (
-                    <div key={`s-${i}`} className="h-[56px] flex items-center justify-center snap-center">
-                      <span className={`font-black transition-all duration-200 ${timerSec === i ? 'text-4xl text-blue-500 scale-110 drop-shadow-md' : 'text-2xl text-[hsl(var(--muted))] scale-90 opacity-40'}`}>{i.toString().padStart(2, '0')} <span className={`text-[12px] uppercase tracking-widest ml-0.5 ${timerSec === i ? 'text-blue-500' : 'text-[hsl(var(--muted))]'}`}>s</span></span>
+                    <div key={`s-${i}`} className="h-[64px] shrink-0 w-full flex items-center justify-center snap-center">
+                      <span className={`font-black transition-all duration-300 transform-gpu ${timerSec === i ? 'text-5xl text-white scale-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'text-3xl text-white/30 scale-90'}`}>{i.toString().padStart(2, '0')}</span>
                     </div>
                   ))}
+                  <div className="h-[98px] shrink-0 w-full" />
                 </div>
               </div>
             </div>
             
-            <div className="p-5 bg-[hsl(var(--surface))] border-t border-[hsl(var(--border))]/50">
-              <button onClick={() => setShowTimerModal(false)} className="w-full py-4 bg-blue-600 text-white font-black uppercase tracking-widest text-sm rounded-xl hover:bg-blue-500 active:scale-95 transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)]">Confirm</button>
+            <div className="p-4 border-t border-white/5">
+              <button onClick={() => setShowTimerModal(false)} className="w-full py-5 bg-blue-600 text-white font-black uppercase tracking-[0.2em] text-sm rounded-[1.5rem] hover:bg-blue-500 active:scale-95 transition-all shadow-[0_10px_30px_rgba(37,99,235,0.4)]">Confirm</button>
             </div>
           </div>
         </div>
