@@ -337,14 +337,15 @@ if (showCalibration) {
       />
 
       <style dangerouslySetInnerHTML={{__html: `
+        body { background-color: #09090b !important; }
         @keyframes shine-sweep { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
         .shine-text { background: linear-gradient(90deg, transparent 0%, #fff 50%, transparent 100%); background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text; animation: shine-sweep 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
         @keyframes idle-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
         @keyframes idle-pulse { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.08); filter: brightness(1.2); } }
         @keyframes idle-heavy { 0%, 100% { transform: translateY(0px) scale(1); } 50% { transform: translateY(-15px) scale(1.05); } }
         @keyframes idle-shake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(2deg); } 75% { transform: rotate(-2deg); } }
-        @keyframes idle-titan { 0%, 100% { filter: drop-shadow(0 0 15px #22d3ee); transform: scale(1); } 50% { filter: drop-shadow(0 0 40px #22d3ee); transform: scale(1.05); } }
-        @keyframes idle-god { 0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 25px #fef08a); } 50% { transform: translateY(-20px) scale(1.1); filter: drop-shadow(0 0 70px #fef08a) brightness(1.2); } }
+        @keyframes idle-titan { 0%, 100% { filter: drop-shadow(0 0 15px #22d3ee); transform: scale(1); } 50% { filter: drop-shadow(0 0 30px #22d3ee); transform: scale(1.05); } }
+        @keyframes idle-god { 0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 15px #fef08a); } 50% { transform: translateY(-15px) scale(1.05); filter: drop-shadow(0 0 40px #fef08a) brightness(1.2); } }
         @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
       `}} />
 
@@ -358,10 +359,10 @@ if (showCalibration) {
 <h2 className={`mt-8 text-4xl sm:text-5xl font-black uppercase tracking-tighter drop-shadow-md z-10 text-center px-4 leading-none w-full break-words ${isGod ? 'bg-gradient-to-r from-[#fef08a] via-white to-[#fef08a] bg-[length:200%_auto] text-transparent bg-clip-text animate-[shimmer_3s_infinite]' : ''}`} style={!isGod ? { color: rankTheme.hex } : {}}>{currentRank.name}</h2>          <span className="text-sm font-bold text-white/90 tracking-[0.2em] mt-2 z-10 uppercase">{currentRank.name === 'God' ? 'MAXIMUM RANK' : currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
         </div>
 
-<div className="w-full mt-8 sm:mt-10 mb-20 relative z-10">
-          <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-end mb-3 px-1 gap-1">
-            <span className="text-3xl sm:text-4xl font-black tracking-tighter drop-shadow-md shrink min-w-0 break-all leading-none" style={{ color: rankTheme.hex, textShadow: `0 0 15px ${rankTheme.hex}80` }}>{Math.floor(activePoints).toLocaleString()} PTS</span>
-            <span className="text-[10px] font-bold text-[hsl(var(--muted))] uppercase tracking-widest whitespace-nowrap">{currentRank.next ? `${currentRank.next.toLocaleString()} PTS` : 'UNLIMITED'}</span>
+<div className="w-full mt-8 mb-20 relative z-10">
+          <div className="w-full flex flex-col justify-between items-start mb-3 px-1 gap-1">
+            <span className="font-black tracking-tighter drop-shadow-md leading-none max-w-full text-ellipsis overflow-hidden" style={{ color: rankTheme.hex, textShadow: `0 0 15px ${rankTheme.hex}80`, fontSize: `clamp(1.5rem, 9vw, 3rem)` }}>{Math.floor(activePoints).toString()} PTS</span>
+            <span className="text-[10px] font-bold text-[hsl(var(--muted))] uppercase tracking-widest whitespace-nowrap">{currentRank.next ? `${currentRank.next.toString()} PTS` : 'UNLIMITED'}</span>
           </div>
           <div className="w-full h-[6px] bg-white/10 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)]">
             <div className={`h-full rounded-r-full transition-all duration-1000 ease-out relative shadow-[0_0_15px_currentColor] ${isGod ? 'w-full bg-gradient-to-r from-[#fef08a] to-white bg-[length:200%_auto] animate-[shimmer_2s_infinite]' : ''}`} style={!isGod ? { width: `${Math.min(100, Math.max(0, currentRank.progress))}%`, backgroundColor: rankTheme.hex } : {}}>
@@ -380,7 +381,7 @@ if (showCalibration) {
         const muscleXP = volumes[selectedMuscle] || 0;
         const details = getMuscleDetails(muscleXP);
         return (
-<div className="fixed inset-0 bg-[#09090b]/95 backdrop-blur-3xl z-[100] flex flex-col animate-in fade-in zoom-in duration-300 w-screen h-screen">
+<div className="fixed inset-0 bg-[#09090b]/95 backdrop-blur-3xl z-[100] flex flex-col animate-in fade-in zoom-in duration-300 w-screen h-[100dvh] overflow-hidden">
             <div className="flex-none flex items-center justify-start p-6 pt-[max(env(safe-area-inset-top),2rem)] z-10 w-full relative">
               <button onClick={() => setSelectedMuscle(null)} className="text-[hsl(var(--muted))] hover:text-white transition-colors p-3 bg-white/5 border border-white/10 rounded-full shadow-sm backdrop-blur-md active:scale-95 shrink-0"><ArrowLeft size={24} /></button>
               <div className="flex flex-col ml-4">
@@ -389,21 +390,18 @@ if (showCalibration) {
               </div>
             </div>
             
-            <div className="flex-1 overflow-y-auto flex flex-col justify-between pb-16 px-6 w-full max-w-[500px] mx-auto pt-4">
-              
-              <div className="flex flex-col items-center mt-4 mb-10">
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] mb-8" style={{ color: details.hex, textShadow: `0 0 15px ${details.hex}` }}>Muscle Level</span>
-                
+            <div className="flex-1 flex flex-col justify-between pb-8 px-6 w-full max-w-[500px] mx-auto min-h-0">
+              <div className="flex flex-col items-center mt-2">
                 <div className="relative flex justify-center items-center">
-                  <div className="absolute w-40 h-40 opacity-30 blur-[60px] rounded-full pointer-events-none" style={{ backgroundColor: details.hex }} />
-                  <span className="text-[140px] font-black leading-none tracking-tighter relative z-10" style={{ color: details.hex, textShadow: `0 0 40px ${details.hex}` }}>{details.level}</span>
+                  <div className="absolute w-32 h-32 opacity-30 blur-[50px] rounded-full pointer-events-none" style={{ backgroundColor: details.hex }} />
+                  <span className="text-[120px] font-black leading-none tracking-tighter relative z-10" style={{ color: details.hex, textShadow: `0 0 30px ${details.hex}` }}>{details.level}</span>
                 </div>
               </div>
 
-              <div className="w-full bg-white/5 rounded-3xl p-6 border border-white/10 shadow-2xl backdrop-blur-md mb-12 relative z-10">
-                <div className="flex justify-between items-end mb-4 px-1 text-sm font-black uppercase tracking-widest">
-                  <span style={{ color: details.hex }} className="drop-shadow-md">{Math.floor(muscleXP).toLocaleString()} XP</span>
-                  <span className="text-white/40">{details.nextXP.toLocaleString()} XP</span>
+              <div className="w-full bg-white/5 rounded-3xl p-5 sm:p-6 border border-white/10 shadow-2xl backdrop-blur-md relative z-10 mt-4">
+                <div className="flex justify-between items-end mb-4 px-1 font-black uppercase tracking-widest gap-2">
+                  <span style={{ color: details.hex, fontSize: 'clamp(0.7rem, 4vw, 1.25rem)' }} className="drop-shadow-md truncate">{Math.floor(muscleXP).toString()} XP</span>
+                  <span className="text-white/40 text-[10px] sm:text-xs truncate">{details.nextXP.toString()} XP</span>
                 </div>
                 <div className="w-full h-3 bg-black/50 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
                   <div className="h-full rounded-r-full transition-all duration-1000 ease-out relative" style={{ width: `${Math.min(100, Math.max(0, details.progress))}%`, backgroundColor: details.hex, boxShadow: `0 0 20px ${details.hex}` }}>
@@ -412,10 +410,9 @@ if (showCalibration) {
                 </div>
               </div>
 
-              <div className="w-full max-w-[300px] mx-auto relative pointer-events-none opacity-80 mt-auto">
+              <div className="w-full max-w-[320px] mx-auto relative pointer-events-none opacity-90 mt-8 mb-auto flex-1 min-h-[250px]">
                 <AnatomyModel highlight={selectedMuscle} />
               </div>
-
             </div>
           </div>
         );

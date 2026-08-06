@@ -104,7 +104,7 @@ return (
       */}
 <div className={`flex flex-col w-full pb-32 ${activeTab === 'progression' ? 'px-0' : 'px-4'}`}>
         
-        <header className={`pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${!isNavVisible ? 'opacity-0 -translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0'} ${activeTab === 'progression' ? 'text-white px-6' : ''}`}>          <div>
+<header className={`pt-[max(env(safe-area-inset-top),3rem)] pb-4 flex justify-between items-start transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] bg-transparent relative z-20 ${!isNavVisible ? 'opacity-0 -translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0'} ${activeTab === 'progression' ? 'text-white px-6' : ''}`}>          <div>
             <h1 className="text-4xl font-black tracking-tight drop-shadow-sm">{header.title}</h1>
             <p className={`font-black tracking-[0.2em] text-[10px] uppercase mt-1 ${activeTab === 'progression' ? 'text-blue-500 drop-shadow-md' : 'text-[hsl(var(--muted))]'}`}>
               {header.subtitle}
@@ -121,7 +121,7 @@ return (
           </button>
         </header>
 
-<div key={activeTab} className="w-full flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-8 duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] fill-mode-both">
+<div key={activeTab} className="w-full flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] fill-mode-both">
           {activeTab === 'workout' && <ActiveSession pastWorkoutDate={pastWorkoutDate} onClearPastDate={() => setPastWorkoutDate(null)} />}
           {activeTab === 'builder' && <WorkoutBuilder />}
           {activeTab === 'progression' && <Progression />}
@@ -137,7 +137,7 @@ return (
         - Layout-free animations: Using translate-y and opacity instead of margins/heights to guarantee 60fps buttery smoothness.
       */}
 <div 
-        className={`fixed inset-x-0 bottom-0 z-[90] flex justify-center pointer-events-none transform-gpu pb-6 transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${!isNavVisible ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        className={`fixed inset-x-0 bottom-0 z-[90] flex justify-center pointer-events-none transform-gpu pb-6 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${!isNavVisible ? 'translate-y-[150%] opacity-0' : 'translate-y-0 opacity-100'}`}
         style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         <nav className="w-[92%] max-w-[400px] h-[72px] grid grid-cols-5 items-center bg-[#0e0e11]/85 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-[2.5rem] pointer-events-auto touch-none px-1.5">

@@ -277,12 +277,12 @@ let baseClasses = "aspect-square flex items-center justify-center rounded-2xl te
         <h2 className="text-xl font-black text-[hsl(var(--foreground))] mb-6 flex items-center gap-2">
           <Activity size={20} className="text-blue-500" /> Total Volume
         </h2>
-        {volumeData.length > 0 ? (
+{volumeData.length > 0 ? (
           <div className="grid grid-cols-2 gap-3">
             {volumeData.map(([cat, vol]) => (
-              <div key={cat} className="bg-[hsl(var(--surface))] p-4 rounded-xl border border-[hsl(var(--border))] flex flex-col justify-between shadow-inner">
+              <div key={cat} className="bg-[hsl(var(--surface))] p-4 rounded-xl border border-[hsl(var(--border))] flex flex-col justify-between shadow-inner overflow-hidden">
                 <span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))] mb-1">{cat}</span>
-                <span className="text-[hsl(var(--foreground))] font-black text-xl">{vol.toLocaleString()} <span className="text-[10px] font-bold text-[hsl(var(--muted))]">{unit}</span></span>
+                <span className="text-[hsl(var(--foreground))] font-black flex items-baseline gap-1 truncate w-full" style={{ fontSize: 'clamp(1rem, 5vw, 1.5rem)' }}>{Math.floor(vol).toString()} <span className="text-[9px] font-bold text-[hsl(var(--muted))]">{unit}</span></span>
               </div>
             ))}
           </div>

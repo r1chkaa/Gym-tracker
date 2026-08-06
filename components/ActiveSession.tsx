@@ -55,7 +55,10 @@ const getMuscleDetails = (xp: number) => {
 const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, onComplete }: any) => {
   const [step, setStep] = useState<'rank' | 'xp'>('rank');
   const [displayPoints, setDisplayPoints] = useState(initialPoints);
-  const [displayXP, setDisplayXP] = useState<Record<string, number>>(initialXP);
+  
+  const muscleKeys = Object.keys(earnedXP);
+  const [xpIndex, setXpIndex] = useState(0);
+  const [displayXP, setDisplayXP] = useState<number>(muscleKeys.length > 0 ? (initialXP[muscleKeys[0]] || 0) : 0);
   
   const [skipRank, setSkipRank] = useState(false);
   const [skipXP, setSkipXP] = useState(false);
@@ -63,7 +66,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
   const [isXPAnimDone, setIsXPAnimDone] = useState(false);
   
   const [isRankLeveling, setIsRankLeveling] = useState(false);
-  const [levelUpMuscles, setLevelUpMuscles] = useState<Record<string, boolean>>({});
+  const [isMuscleLeveling, setIsMuscleLeveling] = useState(false);
 
   useEffect(() => {
     if (step !== 'rank') return;
@@ -75,7 +78,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
       if (skipRank) {
         setDisplayPoints(target); setIsRankAnimDone(true); return;
       }
-      let progress = Math.min((now - startTime) / 2500, 1);
+      let progress = Math.min((now - startTime) / 2000, 1);
       let eased = 1 - Math.pow(1 - progress, 4);
       let current = initialPoints + (target - initialPoints) * eased;
       
@@ -95,53 +98,64 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
   }, [step, skipRank, initialPoints, earnedPoints]);
 
   useEffect(() => {
-    if (step !== 'xp') return;
-    const targetXP: Record<string, number> = {};
-    Object.keys(earnedXP).forEach(m => targetXP[m] = (initialXP[m] || 0) + earnedXP[m]);
+    if (step !== 'xp' || muscleKeys.length === 0) return;
+    const currentMuscle = muscleKeys[xpIndex];
+    const startVal = initialXP[currentMuscle] || 0;
+    const targetVal = startVal + earnedXP[currentMuscle];
     
     let startTime = performance.now();
     let animationFrameId: number;
+    let triggeredHaptic = false;
 
     const tick = (now: number) => {
       if (skipXP) {
-        setDisplayXP(targetXP); setIsXPAnimDone(true); return;
+        setDisplayXP(targetVal); setIsXPAnimDone(true); return;
       }
-      let progress = Math.min((now - startTime) / 2500, 1);
+      let progress = Math.min((now - startTime) / 1500, 1);
       let eased = 1 - Math.pow(1 - progress, 4);
+      let currentVal = startVal + (targetVal - startVal) * eased;
 
-      let currentXP: Record<string, number> = {};
-      let triggeredHaptic = false;
-
-      Object.keys(targetXP).forEach(m => {
-        const val = (initialXP[m] || 0) + (targetXP[m] - (initialXP[m] || 0)) * eased;
-        currentXP[m] = val;
-        
-        const prevLevel = getMuscleDetails(displayXP[m] || 0).level;
-        const newLevel = getMuscleDetails(val).level;
-        if (newLevel > prevLevel) {
-          setLevelUpMuscles(prev => ({ ...prev, [m]: true }));
-          if (!triggeredHaptic && typeof navigator !== 'undefined' && navigator.vibrate) {
-            navigator.vibrate([50, 50, 100]); triggeredHaptic = true;
-          }
+      const prevLevel = getMuscleDetails(displayXP).level;
+      const newLevel = getMuscleDetails(currentVal).level;
+      if (newLevel > prevLevel) {
+        setIsMuscleLeveling(true);
+        if (!triggeredHaptic && typeof navigator !== 'undefined' && navigator.vibrate) {
+          navigator.vibrate([50, 50, 100]); triggeredHaptic = true;
         }
-      });
+      }
 
-      setDisplayXP(currentXP);
+      setDisplayXP(currentVal);
       if (progress < 1) animationFrameId = requestAnimationFrame(tick);
-      else { setDisplayXP(targetXP); setIsXPAnimDone(true); }
+      else { setDisplayXP(targetVal); setIsXPAnimDone(true); }
     };
 
     animationFrameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [step, skipXP, initialXP, earnedXP]);
+  }, [step, skipXP, xpIndex]);
 
   const handleNext = () => {
     if (step === 'rank') {
       if (!isRankAnimDone) setSkipRank(true);
-      else { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(50); setStep('xp'); }
+      else { 
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(50); 
+        if (muscleKeys.length === 0) { onComplete(); }
+        else { setStep('xp'); }
+      }
     } else {
-      if (!isXPAnimDone) setSkipXP(true);
-      else onComplete();
+      if (!isXPAnimDone) {
+        setSkipXP(true);
+      } else {
+        if (xpIndex < muscleKeys.length - 1) {
+          if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(50);
+          setSkipXP(false);
+          setIsXPAnimDone(false);
+          setIsMuscleLeveling(false);
+          setDisplayXP(initialXP[muscleKeys[xpIndex + 1]] || 0);
+          setXpIndex(prev => prev + 1);
+        } else {
+          onComplete();
+        }
+      }
     }
   };
 
@@ -182,9 +196,9 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
               <h2 className="text-5xl font-black uppercase tracking-widest text-white mt-12 mb-2 z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{currentRank.name}</h2>
               <span className="text-sm font-bold text-white/60 tracking-[0.4em] uppercase mb-16 z-10">{currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
               
-              <div className="w-full max-w-sm flex justify-between items-end mb-3 px-6 z-10">
-                <span className="text-2xl font-black tracking-widest text-white">{Math.floor(displayPoints).toLocaleString()} PTS</span>
-                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{currentRank.next ? `${currentRank.next.toLocaleString()}` : 'MAX'}</span>
+<div className="w-full max-w-sm flex flex-col items-start mb-3 px-6 z-10">
+                <span className="font-black tracking-tighter text-white drop-shadow-md leading-none truncate w-full" style={{ fontSize: `clamp(1.5rem, 8vw, 2.5rem)` }}>{Math.floor(displayPoints).toString()} PTS</span>
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">{currentRank.next ? `${currentRank.next.toString()}` : 'MAX'}</span>
               </div>
               <div className="w-full max-w-sm px-4 z-10">
                 <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)]">
@@ -201,42 +215,40 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
         );
       })()}
 
-      {step === 'xp' && (
-        <div className="fixed inset-0 w-screen h-[100dvh] flex flex-col items-center bg-[#09090b] z-[150] touch-none pt-[max(env(safe-area-inset-top),4rem)] pb-32 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <div className="w-full max-w-md flex flex-col items-center px-4">
-            <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8 animate-in fade-in duration-500">Muscle Mastery</span>
-            <div className="w-full space-y-4">
-              {Object.entries(earnedXP).map(([muscle]: any, idx) => {
-                const details = getMuscleDetails(displayXP[muscle] || 0);
-                const isLeveling = levelUpMuscles[muscle];
-                
-                return (
-                  <div key={muscle} style={{ animationDelay: `${idx * 200}ms`, animationFillMode: 'both' }} className={`bg-[#0e0e11] border p-5 rounded-[2rem] transition-all animate-in slide-in-from-bottom-8 fade-in duration-700 relative overflow-hidden ${isLeveling ? 'border-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] scale-[1.02]' : 'border-white/10 shadow-lg'}`}>
-                    <div className="absolute inset-0 opacity-[0.03] bg-gradient-to-tr from-white to-transparent pointer-events-none" />
-                    <div className="flex justify-between items-start mb-2 gap-2 relative z-10">
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-black text-white text-2xl truncate">{muscle}</span>
-                        <span className="text-[10px] font-black tracking-widest uppercase mt-0.5" style={{ color: details.hex }}>LVL {details.level}</span>
-                      </div>
-                      <span className="font-black text-blue-400 text-xl sm:text-2xl shrink min-w-0 break-all text-right leading-none">+{Math.floor((displayXP[muscle] || 0) - (initialXP[muscle]||0)).toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-[10px] font-bold text-white/40 mb-2 px-0.5 mt-4 relative z-10">
-                      <span className="truncate pr-2">{Math.floor(displayXP[muscle] || 0).toLocaleString()}</span>
-                      <span className="truncate pl-2">{details.nextXP.toLocaleString()}</span>
-                    </div>
-                    <div className="w-full h-2 bg-black/60 rounded-full overflow-hidden shadow-[inset_0_1px_3px_rgba(0,0,0,0.8)] relative z-10">
-                      <div className="h-full rounded-r-full transition-none relative" style={{ width: `${details.progress}%`, backgroundColor: details.hex, boxShadow: `0 0 15px ${details.hex}` }}>
-                        <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]" />
-                      </div>
-                    </div>
+{step === 'xp' && (() => {
+        const currentMuscle = muscleKeys[xpIndex];
+        const details = getMuscleDetails(displayXP);
+        return (
+        <div className="fixed inset-0 w-screen h-[100dvh] flex flex-col items-center justify-center bg-[#09090b] z-[150] touch-none">
+          <div key={currentMuscle} className="w-full max-w-sm flex flex-col items-center px-6 animate-in slide-in-from-bottom-8 fade-in duration-700">
+            <span className="text-[10px] font-black uppercase text-white/40 tracking-[0.4em] mb-12 drop-shadow-sm">Muscle Mastery</span>
+            
+            <div className={`w-full bg-[#0e0e11] border p-6 rounded-[2.5rem] transition-all relative overflow-hidden ${isMuscleLeveling ? 'border-white drop-shadow-[0_0_30px_rgba(255,255,255,0.6)] scale-[1.05]' : 'border-white/10 shadow-2xl'}`}>
+              <div className="absolute inset-0 opacity-[0.03] bg-gradient-to-tr from-white to-transparent pointer-events-none" />
+              <div className="flex flex-col mb-6 relative z-10">
+                <span className="font-black text-white text-4xl truncate drop-shadow-md">{currentMuscle}</span>
+                <span className="text-[11px] font-black tracking-widest uppercase mt-1" style={{ color: details.hex }}>LVL {details.level}</span>
+              </div>
+              <div className="flex flex-col items-start mb-6 relative z-10">
+                <span className="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">XP Gained</span>
+                <span className="font-black text-blue-400 drop-shadow-sm" style={{ fontSize: `clamp(1.5rem, 8vw, 3rem)` }}>+{Math.floor(earnedXP[currentMuscle]).toString()}</span>
+              </div>
+              <div className="flex justify-between text-[10px] font-bold text-white/40 mb-2 px-1 relative z-10">
+                <span className="truncate pr-2">{Math.floor(displayXP).toString()}</span>
+                <span className="truncate pl-2">{details.nextXP.toString()}</span>
+              </div>
+              <div className="w-full h-3 bg-black/60 rounded-full overflow-hidden shadow-[inset_0_1px_3px_rgba(0,0,0,0.8)] relative z-10">
+                <div className="h-full rounded-r-full transition-none relative" style={{ width: `${details.progress}%`, backgroundColor: details.hex, boxShadow: `0 0 15px ${details.hex}` }}>
+                  <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]" />
                 </div>
-                );
-              })}
+              </div>
             </div>
-            <div className={`mt-12 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 pb-20 ${isXPAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to finish</div>
+
+            <div className={`mt-16 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 ${isXPAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to continue ({xpIndex + 1}/{muscleKeys.length})</div>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 };
@@ -631,18 +643,18 @@ const closeSummary = () => {
 
   if (previewTemplate) {
     return (
-      <div className="fixed inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in slide-in-from-right-4 w-screen h-[100dvh] pb-safe">
+<div className="fixed inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col animate-in slide-in-from-right-4 w-screen h-[100dvh] pb-safe">
         {isActuallyPastWorkout && (
-          <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-center py-2 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] z-10 shadow-md break-words flex flex-col items-center justify-center min-h-[calc(env(safe-area-inset-top)+3.5rem)] leading-tight">
+          <div className="flex-none w-full bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest text-center py-2 px-4 pt-[max(env(safe-area-inset-top),1rem)] z-[60] shadow-md break-words flex flex-col items-center justify-center leading-tight">
             <span>Logging Past Workout:</span>
             <span>{new Date(pastWorkoutDate as number).toLocaleDateString()}</span>
           </div>
         )}
-        <div className={`flex items-center gap-4 mb-8 mt-6 ${isActuallyPastWorkout ? 'pt-6' : ''}`}>
+        <div className={`flex-none flex items-center gap-4 mb-8 px-4 ${isActuallyPastWorkout ? 'pt-6' : 'pt-[max(env(safe-area-inset-top),3rem)] mt-6'}`}>
           <button onClick={() => { setPreviewTemplate(null); if(onClearPastDate) onClearPastDate(); }} className="p-3 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] text-[hsl(var(--muted))]"><ArrowLeft size={20} /></button>
           <div className="flex-1 min-w-0"><span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))]">Preview</span><h2 className="text-3xl font-black text-[hsl(var(--foreground))] truncate">{previewTemplate.name}</h2></div>
         </div>
-        <div className="flex-1 overflow-y-auto space-y-3 pb-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+<div className="flex-1 overflow-y-auto space-y-3 pb-8 px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {previewTemplate.exercises.map((setup, i) => (
             <div key={i} className="bg-[hsl(var(--surface))] border border-[hsl(var(--border))] p-4 rounded-[1.5rem] flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-4">
@@ -664,8 +676,8 @@ const closeSummary = () => {
 
   return (
     <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col w-screen h-[100dvh] animate-in slide-in-from-bottom-4">
-      {isActuallyPastWorkout && (
-        <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-center py-2 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] z-50 shadow-md break-words flex flex-col items-center justify-center min-h-[calc(env(safe-area-inset-top)+3.5rem)] leading-tight">
+{isActuallyPastWorkout && (
+        <div className="flex-none w-full bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest text-center py-2 px-4 pt-[max(env(safe-area-inset-top),1rem)] z-[60] shadow-md break-words flex flex-col items-center justify-center leading-tight">
           <span>Logging Past Workout:</span>
           <span>{new Date(pastWorkoutDate as number).toLocaleDateString()}</span>
         </div>
@@ -698,7 +710,7 @@ const closeSummary = () => {
         </div>
       )}
 
-      <div className={`flex-none flex justify-between items-start pt-[max(env(safe-area-inset-top),3rem)] px-6 pb-4 border-b border-[hsl(var(--border))]/50 mt-4 ${isActuallyPastWorkout ? 'pt-[calc(env(safe-area-inset-top)+3.5rem)]' : ''}`}>
+<div className={`flex-none flex justify-between items-start px-6 pb-4 border-b border-[hsl(var(--border))]/50 ${isActuallyPastWorkout ? 'pt-4' : 'pt-[max(env(safe-area-inset-top),3rem)] mt-4'}`}>
         <div className="flex-1 min-w-0 pr-4">
           {/* Un-truncated active workout title */}
           <h1 className="text-3xl font-black tracking-tight drop-shadow-sm leading-tight whitespace-normal break-words">{currentExercise.name}</h1>
