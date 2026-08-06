@@ -257,23 +257,23 @@ export default function ExerciseLibrary() {
   }
 
 return (
-    <div className="flex-1 flex flex-col gap-3 h-full pb-6 px-4 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex-1 grid grid-cols-2 grid-rows-4 gap-3 pb-8 px-4 h-full min-h-0 max-h-[calc(100dvh-150px)] overflow-hidden">
       {categories.map((category) => {
         const Icon = MuscleIcons[category as keyof typeof MuscleIcons];
         return (
           <button
             key={category}
             onClick={() => setActiveCategory(category)}
-            className="group relative flex items-center justify-between w-full h-[88px] bg-[hsl(var(--surface))] rounded-[2rem] border border-[hsl(var(--border))] shadow-sm hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-300 active:scale-[0.98] overflow-hidden px-6"
+            className="group relative flex flex-col items-center justify-center w-full h-full bg-[hsl(var(--surface))] rounded-[2rem] border border-[hsl(var(--border))] shadow-sm hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-300 active:scale-[0.95] overflow-hidden"
           >
-            <div className="absolute right-[-20px] top-1/2 -translate-y-1/2 opacity-10 group-hover:opacity-20 transition-opacity duration-500 scale-[2.5] pointer-events-none grayscale group-hover:grayscale-0">
-              {Icon && <Icon />}
-            </div>
-            <span className="font-black text-2xl tracking-widest uppercase text-[hsl(var(--foreground))] relative z-10 group-hover:translate-x-2 transition-transform duration-500">
-              {category}
-            </span>
-            <div className="relative z-10 w-10 h-10 rounded-full bg-[hsl(var(--background))] border border-[hsl(var(--border))] flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-500 transition-colors duration-500 shadow-inner">
-              <ChevronRight size={20} strokeWidth={3} />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className="relative z-10 flex flex-col items-center transform-gpu group-hover:-translate-y-1 transition-transform duration-300">
+              <div className="w-12 h-12 mb-1 flex items-center justify-center drop-shadow-md">
+                {Icon && <Icon />}
+              </div>
+              <span className="font-black text-[13px] tracking-widest uppercase text-[hsl(var(--foreground))] drop-shadow-sm">
+                {category}
+              </span>
             </div>
           </button>
         );

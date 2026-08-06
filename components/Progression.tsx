@@ -137,11 +137,11 @@ const goToStep = (step: number) => {
 
 if (showCalibration) {
     return (
-      <div className="fixed inset-0 z-[999999] bg-[#09090b] overflow-hidden touch-none transition-colors duration-1000">
-        <div className="h-[100dvh] w-full flex flex-col items-center justify-center px-6 pb-[env(safe-area-inset-bottom)]">
+      <div className="fixed top-[-100px] bottom-[-100px] left-0 right-0 z-[999999] bg-[#09090b] overflow-hidden touch-none transition-colors duration-1000 flex flex-col items-center justify-center">
+        <div className="w-full flex flex-col items-center justify-center px-6">
           {/* Smart Scroll Lock to prevent dark rectangle artifacts */}
           <style dangerouslySetInnerHTML={{__html: `
-            html, body { overflow: visible !important; height: auto !important; overscroll-behavior-y: none !important; }
+            html, body { overflow: hidden !important; height: 100% !important; overscroll-behavior-y: none !important; }
           `}} />
 
           {/* Premium Atmospheric Background */}
@@ -191,18 +191,23 @@ if (showCalibration) {
                 <h2 className="text-3xl font-black text-white text-center mb-4 leading-tight">Combat History</h2>
                 <p className="text-white/50 text-center text-[10px] font-black uppercase tracking-widest leading-relaxed mb-12">How many months have you been<br/>moving iron?</p>
 <div className="w-full relative flex flex-col items-center mb-16">
-                  <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-28 bg-white/5 rounded-3xl border border-white/10 pointer-events-none z-0 shadow-inner backdrop-blur-sm" />
+                  <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90px] h-[100px] bg-white/10 rounded-[2rem] border border-white/20 pointer-events-none z-0 shadow-inner backdrop-blur-md" />
                   <div
-                    className="w-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-[calc(50vw-2.5rem)] py-8 relative z-10"
+                    className="w-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative z-10 items-center h-[120px]"
+                    style={{ paddingLeft: 'calc(50vw - 45px)', paddingRight: 'calc(50vw - 45px)' }}
                     onScroll={(e) => {
                       const el = e.currentTarget;
-                      const index = Math.round(el.scrollLeft / 80);
-                      if(index !== liftMonths) setLiftMonths(Math.min(120, Math.max(0, index)));
+                      const index = Math.round(el.scrollLeft / 90);
+                      if(index !== liftMonths) {
+                        requestAnimationFrame(() => {
+                          setLiftMonths(Math.min(240, Math.max(0, index)));
+                        });
+                      }
                     }}
                   >
-                    {Array.from({ length: 121 }).map((_, i) => (
-                      <div key={i} className="flex-shrink-0 w-[80px] snap-center flex justify-center items-center">
-                        <span className={`font-black transition-all duration-300 transform-gpu ${liftMonths === i ? 'text-7xl text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-110' : 'text-3xl text-white/20 scale-90'}`}>{i}</span>
+                    {Array.from({ length: 241 }).map((_, i) => (
+                      <div key={i} className="flex-shrink-0 w-[90px] h-full snap-center flex justify-center items-center">
+                        <span className={`font-black transition-all duration-150 transform-gpu ${liftMonths === i ? 'text-6xl text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]' : 'text-3xl text-white/20'}`}>{i}</span>
                       </div>
                     ))}
                   </div>
@@ -239,8 +244,7 @@ if (showCalibration) {
                   <img src={`/ranks/${calcRank.image}`} alt={calcRank.name} className={`w-64 h-64 object-contain relative z-20 drop-shadow-[0_0_40px_rgba(255,255,255,0.15)] ${tTheme.anim}`} />
                 </div>
 
-                <h1 className="text-7xl font-black uppercase tracking-tighter mt-12 z-10 text-center animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-500 fill-mode-both" style={{ color: tTheme.hex, textShadow: `0 0 40px ${tTheme.hex}60` }}>{calcRank.name}</h1>
-                <span className="text-sm font-bold text-white/80 tracking-[0.4em] uppercase mt-4 z-10 animate-in fade-in duration-1000 delay-[800ms] fill-mode-both">{calcRank.tier || `LEVEL ${calcRank.tier}`}</span>
+<h1 className="text-5xl sm:text-6xl font-black uppercase tracking-tighter mt-12 z-10 text-center px-4 leading-none animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-500 fill-mode-both w-full break-words" style={{ color: tTheme.hex, textShadow: `0 0 40px ${tTheme.hex}60` }}>{calcRank.name}</h1>                <span className="text-sm font-bold text-white/80 tracking-[0.4em] uppercase mt-4 z-10 animate-in fade-in duration-1000 delay-[800ms] fill-mode-both">{calcRank.tier || `LEVEL ${calcRank.tier}`}</span>
                 
                 <div className="absolute bottom-[max(env(safe-area-inset-bottom),3rem)] text-[10px] font-black uppercase tracking-widest text-white/40 animate-in fade-in duration-1000 delay-[1500ms] fill-mode-both bg-white/5 px-8 py-4 rounded-full backdrop-blur-md border border-white/10 shadow-lg hover:bg-white/10 transition-colors">
                   <span className="animate-pulse">Tap anywhere to continue</span>
@@ -323,11 +327,11 @@ if (showCalibration) {
   return (
     <div className="bg-transparent text-white overflow-x-hidden font-sans flex flex-col items-center relative w-full h-full pb-32">
       
-{/* Global Fixed Glow engineered to span the entire screen uniformly, destroying iOS blur clipping bugs */}
+{/* Absolute overflow destruction: Expanded bounds eliminate any safe-area/status-bar clipping gaps completely */}
       <div 
-        className="fixed inset-0 pointer-events-none z-[-1] w-screen h-screen transition-colors duration-1000"
+        className="fixed top-[-150px] bottom-[-150px] left-[-150px] right-[-150px] pointer-events-none z-[-1] transition-colors duration-1000"
         style={{
-          background: `radial-gradient(circle at 50% 15%, ${rankTheme.hex}35 0%, transparent 60%), radial-gradient(circle at 50% 90%, ${rankTheme.hex}25 0%, transparent 60%)`,
+          background: `radial-gradient(circle at 50% 20%, ${rankTheme.hex}35 0%, transparent 50%), radial-gradient(circle at 50% 80%, ${rankTheme.hex}25 0%, transparent 50%)`,
           backgroundColor: '#09090b'
         }} 
       />
@@ -351,8 +355,7 @@ if (showCalibration) {
           <div className="relative group flex items-center justify-center w-full aspect-square max-w-[220px]">
             <img src={`/ranks/${currentRank.image}`} alt={currentRank.fullName} loading="eager" className={`w-40 h-40 md:w-48 md:h-48 object-contain relative z-10 transform-gpu will-change-transform drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] ${rankTheme.anim}`} style={{ transform: 'translateZ(0)' }} />
           </div>
-          <h2 className={`mt-8 text-5xl font-black uppercase tracking-tighter drop-shadow-md z-10 ${isGod ? 'bg-gradient-to-r from-[#fef08a] via-white to-[#fef08a] bg-[length:200%_auto] text-transparent bg-clip-text animate-[shimmer_3s_infinite]' : ''}`} style={!isGod ? { color: rankTheme.hex } : {}}>{currentRank.name}</h2>
-          <span className="text-sm font-bold text-white/90 tracking-[0.2em] mt-2 z-10 uppercase">{currentRank.name === 'God' ? 'MAXIMUM RANK' : currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
+<h2 className={`mt-8 text-4xl sm:text-5xl font-black uppercase tracking-tighter drop-shadow-md z-10 text-center px-4 leading-none w-full break-words ${isGod ? 'bg-gradient-to-r from-[#fef08a] via-white to-[#fef08a] bg-[length:200%_auto] text-transparent bg-clip-text animate-[shimmer_3s_infinite]' : ''}`} style={!isGod ? { color: rankTheme.hex } : {}}>{currentRank.name}</h2>          <span className="text-sm font-bold text-white/90 tracking-[0.2em] mt-2 z-10 uppercase">{currentRank.name === 'God' ? 'MAXIMUM RANK' : currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
         </div>
 
         <div className="w-full mt-10 mb-20 relative z-10">
