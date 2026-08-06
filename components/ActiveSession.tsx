@@ -209,7 +209,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
                 </div>
               </div>
               
-              <div className={`absolute bottom-[max(env(safe-area-inset-bottom),3rem)] text-[10px] font-black uppercase tracking-widest text-white/40 transition-opacity duration-300 z-10 bg-white/5 px-8 py-4 rounded-full backdrop-blur-md border border-white/10 shadow-lg ${isRankAnimDone ? 'opacity-100 cursor-pointer hover:bg-white/10' : 'opacity-0 pointer-events-none'}`}>
+<div className={`absolute bottom-[max(env(safe-area-inset-bottom),3rem)] text-[10px] font-black uppercase tracking-widest text-white/50 transition-opacity duration-300 z-10 flex flex-col items-center justify-center ${isRankAnimDone ? 'opacity-100 cursor-pointer' : 'opacity-0 pointer-events-none'}`}>
                 <span className="animate-pulse">Tap anywhere to continue</span>
               </div>
             </div>
@@ -219,11 +219,11 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
       {step === 'xp' && (() => {
         const currentMuscle = muscleKeys[xpIndex];
         const details = getMuscleDetails(displayXP);
-        return (
-        <div className="fixed inset-0 w-screen h-[100dvh] flex flex-col items-center justify-center bg-[#09090b] z-[150] touch-none">
+return (
+        <div className="fixed inset-0 w-screen h-[100dvh] flex flex-col items-center justify-center bg-[#09090b] z-[150] touch-none overflow-hidden">
+          <div className="absolute w-[150vw] h-[150vw] max-w-[800px] max-h-[800px] rounded-full mix-blend-screen opacity-30 blur-[100px] pointer-events-none transition-colors duration-1000" style={{ backgroundColor: details.hex }} />
           <div key={currentMuscle} className="w-full flex flex-col items-center px-6 animate-in slide-in-from-bottom-8 fade-in duration-700 relative z-10">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 blur-[80px] rounded-full mix-blend-screen opacity-40 pointer-events-none" style={{ backgroundColor: details.hex }} />
-            <span className="text-[10px] font-black uppercase text-white/30 tracking-[0.5em] mb-6 drop-shadow-sm">Muscle Mastery</span>
+            <span className="text-[10px] font-black uppercase text-white/50 tracking-[0.5em] mb-6 drop-shadow-sm">Muscle Mastery</span>
             
             <div className="flex flex-col items-center mb-12 relative z-10">
               <span className="font-black text-white text-6xl sm:text-7xl truncate drop-shadow-lg mb-2 w-full text-center">{currentMuscle}</span>
@@ -244,7 +244,10 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
               </div>
             </div>
 
-            <div className={`absolute -bottom-24 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 ${isXPAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to continue ({xpIndex + 1}/{muscleKeys.length})</div>
+<div className={`absolute -bottom-28 flex flex-col items-center gap-2 transition-opacity duration-300 ${isXPAnimDone ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/50 animate-pulse">Tap to continue</span>
+              <span className="text-[12px] font-black text-white/30 tracking-widest">{xpIndex + 1} | {muscleKeys.length}</span>
+            </div>
           </div>
         </div>
         );
@@ -643,13 +646,13 @@ const closeSummary = () => {
 
   if (previewTemplate) {
     return (
-<div className="fixed inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col animate-in slide-in-from-right-4 w-screen h-[100dvh] pb-safe">
-{isActuallyPastWorkout && (
-        <div className="absolute top-[max(env(safe-area-inset-top),1rem)] left-1/2 -translate-x-1/2 bg-blue-500/10 backdrop-blur-xl border border-blue-500/30 text-blue-400 text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded-full z-[150] shadow-[0_0_30px_rgba(59,130,246,0.15)] flex items-center justify-center gap-2 w-max whitespace-nowrap pointer-events-none">
-          <Clock size={14} /> PAST WORKOUT: {new Date(pastWorkoutDate as number).toLocaleDateString()}
-        </div>
-      )}
-        <div className={`flex-none flex items-center gap-4 mb-8 px-4 ${isActuallyPastWorkout ? 'pt-6' : 'pt-[max(env(safe-area-inset-top),3rem)] mt-6'}`}>
+<div className="fixed inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col animate-in slide-in-from-right-4 w-screen h-[100dvh] pb-safe relative">
+        {isActuallyPastWorkout && (
+          <div className="absolute top-[max(env(safe-area-inset-top),1rem)] left-1/2 -translate-x-1/2 bg-blue-500/10 backdrop-blur-xl border border-blue-500/30 text-blue-500 text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full z-[150] shadow-sm flex items-center gap-1.5 whitespace-nowrap pointer-events-none">
+            <Clock size={12} /> {new Date(pastWorkoutDate as number).toLocaleDateString()}
+          </div>
+        )}
+        <div className={`flex-none flex items-center gap-4 mb-8 px-4 ${isActuallyPastWorkout ? 'pt-[max(env(safe-area-inset-top),4rem)] mt-2' : 'pt-[max(env(safe-area-inset-top),3rem)] mt-6'}`}>
           <button onClick={() => { setPreviewTemplate(null); if(onClearPastDate) onClearPastDate(); }} className="p-3 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] text-[hsl(var(--muted))]"><ArrowLeft size={20} /></button>
           <div className="flex-1 min-w-0"><span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))]">Preview</span><h2 className="text-3xl font-black text-[hsl(var(--foreground))] truncate">{previewTemplate.name}</h2></div>
         </div>
@@ -663,9 +666,9 @@ const closeSummary = () => {
             </div>
           ))}
         </div>
-        {/* Ensures the button clears the bottom nav bar */}
-        <div className="flex-none pt-4 pb-[110px] border-t border-[hsl(var(--border))] bg-[hsl(var(--background))]">
-          <button onClick={startWorkout} className="w-full bg-blue-600 text-white font-black text-xl py-5 rounded-3xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-md"><PlayCircle size={28} /> START WORKOUT</button>
+{/* Pushes the start button deeply to the bottom to avoid interference */}
+        <div className="flex-none pt-6 pb-[max(env(safe-area-inset-bottom),40px)] border-t border-[hsl(var(--border))] bg-[hsl(var(--background))] px-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+          <button onClick={startWorkout} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xl py-6 rounded-[2rem] flex items-center justify-center gap-3 active:scale-95 transition-transform shadow-[0_10px_30px_rgba(37,99,235,0.4)]"><PlayCircle size={28} /> START WORKOUT</button>
         </div>
       </div>
     );

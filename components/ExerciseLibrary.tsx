@@ -273,20 +273,20 @@ return (
 <button
             key={category}
             onClick={() => setActiveCategory(category)}
-            className="group relative flex-1 flex items-center justify-between w-full bg-[hsl(var(--surface))] rounded-[2rem] border border-[hsl(var(--border))] shadow-sm hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all duration-300 active:scale-[0.98] overflow-hidden px-8"
+            className="group relative flex-1 flex items-center justify-between w-full bg-[hsl(var(--surface))] rounded-[2rem] border border-[hsl(var(--border))] shadow-sm hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all duration-300 active:scale-[0.98] overflow-hidden px-6 sm:px-8 py-2 my-0.5"
           >
             <div className="absolute right-[5%] top-1/2 -translate-y-1/2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 scale-[3] pointer-events-none">
               {Icon && <Icon />}
             </div>
-            <div className="flex items-center gap-6 relative z-10 translate-y-0.5">
-              <div className="w-12 h-12 flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-sm">
+            <div className="flex items-center gap-4 sm:gap-6 relative z-10 translate-y-0.5">
+              <div className="w-10 h-10 flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-sm">
                 {Icon && <Icon />}
               </div>
-              <span className="font-black text-2xl tracking-[0.25em] uppercase text-[hsl(var(--foreground))] drop-shadow-sm group-hover:text-blue-500 transition-colors">
+              <span className="font-black text-xl tracking-[0.2em] uppercase text-[hsl(var(--foreground))] drop-shadow-sm group-hover:text-blue-500 transition-colors">
                 {category}
               </span>
             </div>
-            <ChevronRight size={24} className="text-[hsl(var(--muted))] group-hover:text-blue-500 transition-colors relative z-10" strokeWidth={3} />
+            <ChevronRight size={20} className="text-[hsl(var(--muted))] group-hover:text-blue-500 transition-colors relative z-10" strokeWidth={3} />
           </button>
         );
       })}
