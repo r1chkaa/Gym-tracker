@@ -11,6 +11,7 @@ const getExerciseDetails = (id: string) => allExercises.find(ex => ex.id === id)
 const RANK_THRESHOLDS = [0, 5000, 10000, 25000, 50000, 75000, 100000, 150000, 200000, 250000, 350000, 500000, 750000, 1000000, 1250000, 1500000, 1750000, 2000000, 2500000, 3000000, 3500000, 4500000, 5000000, 6000000, 7000000, 8000000, 9000000];
 const RANKS = ["Wood", "Chalk", "Iron", "Steel", "Contender", "Gladiator", "Juggernaut", "Colossus", "Olympian"];
 const TIERS = ["I", "II", "III"];
+
 const getBWModifier = (name: string) => {
   const n = name.toLowerCase();
   if (n.includes('incline push')) return 0.40;
@@ -148,13 +149,14 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
   const isGod = currentRank.name === 'God';
 
   return (
-    <div className="fixed inset-0 w-screen h-screen z-[999999] bg-[#09090b] flex flex-col items-center justify-center p-0 m-0 overflow-hidden animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
-{step === 'rank' && (
-            <div className={`fixed inset-0 w-full h-full flex flex-col items-center justify-center bg-[#09090b] z-[150] touch-none ${isRankLeveling ? 'animate-in fade-in duration-500' : 'animate-in slide-in-from-bottom-8 duration-700'}`}>
-<style dangerouslySetInnerHTML={{__html: `
-                @keyframes rank-scale-in { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+    <div className="fixed top-[-150px] bottom-[-150px] left-[-150px] right-[-150px] z-[999999] bg-[#09090b] flex flex-col items-center justify-center p-0 m-0 overflow-hidden animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
+      {step === 'rank' && (
+            <div className={`fixed top-[-150px] bottom-[-150px] left-[-150px] right-[-150px] flex flex-col items-center justify-center bg-[#09090b] z-[150] touch-none ${isRankLeveling ? 'animate-in fade-in duration-500' : 'animate-in slide-in-from-bottom-8 duration-700'}`}>
+              <style dangerouslySetInnerHTML={{__html: `
+                html, body { background-color: #09090b !important; overflow: hidden !important; }
+                @keyframes rank-scale-in { 0% { transform: scale(0.3) translateZ(0); opacity: 0; filter: brightness(3) blur(20px); } 50% { transform: scale(1.15) translateZ(0); opacity: 1; filter: brightness(1.5) blur(0px); } 100% { transform: scale(1) translateZ(0); filter: brightness(1); } }
                 @keyframes rank-flash { 0% { background-color: rgba(255,255,255,1); opacity: 1; } 100% { background-color: rgba(255,255,255,0); opacity: 0; pointer-events: none; } }
-                @keyframes orb-breathe { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.2); opacity: 0.5; } }
+                @keyframes orb-breathe { 0%, 100% { transform: scale(1) translateZ(0); opacity: 0.4; } 50% { transform: scale(1.3) translateZ(0); opacity: 0.7; } }
               `}} />
               
               {isRankLeveling && <div className="absolute inset-0 z-[100] animate-[rank-flash_1.5s_cubic-bezier(0.22,1,0.36,1)_forwards]" />}
@@ -189,34 +191,36 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
           )}
 
       {step === 'xp' && (
-        <div className="w-full max-w-sm flex flex-col items-center animate-in slide-in-from-right-8 duration-500 relative z-10 pb-32 overflow-y-auto px-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8 mt-12">Muscle Mastery</span>
-          <div className="w-full space-y-4">
-            {Object.entries(earnedXP).map(([muscle]: any, idx) => {
-              const details = getMuscleDetails(displayXP[muscle] || 0);
-              const isLeveling = levelUpMuscles[muscle];
-              
-              return (
-                <div key={muscle} className={`bg-white/5 border p-5 rounded-3xl backdrop-blur-md transition-all ${isLeveling ? 'border-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] scale-105' : 'border-white/10'}`}>
-                  <div className="flex justify-between items-end mb-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-black text-white text-xl">{muscle}</span>
-                      <span className="text-[10px] font-black tracking-widest" style={{ color: details.hex }}>LVL {details.level}</span>
+        <div className="fixed top-[-100px] bottom-[-100px] left-[-100px] right-[-100px] flex flex-col items-center bg-[#09090b] z-[150] touch-none pt-[120px] pb-32 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="w-full max-w-sm flex flex-col items-center px-6">
+            <span className="text-[10px] font-black uppercase text-blue-500 tracking-[0.4em] mb-8 animate-in fade-in duration-500">Muscle Mastery</span>
+            <div className="w-full space-y-4">
+              {Object.entries(earnedXP).map(([muscle]: any, idx) => {
+                const details = getMuscleDetails(displayXP[muscle] || 0);
+                const isLeveling = levelUpMuscles[muscle];
+                
+                return (
+                  <div key={muscle} style={{ animationDelay: `${idx * 150}ms` }} className={`bg-white/5 border p-5 rounded-3xl backdrop-blur-md transition-all animate-in slide-in-from-bottom-4 fade-in fill-mode-both duration-500 ${isLeveling ? 'border-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] scale-105' : 'border-white/10'}`}>
+                    <div className="flex justify-between items-end mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-white text-xl">{muscle}</span>
+                        <span className="text-[10px] font-black tracking-widest" style={{ color: details.hex }}>LVL {details.level}</span>
+                      </div>
+                      <span className="font-black text-blue-400 text-lg">+{Math.floor((displayXP[muscle] || 0) - (initialXP[muscle]||0)).toLocaleString()}</span>
                     </div>
-                    <span className="font-black text-blue-400 text-lg">+{Math.floor((displayXP[muscle] || 0) - (initialXP[muscle]||0)).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-bold text-white/40 mb-3 px-0.5">
-                    <span>{Math.floor(displayXP[muscle] || 0).toLocaleString()}</span>
-                    <span>{details.nextXP.toLocaleString()}</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-black/50 rounded-full overflow-hidden">
-                    <div className="h-full rounded-r-full transition-none" style={{ width: `${details.progress}%`, backgroundColor: details.hex, boxShadow: `0 0 10px ${details.hex}` }} />
-                  </div>
+                    <div className="flex justify-between text-[10px] font-bold text-white/40 mb-3 px-0.5">
+                      <span>{Math.floor(displayXP[muscle] || 0).toLocaleString()}</span>
+                      <span>{details.nextXP.toLocaleString()}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-black/50 rounded-full overflow-hidden">
+                      <div className="h-full rounded-r-full transition-none" style={{ width: `${details.progress}%`, backgroundColor: details.hex, boxShadow: `0 0 10px ${details.hex}` }} />
+                    </div>
                 </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            <div className={`mt-16 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 pb-20 ${isXPAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to finish</div>
           </div>
-          <div className={`mt-16 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 ${isXPAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to finish</div>
         </div>
       )}
     </div>
@@ -328,7 +332,7 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
         triggerHaptic(true); 
         setShowTimerOverlay(false);
         
-if ('serviceWorker' in navigator) {
+        if ('serviceWorker' in navigator) {
           navigator.serviceWorker.ready.then(reg => {
             reg.showNotification('Rest Complete', { 
               body: 'Time for your next set!', 
@@ -615,8 +619,9 @@ const closeSummary = () => {
     return (
       <div className="fixed inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in slide-in-from-right-4 w-screen h-screen pb-safe">
         {isActuallyPastWorkout && (
-          <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest text-center py-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] z-10 shadow-md">
-            Logging Past Workout: {new Date(pastWorkoutDate as number).toLocaleDateString()}
+          <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-center py-2 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] z-10 shadow-md break-words flex flex-col items-center justify-center min-h-[calc(env(safe-area-inset-top)+3.5rem)] leading-tight">
+            <span>Logging Past Workout:</span>
+            <span>{new Date(pastWorkoutDate as number).toLocaleDateString()}</span>
           </div>
         )}
         <div className={`flex items-center gap-4 mb-8 mt-6 ${isActuallyPastWorkout ? 'pt-6' : ''}`}>
@@ -646,8 +651,9 @@ const closeSummary = () => {
   return (
     <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col w-screen h-screen animate-in slide-in-from-bottom-4">
       {isActuallyPastWorkout && (
-        <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest text-center py-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] z-50 shadow-md">
-          Logging Past Workout: {new Date(pastWorkoutDate as number).toLocaleDateString()}
+        <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-center py-2 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] z-50 shadow-md break-words flex flex-col items-center justify-center min-h-[calc(env(safe-area-inset-top)+3.5rem)] leading-tight">
+          <span>Logging Past Workout:</span>
+          <span>{new Date(pastWorkoutDate as number).toLocaleDateString()}</span>
         </div>
       )}
 
