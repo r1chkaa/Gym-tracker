@@ -11,13 +11,13 @@ const getExerciseDetails = (id: string) => allExercises.find(ex => ex.id === id)
 const RANK_THRESHOLDS = [0, 5000, 10000, 25000, 50000, 75000, 100000, 150000, 200000, 250000, 350000, 500000, 750000, 1000000, 1250000, 1500000, 1750000, 2000000, 2500000, 3000000, 3500000, 4500000, 5000000, 6000000, 7000000, 8000000, 9000000];
 const RANKS = ["Wood", "Chalk", "Iron", "Steel", "Contender", "Gladiator", "Juggernaut", "Colossus", "Olympian"];
 const TIERS = ["I", "II", "III"];
-
 const getBWModifier = (name: string) => {
   const n = name.toLowerCase();
   if (n.includes('incline push')) return 0.40;
   if (n.includes('decline push')) return 0.75;
   if (n.includes('push up') || n.includes('push-up') || n.includes('pushup')) return 0.64;
   if (n.includes('pike')) return 0.50;
+  if (n.includes('leg raise') || n.includes('knee raise') || n.includes('crunch')) return 0.35;
   if (n.includes('pull') || n.includes('chin') || n.includes('dip') || n.includes('handstand')) return 1.0;
   if (n.includes('squat') || n.includes('lunge')) return 1.0;
   return 1.0; 
@@ -328,13 +328,17 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
         triggerHaptic(true); 
         setShowTimerOverlay(false);
         
-        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+if ('serviceWorker' in navigator) {
           navigator.serviceWorker.ready.then(reg => {
             reg.showNotification('Rest Complete', { 
               body: 'Time for your next set!', 
               icon: '/icon512_maskable.png', 
               vibrate: [200, 100, 200] 
-            } as any);
+            } as any).catch(() => {
+              if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+                new Notification('Rest Complete', { body: 'Time for your next set!', icon: '/icon512_maskable.png' });
+              }
+            });
           });
         } else if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
           new Notification('Rest Complete', { body: 'Time for your next set!', icon: '/icon512_maskable.png' });

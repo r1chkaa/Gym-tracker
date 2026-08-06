@@ -137,8 +137,8 @@ const goToStep = (step: number) => {
 
 if (showCalibration) {
     return (
-      <div className="fixed inset-0 z-[999] bg-[#09090b] overflow-y-auto overscroll-none transition-colors duration-1000">
-        <div className="min-h-full w-full flex flex-col items-center justify-center px-6 py-[max(env(safe-area-inset-top),2rem)]">
+      <div className="fixed inset-0 z-[999999] bg-[#09090b] overflow-hidden touch-none transition-colors duration-1000">
+        <div className="h-[100dvh] w-full flex flex-col items-center justify-center px-6 pb-[env(safe-area-inset-bottom)]">
           {/* Smart Scroll Lock to prevent dark rectangle artifacts */}
           <style dangerouslySetInnerHTML={{__html: `
             html, body { overflow: visible !important; height: auto !important; overscroll-behavior-y: none !important; }
@@ -190,13 +190,23 @@ if (showCalibration) {
                 <Calendar className="text-blue-500 mb-6 drop-shadow-[0_0_15px_rgba(59,130,246,0.4)]" size={48} />
                 <h2 className="text-3xl font-black text-white text-center mb-4 leading-tight">Combat History</h2>
                 <p className="text-white/50 text-center text-[10px] font-black uppercase tracking-widest leading-relaxed mb-12">How many months have you been<br/>moving iron?</p>
-                <div className="flex items-center gap-6 mb-12 w-full justify-center">
-                  <button onClick={() => setLiftMonths(Math.max(0, liftMonths - 1))} className="p-5 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-90 transition-all border border-white/10 text-white font-black backdrop-blur-md"><ChevronDown size={28} /></button>
-                  <div className="flex flex-col items-center w-28">
-                    <span className="text-7xl font-black text-white tracking-tighter drop-shadow-lg">{liftMonths}</span>
-                    <span className="text-[10px] font-black tracking-widest text-blue-500 uppercase mt-2">Months</span>
+<div className="w-full relative flex flex-col items-center mb-16">
+                  <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-28 bg-white/5 rounded-3xl border border-white/10 pointer-events-none z-0 shadow-inner backdrop-blur-sm" />
+                  <div
+                    className="w-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-[calc(50vw-2.5rem)] py-8 relative z-10"
+                    onScroll={(e) => {
+                      const el = e.currentTarget;
+                      const index = Math.round(el.scrollLeft / 80);
+                      if(index !== liftMonths) setLiftMonths(Math.min(120, Math.max(0, index)));
+                    }}
+                  >
+                    {Array.from({ length: 121 }).map((_, i) => (
+                      <div key={i} className="flex-shrink-0 w-[80px] snap-center flex justify-center items-center">
+                        <span className={`font-black transition-all duration-300 transform-gpu ${liftMonths === i ? 'text-7xl text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-110' : 'text-3xl text-white/20 scale-90'}`}>{i}</span>
+                      </div>
+                    ))}
                   </div>
-                  <button onClick={() => setLiftMonths(Math.min(120, liftMonths + 1))} className="p-5 bg-white/5 rounded-2xl hover:bg-white/10 active:scale-90 transition-all border border-white/10 text-white font-black backdrop-blur-md"><ChevronUp size={28} /></button>
+                  <span className="text-[10px] font-black tracking-widest text-blue-500 uppercase mt-4">Months</span>
                 </div>
                 <button onClick={() => goToStep(5)} className="w-full bg-blue-600 text-white font-black py-5 rounded-full tracking-widest uppercase transition-all shadow-[0_0_30px_rgba(37,99,235,0.4)] active:scale-95 text-sm">Calibrate</button>
               </>
@@ -313,11 +323,14 @@ if (showCalibration) {
   return (
     <div className="bg-transparent text-white overflow-x-hidden font-sans flex flex-col items-center relative w-full h-full pb-32">
       
-      {/* Global Fixed Glow explicitly engineered to sweep across the full screen seamlessly */}
-      <div className="fixed inset-0 pointer-events-none z-[-1] flex items-center justify-center w-screen h-screen overflow-hidden">
-        <div className="absolute top-[-10%] w-[1000px] h-[1000px] opacity-[0.25] blur-[150px] rounded-full transition-colors duration-1000" style={{ backgroundColor: rankTheme.hex }} />
-        <div className="absolute bottom-[-20%] w-[800px] h-[800px] opacity-[0.15] blur-[120px] rounded-full transition-colors duration-1000" style={{ backgroundColor: rankTheme.hex }} />
-      </div>
+{/* Global Fixed Glow engineered to span the entire screen uniformly, destroying iOS blur clipping bugs */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-[-1] w-screen h-screen transition-colors duration-1000"
+        style={{
+          background: `radial-gradient(circle at 50% 15%, ${rankTheme.hex}35 0%, transparent 60%), radial-gradient(circle at 50% 90%, ${rankTheme.hex}25 0%, transparent 60%)`,
+          backgroundColor: '#09090b'
+        }} 
+      />
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes shine-sweep { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
