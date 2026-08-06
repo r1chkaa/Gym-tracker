@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { db } from '@/lib/db';
-import { Download, Trash2, Database, Scale, Clock, Sun, Moon, User, Upload } from 'lucide-react';
+import { Download, Trash2, Database, Scale, Clock, Sun, Moon, User, Upload, X } from 'lucide-react';
 export default function Settings() {
   const [showTimerModal, setShowTimerModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
