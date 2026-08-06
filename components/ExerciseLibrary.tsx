@@ -73,8 +73,9 @@ export default function ExerciseLibrary() {
   if (selectedExercise) {
     const isFav = favoriteIds.has(selectedExercise.id);
     return (
-      <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col animate-in slide-in-from-right-4 duration-300 w-screen h-screen">
-        <div className="flex-none flex items-center justify-between p-6 pt-[max(env(safe-area-inset-top),3rem)] relative z-10 bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] shadow-sm">
+<div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col animate-in slide-in-from-right-4 duration-300 w-screen h-screen">
+          <style dangerouslySetInnerHTML={{__html: `#mobile-nav { display: none !important; }`}} />
+        <div className="flex-none flex items-center justify-between p-6 pt-[max(env(safe-area-inset-top),2rem)] relative z-10 bg-[hsl(var(--background))]">
           <button onClick={() => setSelectedExercise(null)} className="p-2 bg-[hsl(var(--surface))] rounded-xl text-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] transition-colors flex-shrink-0 border border-[hsl(var(--border))]">
             <ArrowLeft size={20} />
           </button>
@@ -99,17 +100,17 @@ export default function ExerciseLibrary() {
             </span>
           </div>
 
-          {selectedExercise.images && selectedExercise.images.length > 0 && (
-            <div className="grid grid-cols-2 gap-3">
+{selectedExercise.images && selectedExercise.images.length > 0 && (
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden -mx-4 px-4 pb-4">
               {selectedExercise.images.map((imgPath: string, idx: number) => (
-                <button key={idx} onClick={() => setFullscreenImage(imgPath)} className="aspect-square bg-[hsl(var(--card))] rounded-[1.5rem] border-2 border-[hsl(var(--border))] overflow-hidden flex items-center justify-center transition-transform active:scale-95 shadow-md">
-                  <img src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${imgPath}`} alt="Step" loading="lazy" className="w-full h-full object-cover" />
+                <button key={idx} onClick={() => setFullscreenImage(imgPath)} className="flex-shrink-0 snap-center w-full aspect-[4/3] bg-[hsl(var(--card))] rounded-[2rem] overflow-hidden flex items-center justify-center transition-transform active:scale-95 shadow-lg border border-[hsl(var(--border))]">
+                  <img src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${imgPath}`} alt="Step" loading="lazy" className="w-full h-full object-cover scale-[1.02]" />
                 </button>
               ))}
             </div>
           )}
 
-          <div className="bg-[hsl(var(--surface))] rounded-[1.5rem] border border-[hsl(var(--border))] p-5 space-y-4 shadow-sm">
+          <div className="bg-[hsl(var(--surface))] rounded-[2rem] border border-[hsl(var(--border))] p-6 space-y-5 shadow-sm">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))] flex items-center gap-2 border-b border-[hsl(var(--border))] pb-2">
               <Target size={14} /> Muscle Activation
             </h4>

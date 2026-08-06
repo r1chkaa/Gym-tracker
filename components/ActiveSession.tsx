@@ -163,8 +163,9 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
   const isGod = currentRank.name === 'God';
 
   return (
-    <div className="fixed inset-0 w-screen h-[100dvh] z-[999999] bg-[#09090b] flex flex-col items-center justify-center p-0 m-0 overflow-hidden animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
+<div className="fixed top-[-50px] bottom-[-50px] left-[-50px] right-[-50px] z-[999999] bg-[#09090b] flex flex-col items-center justify-center p-0 m-0 overflow-hidden animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
       <style dangerouslySetInnerHTML={{__html: `
+        #mobile-nav { display: none !important; }
         html, body { background-color: #09090b !important; overflow: hidden !important; overscroll-behavior-y: none !important; }
         @keyframes rank-flash { 0% { background-color: rgba(255,255,255,1); opacity: 1; } 100% { background-color: rgba(255,255,255,0); opacity: 0; pointer-events: none; } }
         @keyframes orb-breathe { 0%, 100% { transform: scale(1) translateZ(0); opacity: 0.4; } 50% { transform: scale(1.3) translateZ(0); opacity: 0.7; } }
@@ -172,8 +173,8 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
         @keyframes idle-pulse { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.08); filter: brightness(1.2); } }
         @keyframes idle-heavy { 0%, 100% { transform: translateY(0px) scale(1); } 50% { transform: translateY(-15px) scale(1.05); } }
         @keyframes idle-shake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(2deg); } 75% { transform: rotate(-2deg); } }
-        @keyframes idle-titan { 0%, 100% { filter: drop-shadow(0 0 15px #22d3ee); transform: scale(1); } 50% { filter: drop-shadow(0 0 40px #22d3ee); transform: scale(1.05); } }
-        @keyframes idle-god { 0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 25px #fef08a); } 50% { transform: translateY(-20px) scale(1.1); filter: drop-shadow(0 0 70px #fef08a) brightness(1.2); } }
+        @keyframes idle-titan { 0%, 100% { filter: drop-shadow(0 0 15px #22d3ee); transform: scale(1); } 50% { filter: drop-shadow(0 0 30px #22d3ee); transform: scale(1.05); } }
+        @keyframes idle-god { 0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 15px #fef08a); } 50% { transform: translateY(-15px) scale(1.05); filter: drop-shadow(0 0 40px #fef08a) brightness(1.2); } }
         @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
       `}} />
       
@@ -196,9 +197,9 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
               <h2 className="text-5xl font-black uppercase tracking-widest text-white mt-12 mb-2 z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{currentRank.name}</h2>
               <span className="text-sm font-bold text-white/60 tracking-[0.4em] uppercase mb-16 z-10">{currentRank.tier || `LEVEL ${currentRank.tier}`}</span>
               
-<div className="w-full max-w-sm flex flex-col items-start mb-3 px-6 z-10">
+              <div className="w-full max-w-sm flex flex-col items-center mb-3 px-6 z-10 text-center">
                 <span className="font-black tracking-tighter text-white drop-shadow-md leading-none truncate w-full" style={{ fontSize: `clamp(1.5rem, 8vw, 2.5rem)` }}>{Math.floor(displayPoints).toString()} PTS</span>
-                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">{currentRank.next ? `${currentRank.next.toString()}` : 'MAX'}</span>
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-2">{currentRank.next ? `${currentRank.next.toString()}` : 'MAX'}</span>
               </div>
               <div className="w-full max-w-sm px-4 z-10">
                 <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)]">
@@ -215,36 +216,35 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
         );
       })()}
 
-{step === 'xp' && (() => {
+      {step === 'xp' && (() => {
         const currentMuscle = muscleKeys[xpIndex];
         const details = getMuscleDetails(displayXP);
         return (
         <div className="fixed inset-0 w-screen h-[100dvh] flex flex-col items-center justify-center bg-[#09090b] z-[150] touch-none">
-          <div key={currentMuscle} className="w-full max-w-sm flex flex-col items-center px-6 animate-in slide-in-from-bottom-8 fade-in duration-700">
-            <span className="text-[10px] font-black uppercase text-white/40 tracking-[0.4em] mb-12 drop-shadow-sm">Muscle Mastery</span>
+          <div key={currentMuscle} className="w-full flex flex-col items-center px-6 animate-in slide-in-from-bottom-8 fade-in duration-700 relative z-10">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 blur-[80px] rounded-full mix-blend-screen opacity-40 pointer-events-none" style={{ backgroundColor: details.hex }} />
+            <span className="text-[10px] font-black uppercase text-white/30 tracking-[0.5em] mb-6 drop-shadow-sm">Muscle Mastery</span>
             
-            <div className={`w-full bg-[#0e0e11] border p-6 rounded-[2.5rem] transition-all relative overflow-hidden ${isMuscleLeveling ? 'border-white drop-shadow-[0_0_30px_rgba(255,255,255,0.6)] scale-[1.05]' : 'border-white/10 shadow-2xl'}`}>
-              <div className="absolute inset-0 opacity-[0.03] bg-gradient-to-tr from-white to-transparent pointer-events-none" />
-              <div className="flex flex-col mb-6 relative z-10">
-                <span className="font-black text-white text-4xl truncate drop-shadow-md">{currentMuscle}</span>
-                <span className="text-[11px] font-black tracking-widest uppercase mt-1" style={{ color: details.hex }}>LVL {details.level}</span>
-              </div>
-              <div className="flex flex-col items-start mb-6 relative z-10">
-                <span className="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">XP Gained</span>
-                <span className="font-black text-blue-400 drop-shadow-sm" style={{ fontSize: `clamp(1.5rem, 8vw, 3rem)` }}>+{Math.floor(earnedXP[currentMuscle]).toString()}</span>
-              </div>
-              <div className="flex justify-between text-[10px] font-bold text-white/40 mb-2 px-1 relative z-10">
+            <div className="flex flex-col items-center mb-12 relative z-10">
+              <span className="font-black text-white text-6xl sm:text-7xl truncate drop-shadow-lg mb-2 w-full text-center">{currentMuscle}</span>
+              <span className="text-sm font-black tracking-widest uppercase" style={{ color: details.hex, textShadow: `0 0 20px ${details.hex}` }}>Level {details.level}</span>
+            </div>
+            <div className="flex flex-col items-center mb-16 relative z-10 w-full">
+              <span className="font-black text-blue-400 drop-shadow-md truncate w-full text-center" style={{ fontSize: `clamp(3rem, 12vw, 5rem)` }}>+{Math.floor(earnedXP[currentMuscle]).toString()}</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/30 mt-2">XP Gained</span>
+            </div>
+            
+            <div className="w-full max-w-xs flex flex-col gap-2 relative z-10">
+              <div className="flex justify-between text-[10px] font-bold text-white/50 px-1">
                 <span className="truncate pr-2">{Math.floor(displayXP).toString()}</span>
                 <span className="truncate pl-2">{details.nextXP.toString()}</span>
               </div>
-              <div className="w-full h-3 bg-black/60 rounded-full overflow-hidden shadow-[inset_0_1px_3px_rgba(0,0,0,0.8)] relative z-10">
-                <div className="h-full rounded-r-full transition-none relative" style={{ width: `${details.progress}%`, backgroundColor: details.hex, boxShadow: `0 0 15px ${details.hex}` }}>
-                  <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]" />
-                </div>
+              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden shadow-[inset_0_1px_3px_rgba(0,0,0,0.8)]">
+                <div className="h-full rounded-r-full transition-none relative" style={{ width: `${details.progress}%`, backgroundColor: details.hex, boxShadow: `0 0 15px ${details.hex}` }} />
               </div>
             </div>
 
-            <div className={`mt-16 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 ${isXPAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to continue ({xpIndex + 1}/{muscleKeys.length})</div>
+            <div className={`absolute -bottom-24 text-[10px] font-black uppercase tracking-widest transition-opacity duration-300 ${isXPAnimDone ? 'text-white/50 animate-pulse' : 'text-transparent'}`}>Tap to continue ({xpIndex + 1}/{muscleKeys.length})</div>
           </div>
         </div>
         );
@@ -644,12 +644,11 @@ const closeSummary = () => {
   if (previewTemplate) {
     return (
 <div className="fixed inset-0 bg-[hsl(var(--background))] z-[100] flex flex-col animate-in slide-in-from-right-4 w-screen h-[100dvh] pb-safe">
-        {isActuallyPastWorkout && (
-          <div className="flex-none w-full bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest text-center py-2 px-4 pt-[max(env(safe-area-inset-top),1rem)] z-[60] shadow-md break-words flex flex-col items-center justify-center leading-tight">
-            <span>Logging Past Workout:</span>
-            <span>{new Date(pastWorkoutDate as number).toLocaleDateString()}</span>
-          </div>
-        )}
+{isActuallyPastWorkout && (
+        <div className="absolute top-[max(env(safe-area-inset-top),1rem)] left-1/2 -translate-x-1/2 bg-blue-500/10 backdrop-blur-xl border border-blue-500/30 text-blue-400 text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded-full z-[150] shadow-[0_0_30px_rgba(59,130,246,0.15)] flex items-center justify-center gap-2 w-max whitespace-nowrap pointer-events-none">
+          <Clock size={14} /> PAST WORKOUT: {new Date(pastWorkoutDate as number).toLocaleDateString()}
+        </div>
+      )}
         <div className={`flex-none flex items-center gap-4 mb-8 px-4 ${isActuallyPastWorkout ? 'pt-6' : 'pt-[max(env(safe-area-inset-top),3rem)] mt-6'}`}>
           <button onClick={() => { setPreviewTemplate(null); if(onClearPastDate) onClearPastDate(); }} className="p-3 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] text-[hsl(var(--muted))]"><ArrowLeft size={20} /></button>
           <div className="flex-1 min-w-0"><span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))]">Preview</span><h2 className="text-3xl font-black text-[hsl(var(--foreground))] truncate">{previewTemplate.name}</h2></div>

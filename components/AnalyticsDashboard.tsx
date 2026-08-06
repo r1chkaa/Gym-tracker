@@ -94,6 +94,13 @@ export default function AnalyticsDashboard() {
     return acc;
   }, {} as Record<string, LoggedSet[]>);
 
+const formatCompact = (num: number) => {
+    if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return Math.floor(num).toString();
+  };
+
   const handleDayClick = (dateStr: string) => {
     const [y, m, d] = dateStr.split('-').map(Number);
     const cellDate = new Date(y, m, d);
@@ -181,9 +188,9 @@ let baseClasses = "aspect-square flex items-center justify-center rounded-2xl te
         </div>
       </div>
 
-      {showWorkoutModal && (
-        <div className="fixed inset-0 bg-[#09090b]/95 backdrop-blur-2xl z-[200] flex flex-col w-screen h-screen px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in fade-in duration-200">
-          <div className="bg-[hsl(var(--card))] w-full max-w-md mx-auto rounded-[2rem] p-6 border border-[hsl(var(--border))] shadow-2xl flex flex-col max-h-[85vh]">
+{showWorkoutModal && (
+        <div className="fixed inset-0 bg-[#09090b]/95 backdrop-blur-2xl z-[200] flex flex-col w-screen h-[100dvh] px-4 pt-[max(env(safe-area-inset-top),3rem)] animate-in fade-in duration-200 touch-none">
+          <div className="bg-[hsl(var(--card))] w-full max-w-md mx-auto rounded-[2rem] p-6 border border-[hsl(var(--border))] shadow-2xl flex flex-col max-h-[85vh] pointer-events-auto" onTouchMove={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6 border-b border-[hsl(var(--border))] pb-4">
               <div>
                 <h3 className="text-2xl font-black text-[hsl(var(--foreground))]">Day Summary</h3>
@@ -229,9 +236,12 @@ let baseClasses = "aspect-square flex items-center justify-center rounded-2xl te
       )}
 
       <div className="bg-[hsl(var(--card))] rounded-[2rem] p-5 sm:p-6 border border-[hsl(var(--border))] shadow-sm">
-        <h2 className="text-xl font-black text-[hsl(var(--foreground))] mb-6 flex items-center gap-2">
-          <Weight size={20} className="text-blue-500" /> Bodyweight
-        </h2>
+<div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-black text-[hsl(var(--foreground))] flex items-center gap-2">
+            <Weight size={20} className="text-blue-500" /> Bodyweight
+          </h2>
+          <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-widest bg-[hsl(var(--surface))] px-3 py-1.5 rounded-lg border border-[hsl(var(--border))]">IN {unit.toUpperCase()}</span>
+        </div>
         
         <div className="relative mb-6">
           <input 
@@ -280,9 +290,9 @@ let baseClasses = "aspect-square flex items-center justify-center rounded-2xl te
 {volumeData.length > 0 ? (
           <div className="grid grid-cols-2 gap-3">
             {volumeData.map(([cat, vol]) => (
-              <div key={cat} className="bg-[hsl(var(--surface))] p-4 rounded-xl border border-[hsl(var(--border))] flex flex-col justify-between shadow-inner overflow-hidden">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))] mb-1">{cat}</span>
-                <span className="text-[hsl(var(--foreground))] font-black flex items-baseline gap-1 truncate w-full" style={{ fontSize: 'clamp(1rem, 5vw, 1.5rem)' }}>{Math.floor(vol).toString()} <span className="text-[9px] font-bold text-[hsl(var(--muted))]">{unit}</span></span>
+              <div key={cat} className="bg-[hsl(var(--surface))] p-5 rounded-[1.5rem] border border-[hsl(var(--border))] flex flex-col justify-between shadow-sm overflow-hidden">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))] mb-2">{cat}</span>
+                <span className="text-[hsl(var(--foreground))] font-black flex items-baseline gap-1 truncate w-full" style={{ fontSize: 'clamp(1.5rem, 6vw, 2rem)' }}>{formatCompact(vol)}</span>
               </div>
             ))}
           </div>

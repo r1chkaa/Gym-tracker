@@ -371,7 +371,7 @@ if (showCalibration) {
           </div>
         </div>
 
-        <div className="w-full flex flex-col items-center relative z-10 pb-8">
+<div className="w-full flex flex-col items-center relative z-10 mt-16 sm:mt-24 pb-8">
           <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-[0.4em] block mb-8">Anatomy Focus</span>
           <AnatomyModel />
         </div>
