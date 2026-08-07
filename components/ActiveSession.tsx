@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trash2, SkipForward, PlayCircle, Settings as SettingsIcon, X, Info, Moon, Sun, Scale, Clock, Loader2, ListPlus, Search, Plus, PenLine } from 'lucide-react';
+import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trash2, SkipForward, PlayCircle, Settings as SettingsIcon, X, Info, Moon, Sun, Scale, Clock, Loader2, ListPlus, Search } from 'lucide-react';
 import { db, defaultExercises, type Template } from '@/lib/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -676,18 +676,11 @@ const closeSummary = () => {
             <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search exercises..." className="w-full bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-xl py-3 pl-10 pr-4 text-[hsl(var(--foreground))] font-bold outline-none focus:border-blue-500" />
          </div>
          <div className="flex-1 overflow-y-auto space-y-2 pb-4 hide-scrollbar">
-{allExercises.filter(ex => ex.name.toLowerCase().includes(searchQuery.toLowerCase())).map(ex => (
+            {allExercises.filter(ex => ex.name.toLowerCase().includes(searchQuery.toLowerCase())).map(ex => (
                <button key={ex.id} onClick={() => {
-                  if (activeTemplate) {
-                      const newTemp = {...activeTemplate};
-                      newTemp.exercises.push({ exerciseId: ex.id, sets: [{tag:'normal', targetReps:'8-12'}] });
-                      setActiveTemplate(newTemp);
-                  } else if (previewTemplate) {
-                      const newTemp = {...previewTemplate};
-                      newTemp.exercises.push({ exerciseId: ex.id, sets: [{tag:'normal', targetReps:'8-12'}] });
-                      setPreviewTemplate(newTemp);
-                      db.templates.update(newTemp.id, { exercises: newTemp.exercises });
-                  }
+                  const newTemp = {...activeTemplate!};
+                  newTemp.exercises.push({ exerciseId: ex.id, sets: [{tag:'normal', targetReps:'8-12'}] });
+                  setActiveTemplate(newTemp);
                   setIsAddingExercise(false);
                   setSearchQuery("");
                }} className="w-full p-4 bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] text-left flex justify-between items-center active:scale-95 transition-transform">
@@ -738,49 +731,21 @@ if (previewTemplate) {
             </div>
           )}
           <div className="flex items-center gap-4">
-            <button onClick={() => { setPreviewTemplate(null); if(onClearPastDate) onClearPastDate(); }} className="p-3 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] text-[hsl(var(--muted))] active:scale-95 transition-transform shrink-0"><ArrowLeft size={20} /></button>
-            <div className="flex-1 min-w-0 relative flex items-center group">
-              <div className="flex flex-col w-full">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))] block mb-1">Edit Routine</span>
-                <input 
-                  value={previewTemplate.name}
-                  onChange={(e) => {
-                    const newName = e.target.value;
-                    setPreviewTemplate({...previewTemplate, name: newName});
-                    db.templates.update(previewTemplate.id, { name: newName });
-                  }}
-                  className="w-full bg-transparent text-3xl font-black text-[hsl(var(--foreground))] truncate leading-none outline-none focus:text-blue-500 transition-colors"
-                  placeholder="Routine Name"
-                />
-              </div>
-              <PenLine size={16} className="text-[hsl(var(--muted))] absolute right-2 opacity-50 pointer-events-none group-focus-within:text-blue-500 group-focus-within:opacity-100 transition-all" />
-            </div>
+            <button onClick={() => { setPreviewTemplate(null); if(onClearPastDate) onClearPastDate(); }} className="p-3 bg-[hsl(var(--surface))] rounded-2xl border border-[hsl(var(--border))] text-[hsl(var(--muted))] active:scale-95 transition-transform"><ArrowLeft size={20} /></button>
+            <div className="flex-1 min-w-0"><span className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--muted))] block mb-1">Preview</span><h2 className="text-3xl font-black text-[hsl(var(--foreground))] truncate leading-none">{previewTemplate.name}</h2></div>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto space-y-3 px-4 py-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {previewTemplate.exercises.map((setup, i) => (
             <div key={i} className="bg-[hsl(var(--surface))] border border-[hsl(var(--border))] p-4 rounded-[1.5rem] flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-4 min-w-0">
+              <div className="flex items-center gap-4">
                 <div className="w-8 h-8 rounded-full bg-[hsl(var(--card))] border border-[hsl(var(--border))] flex items-center justify-center font-black text-xs text-[hsl(var(--muted))] shrink-0">{i + 1}</div>
-                <div className="min-w-0 flex flex-col">
-                  <h4 className="font-black text-[hsl(var(--foreground))] text-sm leading-tight truncate">{getExerciseDetails(setup.exerciseId)?.name || 'Unknown'}</h4>
-                  <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-widest mt-1">{setup.sets.length} SETS</span>
-                </div>
+                <div className="min-w-0"><h4 className="font-black text-[hsl(var(--foreground))] text-sm leading-tight truncate">{getExerciseDetails(setup.exerciseId)?.name || 'Unknown'}</h4><span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-widest">{setup.sets.length} SETS</span></div>
               </div>
-              <button onClick={() => {
-                 const newTemp = {...previewTemplate};
-                 newTemp.exercises.splice(i, 1);
-                 setPreviewTemplate(newTemp);
-                 db.templates.update(newTemp.id, { exercises: newTemp.exercises });
-              }} className="p-3 text-red-500/50 hover:text-red-500 hover:bg-red-500/10 rounded-xl active:scale-95 transition-all shrink-0">
-                <Trash2 size={18} />
-              </button>
             </div>
           ))}
-          <button onClick={() => setIsAddingExercise(true)} className="w-full py-5 mt-2 bg-blue-500/5 text-blue-500 font-black uppercase tracking-widest text-xs rounded-[1.5rem] border border-blue-500/20 border-dashed active:scale-95 transition-all flex justify-center items-center gap-2 shadow-sm hover:bg-blue-500/10">
-             <Plus size={18} strokeWidth={3} /> Add Exercise
-          </button>
         </div>
+{/* Pushes the start button deeply to the bottom to avoid interference */}
         <div className="flex-none pt-6 pb-[max(env(safe-area-inset-bottom),40px)] border-t border-[hsl(var(--border))] bg-[hsl(var(--background))] px-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
           <button onClick={startWorkout} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xl py-6 rounded-[2rem] flex items-center justify-center gap-3 active:scale-95 transition-transform shadow-[0_10px_30px_rgba(37,99,235,0.4)]"><PlayCircle size={28} /> START WORKOUT</button>
         </div>
