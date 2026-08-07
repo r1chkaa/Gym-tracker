@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trash2, SkipForward, PlayCircle, Settings as SettingsIcon, X, Info, Moon, Sun, Scale, Clock, Loader2 } from 'lucide-react';
+import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trash2, SkipForward, PlayCircle, Settings as SettingsIcon, X, Info, Moon, Sun, Scale, Clock, Loader2, ListPlus, Search } from 'lucide-react';
 import { db, defaultExercises, type Template } from '@/lib/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -163,7 +163,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
   const isGod = currentRank.name === 'God';
 
   return (
-<div className="fixed top-[-50px] bottom-[-50px] left-[-50px] right-[-50px] z-[999999] bg-[#09090b] flex flex-col items-center justify-center p-0 m-0 overflow-hidden animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
+    <div className="fixed top-[-50px] bottom-[-50px] left-[-50px] right-[-50px] z-[999999] bg-[#09090b] flex flex-col items-center justify-center p-0 m-0 overflow-hidden animate-in fade-in zoom-in-95 duration-700" onClick={handleNext}>
       <style dangerouslySetInnerHTML={{__html: `
         #mobile-nav { display: none !important; }
         html, body { background-color: #09090b !important; overflow: hidden !important; overscroll-behavior-y: none !important; }
@@ -209,14 +209,14 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
                 </div>
               </div>
               
-<div className={`absolute bottom-[max(env(safe-area-inset-bottom),3rem)] text-[10px] font-black uppercase tracking-widest text-white/50 transition-opacity duration-300 z-10 flex flex-col items-center justify-center ${isRankAnimDone ? 'opacity-100 cursor-pointer' : 'opacity-0 pointer-events-none'}`}>
+              <div className={`absolute bottom-[max(env(safe-area-inset-bottom),3rem)] text-[10px] font-black uppercase tracking-widest text-white/50 transition-opacity duration-300 z-10 flex flex-col items-center justify-center ${isRankAnimDone ? 'opacity-100 cursor-pointer' : 'opacity-0 pointer-events-none'}`}>
                 <span className="animate-pulse">Tap anywhere to continue</span>
               </div>
             </div>
         );
       })()}
 
-{step === 'xp' && (() => {
+      {step === 'xp' && (() => {
         const currentMuscle = muscleKeys[xpIndex];
         const details = getMuscleDetails(displayXP);
         return (
@@ -244,7 +244,7 @@ const CinematicSummary = ({ initialPoints, earnedPoints, initialXP, earnedXP, on
               </div>
             </div>
 
-<div className={`absolute -bottom-28 flex flex-col items-center gap-2 transition-opacity duration-300 ${isXPAnimDone ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <div className={`absolute -bottom-28 flex flex-col items-center gap-2 transition-opacity duration-300 ${isXPAnimDone ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
               <span className="text-[10px] font-black uppercase tracking-widest text-white/50 animate-pulse">Tap to continue</span>
               <span className="text-[12px] font-black text-white/30 tracking-widest">{xpIndex + 1} | {muscleKeys.length}</span>
             </div>
@@ -301,6 +301,11 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState<any | null>(null);
 
+  // Manage Routine State
+  const [showManageModal, setShowManageModal] = useState(false);
+  const [isAddingExercise, setIsAddingExercise] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
   useEffect(() => {
     setUnit(localStorage.getItem('gym_unit') || 'lbs');
     setDefaultTimer(Number(localStorage.getItem('gym_timer')) || 90);
@@ -327,6 +332,7 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
 
   const isUnilateral = !!currentExercise?.name.toLowerCase().match(/(one arm|single arm|alternating|unilateral)/);
   const isBodyweight = currentExercise?.equipment === 'Bodyweight';
+  const isTimeBased = currentExercise?.name.toLowerCase().includes('plank');
 
   useEffect(() => {
     setWeight(""); setReps("");
@@ -495,6 +501,13 @@ const closeSummary = () => {
       xpGained += (lw * lr) + (rw * rr);
       if (lw > 0 || lr > 0) setsToLog.push({ weight: lw, reps: lr });
       if (rw > 0 || rr > 0) setsToLog.push({ weight: rw, reps: rr });
+    } else if (isTimeBased) {
+      const t = Number(reps);
+      if (!t) return;
+      const effVolume = userBw * t * 0.1;
+      pointsGained += effVolume * (1 + (userBw / 150));
+      xpGained += effVolume;
+      setsToLog.push({ weight: 0, reps: t });
     } else if (isBodyweight) {
       const r = Number(reps);
       if (!r) return;
@@ -618,6 +631,68 @@ const closeSummary = () => {
     );
   }
 
+  if (showManageModal && activeTemplate) {
+    return (
+      <div className="fixed inset-0 z-[200] bg-[hsl(var(--background))] flex flex-col w-full h-[100dvh] overflow-hidden animate-in slide-in-from-bottom-4 pt-[max(env(safe-area-inset-top),1.5rem)] px-4 pb-safe">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-black text-[hsl(var(--foreground))]">Manage Routine</h2>
+          <button onClick={() => setShowManageModal(false)} className="p-3 bg-[hsl(var(--surface))] rounded-full text-[hsl(var(--muted))] active:scale-95"><X size={20} /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto space-y-3 pb-8 hide-scrollbar">
+           {activeTemplate.exercises.map((ex, idx) => (
+              <div key={idx} className="bg-[hsl(var(--surface))] p-4 rounded-[1.5rem] flex items-center justify-between shadow-sm border border-[hsl(var(--border))]">
+                 <div className="flex flex-col min-w-0 pr-4">
+                   <span className="font-black text-[hsl(var(--foreground))] text-base truncate">{getExerciseDetails(ex.exerciseId)?.name}</span>
+                   <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-widest">{ex.sets.length} SETS</span>
+                 </div>
+                 <div className="flex items-center gap-2 shrink-0">
+                   <button onClick={() => {
+                      const newTemp = {...activeTemplate};
+                      newTemp.exercises.splice(idx, 1);
+                      setActiveTemplate(newTemp);
+                      if (exerciseIndex >= newTemp.exercises.length) setExerciseIndex(Math.max(0, newTemp.exercises.length - 1));
+                   }} className="p-3 text-red-500 hover:bg-red-500/10 rounded-xl active:scale-95 transition-all"><Trash2 size={18} /></button>
+                 </div>
+              </div>
+           ))}
+        </div>
+        <div className="flex-none pt-4 pb-[max(env(safe-area-inset-bottom),20px)] border-t border-[hsl(var(--border))] bg-[hsl(var(--background))]">
+           <button onClick={() => setIsAddingExercise(true)} className="w-full py-5 bg-[hsl(var(--surface))] text-blue-500 font-black uppercase tracking-widest text-sm rounded-[1.5rem] border border-[hsl(var(--border))] active:scale-95 transition-all mb-3">+ Add Exercise</button>
+           <button onClick={() => setShowManageModal(false)} className="w-full py-5 bg-blue-600 text-white font-black uppercase tracking-widest text-sm rounded-[1.5rem] hover:bg-blue-500 active:scale-95 transition-all">Done</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAddingExercise) {
+    return (
+      <div className="fixed inset-0 z-[210] bg-[hsl(var(--background))] flex flex-col w-full h-[100dvh] overflow-hidden animate-in slide-in-from-right-4 pt-[max(env(safe-area-inset-top),1.5rem)] px-4 pb-safe">
+         <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-black text-[hsl(var(--foreground))]">Add Exercise</h2>
+            <button onClick={() => setIsAddingExercise(false)} className="p-3 bg-[hsl(var(--surface))] rounded-full text-[hsl(var(--muted))] active:scale-95"><X size={20}/></button>
+         </div>
+         <div className="relative mb-4 flex-none">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted))]" size={18} />
+            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search exercises..." className="w-full bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-xl py-3 pl-10 pr-4 text-[hsl(var(--foreground))] font-bold outline-none focus:border-blue-500" />
+         </div>
+         <div className="flex-1 overflow-y-auto space-y-2 pb-4 hide-scrollbar">
+            {allExercises.filter(ex => ex.name.toLowerCase().includes(searchQuery.toLowerCase())).map(ex => (
+               <button key={ex.id} onClick={() => {
+                  const newTemp = {...activeTemplate!};
+                  newTemp.exercises.push({ exerciseId: ex.id, sets: [{tag:'normal', targetReps:'8-12'}] });
+                  setActiveTemplate(newTemp);
+                  setIsAddingExercise(false);
+                  setSearchQuery("");
+               }} className="w-full p-4 bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] text-left flex justify-between items-center active:scale-95 transition-transform">
+                  <span className="font-black text-[hsl(var(--foreground))] truncate pr-4">{ex.name}</span>
+                  <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] shrink-0">{ex.equipment}</span>
+               </button>
+            ))}
+         </div>
+      </div>
+    );
+  }
+
   if (!activeTemplate && !previewTemplate) {
     return (
       <div className="space-y-4 pt-4 pb-10">
@@ -683,13 +758,6 @@ if (previewTemplate) {
 return (
     <div className="fixed inset-0 z-[100] bg-[hsl(var(--background))] flex flex-col w-full h-[100dvh] overflow-hidden overscroll-none animate-in slide-in-from-bottom-4">
       {showTimerOverlay && (
-        <div className="flex-none w-full bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest text-center py-2 px-4 pt-[max(env(safe-area-inset-top),1rem)] z-[60] shadow-md break-words flex flex-col items-center justify-center leading-tight">
-          <span>Logging Past Workout:</span>
-          <span>{new Date(pastWorkoutDate as number).toLocaleDateString()}</span>
-        </div>
-      )}
-
-      {showTimerOverlay && (
         <div className="fixed inset-0 z-[999999] bg-[#09090b]/95 backdrop-blur-2xl flex flex-col items-center justify-center animate-in fade-in duration-300">
           <span className="text-blue-500 font-black tracking-[0.4em] uppercase text-sm mb-12 drop-shadow-md">Take a break</span>
           <div className="relative w-64 h-64 flex items-center justify-center mb-10">
@@ -713,7 +781,7 @@ return (
           <button onClick={handleSkipTimer} className="flex items-center gap-2 text-white/50 hover:text-white bg-white/10 px-8 py-4 rounded-full font-black tracking-widest uppercase text-xs border border-white/20 transition-all active:scale-95 shadow-sm">
             Skip Rest <SkipForward size={16} />
           </button>
-</div>
+        </div>
       )}
 
       <div className="flex-none pt-[max(env(safe-area-inset-top),1.5rem)] px-6 pb-4 flex flex-col gap-4 border-b border-[hsl(var(--border))]/50 bg-[hsl(var(--background))] z-10">
@@ -733,8 +801,8 @@ return (
             </p>
           </div>
           <div className="flex gap-2 shrink-0">
+            <button onClick={() => setShowManageModal(true)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] active:scale-95 transition-transform"><ListPlus size={20} /></button>
             <button onClick={() => setShowInfoModal(currentExercise)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] active:scale-95 transition-transform"><Info size={20} /></button>
-            <button onClick={() => setShowSettingsModal(true)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] active:scale-95 transition-transform"><SettingsIcon size={20} /></button>
           </div>
         </div>
       </div>
@@ -826,6 +894,19 @@ return (
                 <div className="flex-1 relative flex items-center">
                   <input type="number" placeholder="0" value={rightReps} onChange={(e) => setRightReps(e.target.value.replace(/^0+(?=\d)/, ''))} className="w-full bg-transparent text-[hsl(var(--foreground))] text-4xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-[hsl(var(--border))]" />
                   <span className="absolute right-0 text-[10px] font-bold text-[hsl(var(--muted))] uppercase">Reps</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : isTimeBased && !isExerciseDone ? (
+          <div className="flex gap-4 mb-6 animate-in slide-in-from-bottom-2">
+            <div className="flex-1 bg-[hsl(var(--surface))] rounded-3xl p-4 border border-[hsl(var(--border))] shadow-sm relative">
+              <div className="flex justify-between items-center mb-3"><label className="text-[10px] font-black text-[hsl(var(--muted))] uppercase tracking-widest px-2">Time (Seconds)</label></div>
+              <div className="relative flex items-center">
+                <input type="number" placeholder="0" value={reps} onChange={(e) => setReps(e.target.value.replace(/^0+(?=\d)/, ''))} className="w-full bg-transparent text-[hsl(var(--foreground))] text-5xl font-black text-center focus:outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none placeholder:text-[hsl(var(--border))]" />
+                <div className="absolute right-0 flex flex-col gap-1.5">
+                  <button onClick={() => adjustValue(setReps, reps, 10)} className="bg-[hsl(var(--card))] text-[hsl(var(--muted))] p-2 rounded-xl border border-[hsl(var(--border))] hover:text-[hsl(var(--foreground))] transition-colors active:scale-95"><ChevronUp size={16}/></button>
+                  <button onClick={() => adjustValue(setReps, reps, -10)} className="bg-[hsl(var(--card))] text-[hsl(var(--muted))] p-2 rounded-xl border border-[hsl(var(--border))] hover:text-[hsl(var(--foreground))] transition-colors active:scale-95"><ChevronDown size={16}/></button>
                 </div>
               </div>
             </div>
