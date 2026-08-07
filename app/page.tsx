@@ -16,10 +16,26 @@ export default function Home() {
   const [rankGlow, setRankGlow] = useState(false);
 
   const [pastWorkoutDate, setPastWorkoutDate] = useState<number | null>(null);
+  const [userName, setUserName] = useState("");
+  const [showWelcome, setShowWelcome] = useState(false);
 
 useEffect(() => {
     setIsMounted(true);
-    setIsNavVisible(!!localStorage.getItem('gym_calibrated'));
+    const isCalibrated = !!localStorage.getItem('gym_calibrated');
+    setIsNavVisible(isCalibrated);
+
+    // Welcome Back Toast Logic
+    if (isCalibrated) {
+      const storedName = localStorage.getItem('gym_username');
+      if (storedName) {
+        setUserName(storedName);
+        // Delay slightly so it glides in after the initial app render
+        setTimeout(() => setShowWelcome(true), 600);
+        // Hide after 3.5 seconds
+        setTimeout(() => setShowWelcome(false), 4100);
+      }
+    }
+
     const handleGlow = () => setRankGlow(true);
     const handleCalibrated = () => setIsNavVisible(true);
     window.addEventListener('rank-glow-update', handleGlow);
@@ -77,7 +93,17 @@ window.removeEventListener('rank-glow-update', handleGlow);
   }
 
 return (
-    <main className={`min-h-[100dvh] w-full max-w-md mx-auto flex flex-col relative transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-transparent' : 'bg-[hsl(var(--background))]'}`}>      {/* 
+    <main className={`min-h-[100dvh] w-full max-w-md mx-auto flex flex-col relative transition-colors duration-300 text-[hsl(var(--foreground))] ${activeTab === 'progression' ? 'bg-transparent' : 'bg-[hsl(var(--background))]'}`}>
+      
+      {/* Premium Welcome Toast */}
+      <div className={`fixed top-[max(env(safe-area-inset-top),1.5rem)] left-1/2 -translate-x-1/2 z-[99999] transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${showWelcome ? 'translate-y-0 opacity-100' : '-translate-y-12 opacity-0 pointer-events-none'}`}>
+        <div className="bg-[#0e0e11]/90 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] px-6 py-3.5 rounded-full flex items-center gap-3">
+          <Crown size={16} className="text-blue-500 animate-pulse" />
+          <span className="text-white text-sm font-black tracking-wide whitespace-nowrap">Welcome back, <span className="text-blue-400">{userName}</span></span>
+        </div>
+      </div>
+
+      {/* 
 {/* 
         Intelligent Scroll Lock:
         Keeps the native document flow so backgrounds stretch fully behind the nav bar,
@@ -137,6 +163,7 @@ return (
         - Layout-free animations: Using translate-y and opacity instead of margins/heights to guarantee 60fps buttery smoothness.
       */}
 <div 
+        id="mobile-nav"
         className={`fixed inset-x-0 bottom-0 z-[90] flex justify-center pointer-events-none transform-gpu pb-6 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${!isNavVisible ? 'translate-y-[150%] opacity-0' : 'translate-y-0 opacity-100'}`}
         style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
