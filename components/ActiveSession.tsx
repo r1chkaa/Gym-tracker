@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trash2, SkipForward, PlayCircle, Settings as SettingsIcon, X, Info, Moon, Sun, Scale, Clock, Loader2, ListPlus, Search } from 'lucide-react';
+import { Check, Play, ChevronRight, ArrowLeft, ChevronUp, ChevronDown, Trash2, SkipForward, PlayCircle, Settings as SettingsIcon, X, Info, Moon, Sun, Scale, Clock, Loader2 } from 'lucide-react';
 import { db, defaultExercises, type Template } from '@/lib/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -300,11 +300,6 @@ export default function ActiveSession({ pastWorkoutDate, onClearPastDate }: { pa
 
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState<any | null>(null);
-
-  // Manage Routine State
-  const [showManageModal, setShowManageModal] = useState(false);
-  const [isAddingExercise, setIsAddingExercise] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     setUnit(localStorage.getItem('gym_unit') || 'lbs');
@@ -631,68 +626,6 @@ const closeSummary = () => {
     );
   }
 
-  if (showManageModal && activeTemplate) {
-    return (
-      <div className="fixed inset-0 z-[200] bg-[hsl(var(--background))] flex flex-col w-full h-[100dvh] overflow-hidden animate-in slide-in-from-bottom-4 pt-[max(env(safe-area-inset-top),1.5rem)] px-4 pb-safe">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-black text-[hsl(var(--foreground))]">Manage Routine</h2>
-          <button onClick={() => setShowManageModal(false)} className="p-3 bg-[hsl(var(--surface))] rounded-full text-[hsl(var(--muted))] active:scale-95"><X size={20} /></button>
-        </div>
-        <div className="flex-1 overflow-y-auto space-y-3 pb-8 hide-scrollbar">
-           {activeTemplate.exercises.map((ex, idx) => (
-              <div key={idx} className="bg-[hsl(var(--surface))] p-4 rounded-[1.5rem] flex items-center justify-between shadow-sm border border-[hsl(var(--border))]">
-                 <div className="flex flex-col min-w-0 pr-4">
-                   <span className="font-black text-[hsl(var(--foreground))] text-base truncate">{getExerciseDetails(ex.exerciseId)?.name}</span>
-                   <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] tracking-widest">{ex.sets.length} SETS</span>
-                 </div>
-                 <div className="flex items-center gap-2 shrink-0">
-                   <button onClick={() => {
-                      const newTemp = {...activeTemplate};
-                      newTemp.exercises.splice(idx, 1);
-                      setActiveTemplate(newTemp);
-                      if (exerciseIndex >= newTemp.exercises.length) setExerciseIndex(Math.max(0, newTemp.exercises.length - 1));
-                   }} className="p-3 text-red-500 hover:bg-red-500/10 rounded-xl active:scale-95 transition-all"><Trash2 size={18} /></button>
-                 </div>
-              </div>
-           ))}
-        </div>
-        <div className="flex-none pt-4 pb-[max(env(safe-area-inset-bottom),20px)] border-t border-[hsl(var(--border))] bg-[hsl(var(--background))]">
-           <button onClick={() => setIsAddingExercise(true)} className="w-full py-5 bg-[hsl(var(--surface))] text-blue-500 font-black uppercase tracking-widest text-sm rounded-[1.5rem] border border-[hsl(var(--border))] active:scale-95 transition-all mb-3">+ Add Exercise</button>
-           <button onClick={() => setShowManageModal(false)} className="w-full py-5 bg-blue-600 text-white font-black uppercase tracking-widest text-sm rounded-[1.5rem] hover:bg-blue-500 active:scale-95 transition-all">Done</button>
-        </div>
-      </div>
-    );
-  }
-
-  if (isAddingExercise) {
-    return (
-      <div className="fixed inset-0 z-[210] bg-[hsl(var(--background))] flex flex-col w-full h-[100dvh] overflow-hidden animate-in slide-in-from-right-4 pt-[max(env(safe-area-inset-top),1.5rem)] px-4 pb-safe">
-         <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-black text-[hsl(var(--foreground))]">Add Exercise</h2>
-            <button onClick={() => setIsAddingExercise(false)} className="p-3 bg-[hsl(var(--surface))] rounded-full text-[hsl(var(--muted))] active:scale-95"><X size={20}/></button>
-         </div>
-         <div className="relative mb-4 flex-none">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted))]" size={18} />
-            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search exercises..." className="w-full bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-xl py-3 pl-10 pr-4 text-[hsl(var(--foreground))] font-bold outline-none focus:border-blue-500" />
-         </div>
-         <div className="flex-1 overflow-y-auto space-y-2 pb-4 hide-scrollbar">
-            {allExercises.filter(ex => ex.name.toLowerCase().includes(searchQuery.toLowerCase())).map(ex => (
-               <button key={ex.id} onClick={() => {
-                  const newTemp = {...activeTemplate!};
-                  newTemp.exercises.push({ exerciseId: ex.id, sets: [{tag:'normal', targetReps:'8-12'}] });
-                  setActiveTemplate(newTemp);
-                  setIsAddingExercise(false);
-                  setSearchQuery("");
-               }} className="w-full p-4 bg-[hsl(var(--surface))] rounded-xl border border-[hsl(var(--border))] text-left flex justify-between items-center active:scale-95 transition-transform">
-                  <span className="font-black text-[hsl(var(--foreground))] truncate pr-4">{ex.name}</span>
-                  <span className="text-[10px] font-black uppercase text-[hsl(var(--muted))] shrink-0">{ex.equipment}</span>
-               </button>
-            ))}
-         </div>
-      </div>
-    );
-  }
-
   if (!activeTemplate && !previewTemplate) {
     return (
       <div className="space-y-4 pt-4 pb-10">
@@ -801,8 +734,8 @@ return (
             </p>
           </div>
           <div className="flex gap-2 shrink-0">
-            <button onClick={() => setShowManageModal(true)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] active:scale-95 transition-transform"><ListPlus size={20} /></button>
             <button onClick={() => setShowInfoModal(currentExercise)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] active:scale-95 transition-transform"><Info size={20} /></button>
+            <button onClick={() => setShowSettingsModal(true)} className="p-3 bg-[hsl(var(--surface))] rounded-full shadow-sm border border-[hsl(var(--border))] text-[hsl(var(--muted))] active:scale-95 transition-transform"><SettingsIcon size={20} /></button>
           </div>
         </div>
       </div>
